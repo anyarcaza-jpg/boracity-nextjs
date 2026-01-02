@@ -1,51 +1,42 @@
-/* ============================================================
-   BORACITY - GLOBAL STYLES (Next.js)
-   Los imports ahora se manejan en layout.js
-   ============================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* ============================================================
-   UTILITIES - Clases de utilidad
-   ============================================================ */
+/* ============================================
+   CUSTOM UTILITIES
+   ============================================ */
 
-.container {
-  max-width: var(--container-width);
+/* Container personalizado */
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-6 lg:px-8;
+  }
 }
 
-/* Spacing utilities */
-.mt-1 { margin-top: var(--spacing-xs); }
-.mt-2 { margin-top: var(--spacing-sm); }
-.mt-3 { margin-top: var(--spacing-md); }
-.mt-4 { margin-top: var(--spacing-lg); }
-
-.mb-1 { margin-bottom: var(--spacing-xs); }
-.mb-2 { margin-bottom: var(--spacing-sm); }
-.mb-3 { margin-bottom: var(--spacing-md); }
-.mb-4 { margin-bottom: var(--spacing-lg); }
-
-.p-1 { padding: var(--spacing-xs); }
-.p-2 { padding: var(--spacing-sm); }
-.p-3 { padding: var(--spacing-md); }
-.p-4 { padding: var(--spacing-lg); }
-
-/* ============================================================
-   UTILITIES - Clases de utilidad
-   ============================================================ */
-
-.container {
-  max-width: var(--container-width);
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
-/* Spacing utilities */
-.mt-sm { margin-top: var(--space-sm); }
-.mt-md { margin-top: var(--space-md); }
-.mt-lg { margin-top: var(--space-lg); }
+/* Remove focus outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
 
-.mb-sm { margin-bottom: var(--space-sm); }
-.mb-md { margin-bottom: var(--space-md); }
-.mb-lg { margin-bottom: var(--space-lg); }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
 
-/* Display utilities */
-.d-none { display: none; }
-.d-block { display: block; }
-.d-flex { display: flex; }
-.d-grid { display: grid; }
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF4500;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E63E00;
+}

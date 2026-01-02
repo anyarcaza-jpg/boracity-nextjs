@@ -1,51 +1,33 @@
-import { Inter } from 'next/font/google';
+import './globals.css'
+import { Inter } from 'next/font/google'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 
-// ============================================================
-// IMPORTS DE CSS EN ORDEN CORRECTO
-// IMPORTANTE: Las variables DEBEN cargarse PRIMERO
-// ============================================================
-
-// 1. VARIABLES PRIMERO (para que estén disponibles en todos los demás CSS)
-import '../styles/core/variables.css';
-
-// 2. CORE - Fundamentos
-import '../styles/core/reset.css';
-import '../styles/core/typography.css';
-
-// 3. LAYOUT - Estructura
-import '../styles/layout/navbar.css';
-import '../styles/layout/hero.css';
-import '../styles/layout/footer.css';
-
-// 4. COMPONENTS - Componentes
-import '../styles/components/buttons.css';
-import '../styles/components/cards.css';
-import '../styles/components/filters.css';
-import '../styles/components/modal.css';
-import '../styles/components/forms.css';
-
-// 5. PAGES - Páginas específicas
-import '../styles/pages/categories.css';
-import '../styles/pages/pricing.css';
-import '../styles/pages/family-detail.css';
-
-// 6. RESPONSIVE
-import '../styles/responsive.css';
-
-// 7. GLOBALS - Utilidades finales
-import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 export const metadata = {
-  title: 'Boracity - Free Revit Families',
-  description: 'Download high-quality Revit families for architectural projects',
-};
+  title: {
+    default: 'Boracity - Free Revit Families, SketchUp Models & 3D Assets',
+    template: '%s | Boracity'
+  },
+  description: 'Download 10,000+ professional Revit families, SketchUp models, D5 Render assets & textures. Free for students & architects.',
+  keywords: ['revit families', 'bim', 'sketchup models', 'd5 render', 'textures', 'architectural assets'],
+}
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <link 
+          rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+        />
+      </head>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <Navbar />
+        <main className="flex-1 pt-[70px]">{children}</main>
+        <Footer />
+      </body>
     </html>
-  );
+  )
 }
