@@ -1,40 +1,38 @@
-/* ============================================
+/* ============================================================
    BORACITY - GLOBAL STYLES (Next.js)
-   ============================================ */
+   Los imports ahora se manejan en layout.js
+   ============================================================ */
 
-/* 1. CORE - Variables y fundamentos */
-@import '../styles/core/variables.css';
-@import '../styles/core/reset.css';
-@import '../styles/core/typography.css';
-
-/* 2. LAYOUT - Estructura */
-@import '../styles/layout/navbar.css';
-@import '../styles/layout/hero.css';
-@import '../styles/layout/footer.css';
-
-/* 3. COMPONENTS - Componentes */
-@import '../styles/components/buttons.css';
-@import '../styles/components/cards.css';
-@import '../styles/components/filters.css';
-@import '../styles/components/modal.css';
-@import '../styles/components/forms.css';
-
-/* 4. PAGES - Páginas específicas */
-@import '../styles/pages/categories.css';
-@import '../styles/pages/pricing.css';
-@import '../styles/pages/family-detail.css';
-
-/* 5. RESPONSIVE */
-@import '../styles/responsive.css';
-
-/* ============================================
+/* ============================================================
    UTILITIES - Clases de utilidad
-   ============================================ */
+   ============================================================ */
 
 .container {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 var(--space-lg);
+  max-width: var(--container-width);
+}
+
+/* Spacing utilities */
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+
+/* ============================================================
+   UTILITIES - Clases de utilidad
+   ============================================================ */
+
+.container {
+  max-width: var(--container-width);
 }
 
 /* Spacing utilities */
