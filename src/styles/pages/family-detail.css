@@ -1,0 +1,230 @@
+/* ============================================
+   FAMILY DETAIL PAGE
+   ============================================ */
+
+.family-detail-page {
+    background: var(--background);
+    min-height: 100vh;
+}
+
+/* ========================================
+   BREADCRUMBS
+   ======================================== */
+
+.breadcrumbs {
+    padding: var(--space-lg) 0;
+    display: flex;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.breadcrumbs a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition-base);
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   FAMILY HERO
+   ======================================== */
+
+.family-hero {
+    padding: 40px 0 80px;
+    background: var(--white);
+}
+
+.family-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+}
+
+/* ========================================
+   IMAGE SECTION
+   ======================================== */
+
+.family-image-container {
+    background: var(--background);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    text-align: center;
+}
+
+.family-main-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+}
+
+/* ========================================
+   INFO SECTION
+   ======================================== */
+
+.family-info-container {
+    padding: 20px 0;
+}
+
+.family-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-extrabold);
+    margin-bottom: var(--space-lg);
+    color: var(--text-primary);
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+
+.family-badges {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.badge {
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    text-transform: capitalize;
+}
+
+.badge-free {
+    background: var(--success);
+    color: var(--white);
+}
+
+.badge-category {
+    background: var(--primary);
+    color: var(--white);
+}
+
+/* ========================================
+   DESCRIPTION
+   ======================================== */
+
+.family-description {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    line-height: var(--leading-relaxed);
+    font-size: var(--text-base);
+}
+
+/* ========================================
+   STATS
+   ======================================== */
+
+.family-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--background);
+    border-radius: var(--radius-md);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.stat-item i {
+    color: var(--primary);
+    font-size: var(--text-lg);
+    width: 20px;
+}
+
+/* ========================================
+   META INFO
+   ======================================== */
+
+.family-meta {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+}
+
+.meta-item {
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-base);
+}
+
+.meta-item strong {
+    margin-right: var(--space-sm);
+    color: var(--text-primary);
+}
+
+.meta-item a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition-base);
+}
+
+.meta-item a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   ACTIONS
+   ======================================== */
+
+.family-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: var(--text-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.btn-large i {
+    font-size: var(--text-xl);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 991px) {
+    .family-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .family-title {
+        font-size: var(--text-3xl);
+    }
+    
+    .family-actions {
+        flex-direction: column;
+    }
+    
+    .family-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .family-hero {
+        padding: 20px 0 40px;
+    }
+    
+    .family-title {
+        font-size: var(--text-2xl);
+    }
+    
+    .family-image-container {
+        padding: 20px;
+    }
+}

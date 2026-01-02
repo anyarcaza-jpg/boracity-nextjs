@@ -1,0 +1,12 @@
+/* ============================================
+   FILTERS - Category Filters
+   ============================================ */
+
+.filters {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+/* Filter button styles are in components/buttons.css */

@@ -1,0 +1,193 @@
+/* ============================================
+   FAMILY CARDS - Product Cards
+   ============================================ */
+
+/* ========================================
+   FAMILIES SECTION
+   ======================================== */
+
+.families {
+    padding: var(--section-padding);
+    background: var(--background);
+}
+
+.families-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+/* ========================================
+   DOWNLOAD COUNTER
+   ======================================== */
+
+.download-counter {
+    background: var(--white);
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.download-counter i {
+    color: var(--primary);
+}
+
+/* ========================================
+   FAMILIES GRID
+   ======================================== */
+
+.families-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* ========================================
+   FAMILY CARD
+   ======================================== */
+
+.family-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: var(--transition-base);
+    border: 1px solid var(--border);
+}
+
+.family-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+   FAMILY IMAGE
+   ======================================== */
+
+.family-image {
+    width: 100%;
+    height: 220px;
+    background: var(--background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.family-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    
+    /* Optimizaciones */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: var(--background);
+}
+
+/* Cuando termina de cargar */
+.family-image img.loaded {
+    opacity: 1;
+}
+
+/* ========================================
+   FAVORITE BUTTON
+   ======================================== */
+
+.family-favorite {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.family-favorite:hover {
+    transform: scale(1.1);
+}
+
+.family-favorite i {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+}
+
+.family-favorite.active i {
+    color: var(--error);
+}
+
+/* ========================================
+   FAMILY INFO
+   ======================================== */
+
+.family-info {
+    padding: var(--space-lg);
+}
+
+.family-name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-sm);
+}
+
+.family-category {
+    display: inline-block;
+    background: var(--primary);
+    color: var(--white);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-md);
+}
+
+.family-downloads {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+}
+
+.family-downloads i {
+    margin-right: var(--space-xs);
+}
+
+/* ========================================
+   RESPONSIVE - Mobile optimizations
+   ======================================== */
+
+@media (max-width: 767px) {
+    .families-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-lg);
+    }
+    
+    .download-counter {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .family-card {
+        border-radius: var(--radius-md);
+    }
+    
+    .family-image {
+        height: 180px;
+    }
+    
+    .family-info {
+        padding: var(--space-md);
+    }
+}

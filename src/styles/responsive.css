@@ -1,0 +1,421 @@
+/* ============================================
+   RESPONSIVE DESIGN - Mobile First
+   ============================================
+   
+   Sistema de breakpoints profesional usando Mobile-First.
+   Los estilos base (en otros archivos) están pensados para mobile,
+   aquí AGREGAMOS estilos para pantallas más grandes.
+   
+   Breakpoints:
+   - 576px:  Small devices (landscape phones)
+   - 768px:  Medium devices (tablets)
+   - 992px:  Large devices (desktops)
+   - 1200px: Extra large devices (large desktops)
+   - 1440px: Ultra wide (opcional)
+   
+   Version: 2.0.0
+   ============================================ */
+
+/* ============================================
+   BASE MOBILE STYLES
+   ============================================
+   Los estilos mobile ya están en los otros archivos.
+   Aquí solo ajustamos lo que sea necesario.
+   ============================================ */
+
+/* Por defecto en mobile, ocultar menú desktop */
+.nav-menu {
+    display: none;
+}
+
+.hamburger {
+    display: block;
+}
+
+.nav-buttons {
+    display: none;
+}
+
+/* ============================================
+   SMALL DEVICES - Landscape Phones
+   Min-width: 576px
+   ============================================ */
+@media (min-width: 576px) {
+    
+    /* ========================================
+       TYPOGRAPHY
+       ======================================== */
+    .hero-title {
+        font-size: 40px;
+    }
+    
+    .hero-subtitle {
+        font-size: 18px;
+    }
+    
+    .section-title {
+        font-size: 36px;
+    }
+    
+    /* ========================================
+       GRIDS - Mejorar disposición
+       ======================================== */
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .families-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* ========================================
+       HERO STATS - En fila
+       ======================================== */
+    .hero-stats {
+        flex-direction: row;
+        gap: 40px;
+    }
+}
+
+/* ============================================
+   MEDIUM DEVICES - Tablets (Portrait)
+   Min-width: 768px
+   ============================================ */
+@media (min-width: 768px) {
+    
+    /* ========================================
+       NAVIGATION - Mostrar menú desktop
+       ======================================== */
+    .nav-menu {
+        display: flex;
+    }
+    
+    .hamburger {
+        display: none;
+    }
+    
+    .nav-buttons {
+        display: flex;
+    }
+    
+    /* ========================================
+       TYPOGRAPHY - Tamaños mayores
+       ======================================== */
+    .hero-title {
+        font-size: 48px;
+    }
+    
+    .hero-subtitle {
+        font-size: 20px;
+    }
+    
+    .section-title {
+        font-size: 40px;
+    }
+    
+    /* ========================================
+       LAYOUT - Disposición tablet
+       ======================================== */
+    .families-header {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-lg);
+    }
+    
+    /* ========================================
+       GRIDS - 2-3 columnas
+       ======================================== */
+    .categories-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .families-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* ========================================
+       HERO - Stats mejorados
+       ======================================== */
+    .hero-stats {
+        gap: 60px;
+    }
+    
+    /* ========================================
+       FOOTER - 2 columnas
+       ======================================== */
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================
+   LARGE DEVICES - Desktops
+   Min-width: 992px
+   ============================================ */
+@media (min-width: 992px) {
+    
+    /* ========================================
+       TYPOGRAPHY - Tamaños completos
+       ======================================== */
+    .hero-title {
+        font-size: 56px;
+    }
+    
+    .section-title {
+        font-size: 40px;
+    }
+    
+    /* ========================================
+       GRIDS - 3-4 columnas
+       ======================================== */
+    .categories-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .families-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* ========================================
+       PRICING - Lado a lado
+       ======================================== */
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 900px;
+    }
+    
+    /* ========================================
+       FOOTER - 4 columnas
+       ======================================== */
+    .footer-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* ========================================
+       MODAL - Más ancho
+       ======================================== */
+    .modal-content {
+        max-width: 500px;
+    }
+}
+
+/* ============================================
+   EXTRA LARGE DEVICES - Large Desktops
+   Min-width: 1200px
+   ============================================ */
+@media (min-width: 1200px) {
+    
+    /* ========================================
+       CONTAINER - Ancho completo
+       ======================================== */
+    .container {
+        max-width: var(--container-width);
+        padding: 0 var(--space-xl);
+    }
+    
+    /* ========================================
+       GRIDS - 4 columnas completas
+       ======================================== */
+    .families-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* ========================================
+       SPACING - Mayor espaciado
+       ======================================== */
+    .hero {
+        padding: 120px 20px;
+    }
+    
+    /* ========================================
+       SEARCH - Más grande
+       ======================================== */
+    .search-container {
+        max-width: 800px;
+    }
+}
+
+/* ============================================
+   ULTRA WIDE - Optional (1440px+)
+   Para monitores muy grandes
+   ============================================ */
+@media (min-width: 1440px) {
+    
+    /* ========================================
+       CONTAINER - Límite máximo
+       ======================================== */
+    .container {
+        max-width: 1400px;
+    }
+    
+    /* ========================================
+       GRIDS - Opcionalmente 5 columnas
+       ======================================== */
+    .families-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    
+    /* ========================================
+       TYPOGRAPHY - Tamaños heroicos
+       ======================================== */
+    .hero-title {
+        font-size: 64px;
+    }
+}
+
+/* ============================================
+   TABLET LANDSCAPE - Orientación específica
+   ============================================ */
+@media (min-width: 768px) and (max-width: 991px) and (orientation: landscape) {
+    
+    /* ========================================
+       HERO - Reducir padding vertical
+       ======================================== */
+    .hero {
+        padding: 60px 20px;
+    }
+    
+    /* ========================================
+       MODAL - Ajustar altura
+       ======================================== */
+    .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* ============================================
+   MOBILE LANDSCAPE - Teléfonos horizontales
+   ============================================ */
+@media (max-width: 767px) and (orientation: landscape) {
+    
+    /* ========================================
+       HERO - Muy compacto
+       ======================================== */
+    .hero {
+        padding: 40px 20px;
+    }
+    
+    .hero-title {
+        font-size: 32px;
+    }
+    
+    .hero-subtitle {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
+    /* ========================================
+       STATS - Más compacto
+       ======================================== */
+    .hero-stats {
+        margin-top: 20px;
+        gap: 30px;
+    }
+    
+    .stat-number {
+        font-size: 24px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+    }
+    
+    /* ========================================
+       NAVBAR - Más delgado
+       ======================================== */
+    .nav-content {
+        padding: var(--space-md) 0;
+    }
+}
+
+/* ============================================
+   PRINT STYLES - Para impresión
+   ============================================ */
+@media print {
+    
+    /* Ocultar elementos no necesarios */
+    .navbar,
+    .hamburger,
+    .nav-buttons,
+    .search-container,
+    .filters,
+    .modal,
+    .footer {
+        display: none !important;
+    }
+    
+    /* Optimizar para papel */
+    body {
+        background: white;
+    }
+    
+    .family-card {
+        break-inside: avoid;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY - Preferencias de usuario
+   ============================================ */
+
+/* Reducir animaciones si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Modo oscuro (preparado para futuro) */
+@media (prefers-color-scheme: dark) {
+    /* Aquí irían los estilos de dark mode */
+    /* Por ahora, dejamos comentado para no afectar el diseño actual */
+    
+    /*
+    :root {
+        --background: #1a1a1a;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+    }
+    */
+}
+
+/* ============================================
+   UTILITIES - Clases auxiliares responsive
+   ============================================ */
+
+/* Ocultar en mobile */
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Ocultar en tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+    .hide-tablet {
+        display: none !important;
+    }
+}
+
+/* Ocultar en desktop */
+@media (min-width: 992px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+
+/* Mostrar solo en mobile */
+@media (min-width: 768px) {
+    .show-mobile-only {
+        display: none !important;
+    }
+}

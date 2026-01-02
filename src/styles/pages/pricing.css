@@ -1,0 +1,138 @@
+/* ============================================
+   PRICING SECTION
+   ============================================ */
+
+.pricing {
+    padding: var(--section-padding);
+    background: var(--white);
+}
+
+/* ========================================
+   PRICING GRID
+   ======================================== */
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   PRICING CARD
+   ======================================== */
+
+.pricing-card {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+    transition: var(--transition-base);
+}
+
+.pricing-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.pricing-card.featured {
+    border-color: var(--primary);
+    border-width: 3px;
+}
+
+/* ========================================
+   POPULAR BADGE
+   ======================================== */
+
+.popular-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: var(--white);
+    padding: 6px 20px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: var(--font-bold);
+}
+
+/* ========================================
+   PLAN DETAILS
+   ======================================== */
+
+.plan-name {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-lg);
+}
+
+.plan-price {
+    margin-bottom: 30px;
+}
+
+.price {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    color: var(--primary);
+}
+
+.period {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   PLAN FEATURES
+   ======================================== */
+
+.plan-features {
+    list-style: none;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.plan-features li {
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.plan-features i.fa-check {
+    color: var(--primary);
+}
+
+.plan-features i.fa-times {
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   RESPONSIVE - Mobile optimizations
+   ======================================== */
+
+@media (max-width: 767px) {
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+    }
+    
+    .pricing-card {
+        padding: var(--space-xl) var(--space-lg);
+    }
+    
+    .plan-name {
+        font-size: 22px;
+    }
+    
+    .price {
+        font-size: 48px;
+    }
+    
+    .period {
+        font-size: 16px;
+    }
+}
