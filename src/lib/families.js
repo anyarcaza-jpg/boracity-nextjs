@@ -1,3 +1,7 @@
+// src/lib/families.js
+import { config } from './config'; // ← AGREGAR ESTA LÍNEA
+
+
 /**
  * FAMILIES SERVICE - Boracity
  * Capa de abstracción para obtener datos de familias
