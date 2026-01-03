@@ -1,4 +1,5 @@
-import './globals.css'
+import './globals.css';
+import { WebsiteSchema, OrganizationSchema } from '@/components/SchemaOrg';
 import { Inter } from 'next/font/google'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -27,6 +28,10 @@ export default function RootLayout({ children }) {
         <Navbar />
         <main className="flex-1 pt-[70px]">{children}</main>
         <Footer />
+        
+        {/* Schema.org Structured Data for SEO */}
+        <WebsiteSchema />
+        <OrganizationSchema />
       </body>
     </html>
   )
