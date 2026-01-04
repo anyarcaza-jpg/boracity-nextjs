@@ -1,6 +1,5 @@
 // src/lib/families.js
-import { config } from './config'; // ← AGREGAR ESTA LÍNEA
-
+import { config } from './config';
 
 /**
  * FAMILIES SERVICE - Boracity
@@ -22,14 +21,9 @@ import {
  * Obtiene todas las familias
  * 
  * @returns {Promise<Array>} - Array de familias
- * 
- * FUTURO (con API):
- * const response = await fetch('/api/families');
- * return response.json();
  */
 export async function getAllFamilies() {
   try {
-    // Por ahora usamos datos mock
     const families = getMockFamilies();
     return families;
   } catch (error) {
@@ -43,10 +37,6 @@ export async function getAllFamilies() {
  * 
  * @param {string} id - ID de la familia (slug)
  * @returns {Promise<Object|null>} - Familia encontrada o null
- * 
- * FUTURO (con API):
- * const response = await fetch(`/api/families/${id}`);
- * return response.json();
  */
 export async function getFamilyById(id) {
   try {
@@ -65,10 +55,6 @@ export async function getFamilyById(id) {
  * 
  * @param {string} category - Categoría (usar FAMILY_CATEGORIES)
  * @returns {Promise<Array>} - Array de familias de esa categoría
- * 
- * FUTURO (con API):
- * const response = await fetch(`/api/families?category=${category}`);
- * return response.json();
  */
 export async function getFamiliesByCategory(category) {
   try {
@@ -86,10 +72,6 @@ export async function getFamiliesByCategory(category) {
  * 
  * @param {string} searchTerm - Término de búsqueda
  * @returns {Promise<Array>} - Array de familias que coinciden
- * 
- * FUTURO (con API):
- * const response = await fetch(`/api/families/search?q=${searchTerm}`);
- * return response.json();
  */
 export async function searchFamilies(searchTerm) {
   try {
@@ -104,12 +86,8 @@ export async function searchFamilies(searchTerm) {
   }
 }
 
- 
 /**
  * Obtiene estadísticas generales
- * Útil para mostrar en homepage o dashboard
- * 
- * @returns {Promise<Object>} - Estadísticas del sitio
  */
 export async function getFamiliesStats() {
   const families = getMockFamilies();
@@ -121,7 +99,7 @@ export async function getFamiliesStats() {
     categoriesCount: new Set(families.map(f => f.category)).size,
     recentlyAdded: families
       .sort((a, b) => b.metadata.uploadDate - a.metadata.uploadDate)
-      .slice(0, 6) // Últimas 6 familias
+      .slice(0, 6)
   };
   
   return Promise.resolve(stats);
@@ -129,9 +107,6 @@ export async function getFamiliesStats() {
 
 /**
  * Obtiene las familias más populares
- * 
- * @param {number} limit - Cantidad de familias a retornar
- * @returns {Promise<Array>} - Array de familias más descargadas
  */
 export async function getPopularFamilies(limit = 6) {
   const families = getMockFamilies();
@@ -144,11 +119,6 @@ export async function getPopularFamilies(limit = 6) {
 
 /**
  * Obtiene familias relacionadas (por categoría)
- * Útil para "Te puede interesar" en páginas de detalle
- * 
- * @param {string} familyId - ID de la familia actual
- * @param {number} limit - Cantidad de familias a retornar
- * @returns {Promise<Array>} - Array de familias relacionadas
  */
 export async function getRelatedFamilies(familyId, limit = 4) {
   const currentFamily = getMockFamilyById(familyId);
@@ -158,8 +128,37 @@ export async function getRelatedFamilies(familyId, limit = 4) {
   
   const families = getMockFamiliesByCategory(currentFamily.category);
   const related = families
-    .filter(f => f.id !== familyId) // Excluir la familia actual
+    .filter(f => f.id !== familyId)
     .slice(0, limit);
   
   return Promise.resolve(related);
+}
+
+/**
+ * Obtiene una familia por categoría y slug
+ * Nueva estructura: /revit/[category]/[slug]
+ * 
+ * @param {string} category - Categoría (furniture, doors, windows, lighting)
+ * @param {string} slug - Slug de la familia
+ * @returns {Promise<Object|null>} - Familia encontrada o null
+ */
+export async function getFamilyBySlug(category, slug) {
+  try {
+    if (!category || !slug) {
+      throw new Error('Category and slug are required');
+    }
+    
+    const families = getMockFamiliesByCategory(category);
+    const family = families.find(f => f.id === slug);
+    
+    if (!family) {
+      console.warn(`Family not found: ${category}/${slug}`);
+      return null;
+    }
+    
+    return family;
+  } catch (error) {
+    console.error('Error fetching family by slug:', error);
+    return null;
+  }
 }
