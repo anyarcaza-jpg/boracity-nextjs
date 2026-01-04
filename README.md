@@ -2,7 +2,7 @@
 
 > Professional BIM & 3D Assets Platform - Multi-Product Architecture
 
-![Version](https://img.shields.io/badge/version-0.3.1-blue)
+![Version](https://img.shields.io/badge/version-0.3.2-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![Status](https://img.shields.io/badge/status-Production_Ready-green)
 
@@ -24,13 +24,18 @@ Convertirse en la plataforma líder de recursos BIM gratuitos, compitiendo direc
 
 ## ✨ **Current Features**
 
-### **Implemented (v0.3.1):**
+### **Implemented (v0.3.2):**
 - ✅ Next.js 15 with App Router (SSR)
+- ✅ **Multi-Product SEO Architecture** - Scalable URL structure
+- ✅ **New Routes:** `/revit/[category]/[slug]/` - Professional URL structure
+- ✅ **Revit Landing Page** - Hero section with category grid
+- ✅ **Category Pages** - Dynamic grids for furniture, doors, windows, lighting
+- ✅ **Family Detail Pages** - Complete with related families section
 - ✅ **Next.js Image Optimization** - All images optimized (80-90% performance boost)
 - ✅ **FamilyCard Component** - Reusable component architecture
 - ✅ **Custom 404 Page** - Professional error handling
 - ✅ **Error Handling System** - Try/catch in all services
-- ✅ Dynamic routes `/family/[id]` with unique SEO
+- ✅ Dynamic routes `/family/[id]` with unique SEO (legacy)
 - ✅ Professional data architecture (models + services)
 - ✅ 9 mock families across 4 categories
 - ✅ **Dynamic sitemap.xml** (auto-generates)
@@ -46,9 +51,10 @@ Convertirse en la plataforma líder de recursos BIM gratuitos, compitiendo direc
 - ✅ Favicon multi-format support
 
 ### **In Progress (v0.4.0):**
+- 🚧 Redirects from `/family/` to `/revit/[category]/`
+- 🚧 Sitemap update for multi-product structure
 - 🚧 Loading states for async pages
 - 🚧 Search functionality
-- 🚧 Category pages
 - 🚧 20-30 additional mock families
 - 🚧 Google Search Console setup
 
@@ -73,50 +79,56 @@ Convertirse en la plataforma líder de recursos BIM gratuitos, compitiendo direc
 boracity-nextjs/
 ├── docs/                         # 📚 Documentation
 │   ├── SEO_STRATEGY.md          # Complete SEO roadmap
-│   ├── IMAGE_STRATEGY.md        # Image optimization guide ✨
-│   ├── SESSION_5_COMPLETE.md    # Latest session (v0.3.1) ✨
-│   ├── SESSION_4_COMPLETE.md    # Previous session notes
+│   ├── IMAGE_STRATEGY.md        # Image optimization guide
+│   ├── SESSION_6_COMPLETE.md    # Latest session (v0.3.2) ✨
+│   ├── SESSION_5_COMPLETE.md    # Previous session (v0.3.1)
+│   ├── SESSION_4_COMPLETE.md    # SEO Foundation
 │   ├── MEJORAS_PENDIENTES.md    # Pending improvements
 │   └── GIT_COMMANDS.md          # Git workflow guide
 ├── src/
 │   ├── app/
-│   │   ├── family/[id]/         # Dynamic family pages (SSR)
-│   │   │   └── page.js          # Family detail (optimized) ✨
-│   │   ├── layout.js            # Root layout + Favicon ✨
-│   │   ├── page.js              # Homepage (with FamilyCard) ✨
-│   │   ├── not-found.js         # Custom 404 page ✨
+│   │   ├── revit/               # ✨ NEW - Multi-product structure
+│   │   │   ├── page.js          # Revit landing
+│   │   │   └── [category]/      
+│   │   │       ├── page.js      # Category listing
+│   │   │       └── [slug]/      
+│   │   │           └── page.js  # Family detail
+│   │   ├── family/[id]/         # Legacy (to be redirected)
+│   │   │   └── page.js          
+│   │   ├── layout.js            # Root layout + Favicon
+│   │   ├── page.js              # Homepage
+│   │   ├── not-found.js         # Custom 404
 │   │   ├── sitemap.js           # Dynamic sitemap
 │   │   └── robots.js            # Robots.txt
 │   ├── components/
-│   │   ├── FamilyCard.js        # Reusable card component ✨
-│   │   ├── Navbar.js            # Navigation (optimized) ✨
-│   │   ├── Footer.js            # Footer (optimized) ✨
+│   │   ├── FamilyCard.js        # Reusable card
+│   │   ├── Navbar.js            # Navigation
+│   │   ├── Footer.js            # Footer
 │   │   └── SchemaOrg.js         # SEO structured data
 │   ├── data/
-│   │   ├── models/              # Data models
-│   │   │   └── family.model.js  # Family type definition
-│   │   └── mock/                # Mock data (9 families)
-│   │       └── families.mock.js # Sample data
+│   │   ├── models/              
+│   │   │   └── family.model.js  
+│   │   └── mock/                
+│   │       └── families.mock.js 
 │   ├── lib/
-│   │   ├── families.js          # Service layer (with error handling) ✨
-│   │   └── config.js            # Environment config
-│   └── styles/                  # (Deprecated - migrated to Tailwind)
-├── public/                      # Static assets
-│   ├── images/                  # Local images
-│   │   └── logo/               # Logos and favicons
-│   └── favicon.ico             # Multi-format favicon ✨
-├── CHANGELOG.md                 # Version history ✨
-├── PROGRESS.md                  # Development log
-├── README.md                    # This file
+│   │   ├── families.js          # Service layer (getFamilyBySlug) ✨
+│   │   └── config.js            
+│   └── styles/                  # (Deprecated)
+├── public/                      
+│   ├── images/                  
+│   │   └── logo/               
+│   └── favicon.ico             
+├── CHANGELOG.md                 # v0.3.2 ✨
+├── PROGRESS.md                  
+├── README.md                    
 ├── .gitignore
-├── package.json                 # v0.3.1 ✨
-├── next.config.js              # Image optimization config ✨
-├── tailwind.config.js          # Tailwind customization
-└── postcss.config.js           # PostCSS setup
+├── package.json                 # v0.3.2 ✨
+├── next.config.js              
+├── tailwind.config.js          
+└── postcss.config.js           
 ```
 
-**Legend:** ✨ = New/Updated in v0.3.1
-├── next.config.js
+**Legend:** ✨ = New/Updated in v0.3.2
 ├── tailwind.config.js
 ├── PROGRESS.md               # Development log
 └── README.md                 # This file
@@ -463,4 +475,4 @@ open http://localhost:3000/robots.txt
 
 ---
 
-*Last Updated: January 3, 2026 - v0.2.0 (SEO Foundation Complete)*
+*Last Updated: January 4, 2026 - v0.3.2 (Multi-Product SEO Architecture)*

@@ -7,7 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.1] - 2026-01-03
+## [0.3.2] - 2026-01-04
+
+### 🎯 **MAJOR UPDATE - Multi-Product SEO Architecture**
+
+This release implements a **scalable SEO architecture** for multi-product support (Revit, SketchUp, D5, Textures).
+
+### ✨ Added
+
+#### **New URL Structure - SEO Optimized**
+- `/revit/[category]/[slug]/` - New semantic URL structure
+  - Example: `/revit/furniture/modern-office-chair-ergonomic`
+  - Better SEO than old `/family/[id]` structure
+  - Captures long-tail keywords automatically
+  - Scalable for SketchUp, D5, Textures
+
+#### **New Pages Created**
+- `/revit/page.js` - Revit landing page
+- `/revit/[category]/page.js` - Category listing pages  
+- `/revit/[category]/[slug]/page.js` - Family detail pages
+
+#### **Service Layer Updates**
+- `getFamilyBySlug(category, slug)` - New function for new URL structure
+
+### 🔄 Changed
+- **Data Migration** - 9 families now accessible via new structure
+  - All categories working: furniture (3), doors (2), windows (2), lighting (2)
+
+### 📚 Documentation
+- Added `SESSION_6_COMPLETE.md` - Complete session documentation
+
+### 📈 SEO Impact
+- Better keyword targeting with semantic URLs
+- Breadcrumbs improve site hierarchy
+- Ready for multi-product expansion
+
+---
+
 
 ### 🎯 **MAJOR IMPROVEMENTS - Production Ready Optimizations**
 
