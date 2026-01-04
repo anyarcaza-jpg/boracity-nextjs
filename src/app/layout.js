@@ -13,6 +13,11 @@ export const metadata = {
   },
   description: 'Download 10,000+ professional Revit families, SketchUp models, D5 Render assets & textures. Free for students & architects.',
   keywords: ['revit families', 'bim', 'sketchup models', 'd5 render', 'textures', 'architectural assets'],
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({ children }) {

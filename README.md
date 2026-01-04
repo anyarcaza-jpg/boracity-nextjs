@@ -2,9 +2,9 @@
 
 > Professional BIM & 3D Assets Platform - Multi-Product Architecture
 
-![Version](https://img.shields.io/badge/version-0.2.0-blue)
+![Version](https://img.shields.io/badge/version-0.3.1-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![Status](https://img.shields.io/badge/status-SEO_Ready-green)
+![Status](https://img.shields.io/badge/status-Production_Ready-green)
 
 ---
 
@@ -24,25 +24,32 @@ Convertirse en la plataforma líder de recursos BIM gratuitos, compitiendo direc
 
 ## ✨ **Current Features**
 
-### **Implemented (v0.2.0):**
+### **Implemented (v0.3.1):**
 - ✅ Next.js 15 with App Router (SSR)
+- ✅ **Next.js Image Optimization** - All images optimized (80-90% performance boost)
+- ✅ **FamilyCard Component** - Reusable component architecture
+- ✅ **Custom 404 Page** - Professional error handling
+- ✅ **Error Handling System** - Try/catch in all services
 - ✅ Dynamic routes `/family/[id]` with unique SEO
 - ✅ Professional data architecture (models + services)
 - ✅ 9 mock families across 4 categories
 - ✅ **Dynamic sitemap.xml** (auto-generates)
 - ✅ **Robots.txt** optimized for SEO
-- ✅ **Schema.org markup** (WebSite + Organization)
+- ✅ **Schema.org markup** (WebSite + Organization + Product)
+- ✅ **Tailwind CSS 100%** - Fully migrated
+- ✅ **ImageKit CDN ready** - Production image hosting configured
 - ✅ Responsive design (mobile-first)
 - ✅ Professional orange branding (#FF4500)
 - ✅ Related families system
 - ✅ Breadcrumb navigation
 - ✅ SEO strategy documented
+- ✅ Favicon multi-format support
 
-### **In Progress (v0.3.0):**
-- 🚧 Homepage with hero section
-- 🚧 Family grid component
-- 🚧 Category showcase
+### **In Progress (v0.4.0):**
+- 🚧 Loading states for async pages
 - 🚧 Search functionality
+- 🚧 Category pages
+- 🚧 20-30 additional mock families
 - 🚧 Google Search Console setup
 
 ---
@@ -51,7 +58,8 @@ Convertirse en la plataforma líder de recursos BIM gratuitos, compitiendo direc
 
 - **Framework:** Next.js 15 (App Router)
 - **Language:** JavaScript (ES6+)
-- **Styling:** Tailwind CSS + Custom CSS modules
+- **Styling:** Tailwind CSS (100% migrated)
+- **Images:** Next.js Image + ImageKit CDN
 - **Fonts:** Inter (Google Fonts)
 - **Icons:** Font Awesome 6.5.1
 - **Version Control:** Git + GitHub
@@ -63,34 +71,51 @@ Convertirse en la plataforma líder de recursos BIM gratuitos, compitiendo direc
 ## 📂 **Project Structure**
 ```
 boracity-nextjs/
-├── docs/                      # Documentation
-│   ├── SEO_STRATEGY.md       # Complete SEO roadmap
-│   ├── SESSION_4_COMPLETE.md # Latest session notes
-│   └── GIT_COMMANDS.md       # Git workflow guide
+├── docs/                         # 📚 Documentation
+│   ├── SEO_STRATEGY.md          # Complete SEO roadmap
+│   ├── IMAGE_STRATEGY.md        # Image optimization guide ✨
+│   ├── SESSION_5_COMPLETE.md    # Latest session (v0.3.1) ✨
+│   ├── SESSION_4_COMPLETE.md    # Previous session notes
+│   ├── MEJORAS_PENDIENTES.md    # Pending improvements
+│   └── GIT_COMMANDS.md          # Git workflow guide
 ├── src/
 │   ├── app/
-│   │   ├── family/[id]/      # Dynamic family pages (SSR)
-│   │   ├── layout.js         # Root layout + Schema.org
-│   │   ├── page.js           # Homepage
-│   │   ├── sitemap.js        # Dynamic sitemap ✨
-│   │   └── robots.js         # Robots.txt ✨
+│   │   ├── family/[id]/         # Dynamic family pages (SSR)
+│   │   │   └── page.js          # Family detail (optimized) ✨
+│   │   ├── layout.js            # Root layout + Favicon ✨
+│   │   ├── page.js              # Homepage (with FamilyCard) ✨
+│   │   ├── not-found.js         # Custom 404 page ✨
+│   │   ├── sitemap.js           # Dynamic sitemap
+│   │   └── robots.js            # Robots.txt
 │   ├── components/
-│   │   ├── Navbar.js         # Navigation
-│   │   ├── Footer.js         # Footer
-│   │   └── SchemaOrg.js      # SEO structured data ✨
+│   │   ├── FamilyCard.js        # Reusable card component ✨
+│   │   ├── Navbar.js            # Navigation (optimized) ✨
+│   │   ├── Footer.js            # Footer (optimized) ✨
+│   │   └── SchemaOrg.js         # SEO structured data
 │   ├── data/
-│   │   ├── models/           # Data models
-│   │   └── mock/             # Mock data (9 families)
+│   │   ├── models/              # Data models
+│   │   │   └── family.model.js  # Family type definition
+│   │   └── mock/                # Mock data (9 families)
+│   │       └── families.mock.js # Sample data
 │   ├── lib/
-│   │   └── families.js       # Service layer (API-ready)
-│   └── styles/
-│       ├── core/             # Variables, reset, typography
-│       ├── layout/           # Navbar, hero, footer
-│       ├── components/       # Buttons, cards, forms
-│       └── pages/            # Page-specific styles
-├── public/                   # Static assets
+│   │   ├── families.js          # Service layer (with error handling) ✨
+│   │   └── config.js            # Environment config
+│   └── styles/                  # (Deprecated - migrated to Tailwind)
+├── public/                      # Static assets
+│   ├── images/                  # Local images
+│   │   └── logo/               # Logos and favicons
+│   └── favicon.ico             # Multi-format favicon ✨
+├── CHANGELOG.md                 # Version history ✨
+├── PROGRESS.md                  # Development log
+├── README.md                    # This file
 ├── .gitignore
-├── package.json
+├── package.json                 # v0.3.1 ✨
+├── next.config.js              # Image optimization config ✨
+├── tailwind.config.js          # Tailwind customization
+└── postcss.config.js           # PostCSS setup
+```
+
+**Legend:** ✨ = New/Updated in v0.3.1
 ├── next.config.js
 ├── tailwind.config.js
 ├── PROGRESS.md               # Development log

@@ -20,7 +20,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.FURNITURE,
     description: 'High-quality ergonomic office chair with adjustable height, lumbar support, and armrests. Perfect for modern office spaces and coworking environments. Features breathable mesh back and comfortable cushioned seat. Fully parametric with multiple finish options.',
     images: {
-      thumbnail: '/images/families/furniture/office-chair-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/furniture/office-chair-1.jpg',
         '/images/families/furniture/office-chair-2.jpg',
@@ -52,7 +52,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.FURNITURE,
     description: 'Professional conference table designed for 8 people. Features cable management system, premium wood finish options, and modular design. Ideal for meeting rooms, boardrooms, and collaborative spaces. Includes parametric dimensions for custom sizing.',
     images: {
-      thumbnail: '/images/families/furniture/conference-table-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/furniture/conference-table-1.jpg',
         '/images/families/furniture/conference-table-2.jpg'
@@ -83,7 +83,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.FURNITURE,
     description: 'Contemporary 3-seater sofa with clean lines and comfortable cushioning. Features multiple fabric and color options through parameters. Ideal for residential living rooms, office lounges, and hospitality projects. High-detail model with realistic materials.',
     images: {
-      thumbnail: '/images/families/furniture/sofa-3seater-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/furniture/sofa-3seater-1.jpg',
         '/images/families/furniture/sofa-3seater-2.jpg',
@@ -118,7 +118,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.DOORS,
     description: 'Standard single flush door with wood finish. Parametric family with adjustable dimensions, swing direction, and hardware options. Includes door frame, casing, and handles. Suitable for residential and commercial interior applications.',
     images: {
-      thumbnail: '/images/families/doors/flush-door-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/doors/flush-door-1.jpg',
         '/images/families/doors/flush-door-2.jpg'
@@ -149,7 +149,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.DOORS,
     description: 'Modern double glass door with sleek aluminum frame. Perfect for office entrances, commercial buildings, and contemporary residential projects. Features full-height glazing, panic hardware, and accessibility compliance. Parametric width and height adjustments.',
     images: {
-      thumbnail: '/images/families/doors/glass-door-double-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/doors/glass-door-double-1.jpg',
         '/images/families/doors/glass-door-double-2.jpg',
@@ -184,7 +184,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.WINDOWS,
     description: 'Energy-efficient single-hung casement window with vinyl frame. Features double-pane glazing, weather stripping, and easy operation. Parametric design allows custom sizing and configuration. Includes detailed trim and sill components.',
     images: {
-      thumbnail: '/images/families/windows/casement-window-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/windows/casement-window-1.jpg',
         '/images/families/windows/casement-window-2.jpg'
@@ -215,7 +215,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.WINDOWS,
     description: 'Commercial-grade sliding window with thermally-broken aluminum frame. Designed for office buildings and commercial applications. Features high-performance glazing, smooth sliding operation, and multiple color finishes. Meets commercial building codes.',
     images: {
-      thumbnail: '/images/families/windows/sliding-window-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/windows/sliding-window-1.jpg',
         '/images/families/windows/sliding-window-2.jpg'
@@ -249,7 +249,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.LIGHTING,
     description: 'Energy-efficient 6-inch LED recessed downlight perfect for retrofit applications. Features adjustable color temperature (2700K-5000K), dimmable driver, and high CRI. Ideal for residential and commercial spaces. Includes photometric data for lighting calculations.',
     images: {
-      thumbnail: '/images/families/lighting/led-downlight-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/lighting/led-downlight-1.jpg',
         '/images/families/lighting/led-downlight-2.jpg'
@@ -280,7 +280,7 @@ export const mockFamilies = [
     category: FAMILY_CATEGORIES.LIGHTING,
     description: 'Contemporary geometric pendant light with industrial aesthetic. Features matte black finish, exposed bulb design, and adjustable cable length. Perfect for kitchen islands, dining areas, and commercial spaces. Multiple size options available through parameters.',
     images: {
-      thumbnail: '/images/families/lighting/pendant-geometric-thumb.jpg',
+      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
       gallery: [
         '/images/families/lighting/pendant-geometric-1.jpg',
         '/images/families/lighting/pendant-geometric-2.jpg',

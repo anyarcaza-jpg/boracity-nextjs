@@ -28,9 +28,14 @@ import {
  * return response.json();
  */
 export async function getAllFamilies() {
-  // Por ahora usamos datos mock
-  // El 'await' simula una llamada asíncrona (preparando para API)
-  return Promise.resolve(getMockFamilies());
+  try {
+    // Por ahora usamos datos mock
+    const families = getMockFamilies();
+    return families;
+  } catch (error) {
+    console.error('Error fetching families:', error);
+    return [];
+  }
 }
 
 /**
@@ -44,8 +49,15 @@ export async function getAllFamilies() {
  * return response.json();
  */
 export async function getFamilyById(id) {
-  const family = getMockFamilyById(id);
-  return Promise.resolve(family || null);
+  try {
+    if (!id) throw new Error('ID is required');
+    const family = getMockFamilyById(id);
+    if (!family) throw new Error(`Family not found: ${id}`);
+    return family;
+  } catch (error) {
+    console.error('Error fetching family:', error);
+    return null;
+  }
 }
 
 /**
@@ -59,8 +71,14 @@ export async function getFamilyById(id) {
  * return response.json();
  */
 export async function getFamiliesByCategory(category) {
-  const families = getMockFamiliesByCategory(category);
-  return Promise.resolve(families);
+  try {
+    if (!category) throw new Error('Category is required');
+    const families = getMockFamiliesByCategory(category);
+    return families;
+  } catch (error) {
+    console.error('Error fetching families by category:', error);
+    return [];
+  }
 }
 
 /**
@@ -74,14 +92,19 @@ export async function getFamiliesByCategory(category) {
  * return response.json();
  */
 export async function searchFamilies(searchTerm) {
-  if (!searchTerm || searchTerm.trim() === '') {
-    return Promise.resolve([]);
+  try {
+    if (!searchTerm || searchTerm.trim() === '') {
+      return [];
+    }
+    const results = searchMockFamilies(searchTerm);
+    return results;
+  } catch (error) {
+    console.error('Error searching families:', error);
+    return [];
   }
-  
-  const results = searchMockFamilies(searchTerm);
-  return Promise.resolve(results);
 }
 
+ 
 /**
  * Obtiene estadísticas generales
  * Útil para mostrar en homepage o dashboard

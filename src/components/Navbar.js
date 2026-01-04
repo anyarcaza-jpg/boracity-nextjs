@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -11,11 +13,16 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-[70px]">
           <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <img 
-              src="/assets/images/logo.svg" 
-              alt="Boracity" 
-              className="h-10 w-10 object-contain"
-            />
+         
+
+<Image 
+  src="/assets/images/logo.svg" 
+  alt="Boracity" 
+  width={40}
+  height={40}
+  className="object-contain"
+  priority
+/> 
             <span className="text-secondary text-[22px] font-bold tracking-tight">
               Boracity
             </span>

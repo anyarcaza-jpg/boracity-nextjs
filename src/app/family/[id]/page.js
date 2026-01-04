@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getFamilyById, getRelatedFamilies } from '@/lib/families';
 import { ProductSchema, BreadcrumbSchema } from '@/components/SchemaOrg';
 
@@ -48,13 +49,16 @@ export default async function FamilyPage({ params }) {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Image */}
-            <div className="bg-gray-50 rounded-xl p-8">
-              <img 
-                src={family.images?.thumbnail || 'https://via.placeholder.com/800x600/FF4500/ffffff?text=BIM'} 
-                alt={family.name}
-                className="w-full rounded-lg"
-              />
-            </div>
+            
+            <div className="bg-gray-50 rounded-xl p-8 relative aspect-[4/3]">
+  <Image 
+    src={family.images?.thumbnail || 'https://via.placeholder.com/800x600/FF4500/ffffff?text=BIM'} 
+    alt={family.name}
+    fill
+    priority
+    className="rounded-lg object-contain"
+  />
+</div>
 
             {/* Info */}
             <div className="flex flex-col gap-6">
@@ -111,13 +115,15 @@ export default async function FamilyPage({ params }) {
                     href={`/family/${related.id}`}
                     className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all"
                   >
-                    <div className="bg-gray-100 aspect-[4/3]">
-                      <img
-                        src={related.images?.thumbnail || 'https://via.placeholder.com/400x300'}
-                        alt={related.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <div className="bg-gray-100 aspect-[4/3] relative overflow-hidden">
+  <Image
+    src={related.images?.thumbnail || 'https://via.placeholder.com/400x300'}
+    alt={related.name}
+    fill
+    className="object-cover"
+  />
+</div>
+
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900">
                         {related.name}
