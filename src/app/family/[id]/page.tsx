@@ -19,7 +19,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function FamilyPage({ params }) {
+export default async function FamilyPage({ params }: { params: { id: string } }) {
   const resolvedParams = await params;
   const family = await getFamilyById(resolvedParams.id);
   

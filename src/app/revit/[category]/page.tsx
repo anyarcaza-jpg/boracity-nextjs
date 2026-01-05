@@ -4,11 +4,14 @@
  * Example: /revit/furniture
  */
 
-import { getFamiliesByCategory } from '@/lib/families';
 import Link from 'next/link';
+import { getFamiliesByCategory } from '@/lib/families';
+import { CATEGORY_METADATA } from '@/data/models/family.model';
+import FamilyCard from '@/components/FamilyCard';
 import { CollectionPageSchema } from '@/components/SchemaOrg';
+import type { FamilyCategory } from '@/types';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params }: { params: { category: string } }) {
   const { category } = await params;
   
   return {
@@ -17,9 +20,9 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function CategoryPage({ params }) {
+export default async function CategoryPage({ params }: { params: { category: string } }) {
   const { category } = await params;
-  const families = await getFamiliesByCategory(category);
+  const families = await getFamiliesByCategory(category as any);
 
   return (
     <>
@@ -55,31 +58,7 @@ export default async function CategoryPage({ params }) {
           {families.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {families.map(family => (
-                <Link
-                  key={family.id}
-                  href={`/revit/${category}/${family.slug}`}
-                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden group"
-                >
-                  <div className="relative h-64 overflow-hidden">
-                    <img 
-                      src={family.images.thumbnail} 
-                      alt={family.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">
-                      {family.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {family.description}
-                    </p>
-                    <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>📥 {family.metadata.downloads.toLocaleString()}</span>
-                      <span>{family.file.size}</span>
-                    </div>
-                  </div>
-                </Link>
+                <FamilyCard key={family.id} family={family} />
               ))}
             </div>
           ) : (

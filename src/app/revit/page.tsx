@@ -5,7 +5,7 @@
  * Página principal de la sección Revit
  * Muestra categorías y familias destacadas
  */
-
+import Link from 'next/link';
 import { ItemListSchema } from '@/components/SchemaOrg';
 
 export const metadata = {

@@ -1,10 +1,11 @@
+import type { Family, FamilyCategory } from '@/types';
 /**
  * MOCK DATA - Familias de Revit para desarrollo
  * Estos datos simulan lo que vendrá de la API
  * Representan familias reales y profesionales
  */
 
-import { FAMILY_CATEGORIES, REVIT_VERSIONS } from '../models/family.model.js';
+import { FAMILY_CATEGORIES, REVIT_VERSIONS } from '../models/family.model';
 
 /**
  * Datos mock de familias de Revit

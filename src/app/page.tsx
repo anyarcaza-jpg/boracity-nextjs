@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getAllFamilies, getFamiliesStats } from '@/lib/families';
 import FamilyCard from '@/components/FamilyCard';
+import type { Family } from '@/types';
 
 export const metadata = {
   title: 'Boracity - Free Revit Families, SketchUp Models & 3D Assets',

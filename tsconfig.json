@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    /* CONFIGURACIÓN BÁSICA */
+    "target": "ES2017", // JavaScript moderno
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ], // APIs disponibles
+    "allowJs": true, // Permite .js y .ts juntos (IMPORTANTE para migración)
+    "skipLibCheck": true, // Más rápido
+    "strict": false, // ❌ Desactivado al inicio (lo activamos al final)
+    "noEmit": true, // Next.js maneja la compilación
+    "esModuleInterop": true, // Compatibilidad imports
+    "module": "esnext", // Módulos modernos
+    "moduleResolution": "bundler", // Next.js 15 usa bundler
+    "resolveJsonModule": true, // Permite importar JSON
+    "isolatedModules": true, // Cada archivo se compila solo
+    "jsx": "react-jsx",
+    "incremental": true, // Compilación más rápida
+    /* RUTAS */
+    "baseUrl": ".", // Base para imports
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ] // @ = src/
+    },
+    /* NEXT.JS ESPECÍFICO */
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  /* ARCHIVOS A INCLUIR */
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  /* ARCHIVOS A EXCLUIR */
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,4 +1,6 @@
-// src/lib/families.js
+// src/lib/families.ts
+
+import type { Family, FamilyCategory, FamilyStats } from '@/types';
 import { config } from './config';
 
 /**
@@ -19,10 +21,8 @@ import {
 
 /**
  * Obtiene todas las familias
- * 
- * @returns {Promise<Array>} - Array de familias
  */
-export async function getAllFamilies() {
+export async function getAllFamilies(): Promise<Family[]> {
   try {
     const families = getMockFamilies();
     return families;
@@ -34,11 +34,8 @@ export async function getAllFamilies() {
 
 /**
  * Obtiene una familia específica por su ID
- * 
- * @param {string} id - ID de la familia (slug)
- * @returns {Promise<Object|null>} - Familia encontrada o null
  */
-export async function getFamilyById(id) {
+export async function getFamilyById(id: string): Promise<Family | null> {
   try {
     if (!id) throw new Error('ID is required');
     const family = getMockFamilyById(id);
@@ -52,11 +49,8 @@ export async function getFamilyById(id) {
 
 /**
  * Obtiene familias por categoría
- * 
- * @param {string} category - Categoría (usar FAMILY_CATEGORIES)
- * @returns {Promise<Array>} - Array de familias de esa categoría
  */
-export async function getFamiliesByCategory(category) {
+export async function getFamiliesByCategory(category: FamilyCategory): Promise<Family[]> {
   try {
     if (!category) throw new Error('Category is required');
     const families = getMockFamiliesByCategory(category);
@@ -69,11 +63,8 @@ export async function getFamiliesByCategory(category) {
 
 /**
  * Busca familias por término de búsqueda
- * 
- * @param {string} searchTerm - Término de búsqueda
- * @returns {Promise<Array>} - Array de familias que coinciden
  */
-export async function searchFamilies(searchTerm) {
+export async function searchFamilies(searchTerm: string): Promise<Family[]> {
   try {
     if (!searchTerm || searchTerm.trim() === '') {
       return [];
@@ -89,41 +80,41 @@ export async function searchFamilies(searchTerm) {
 /**
  * Obtiene estadísticas generales
  */
-export async function getFamiliesStats() {
+export async function getFamiliesStats(): Promise<FamilyStats> {
   const families = getMockFamilies();
   
-  const stats = {
+  const stats: FamilyStats = {
     totalFamilies: families.length,
     totalDownloads: families.reduce((sum, f) => sum + f.metadata.downloads, 0),
     totalViews: families.reduce((sum, f) => sum + f.metadata.views, 0),
     categoriesCount: new Set(families.map(f => f.category)).size,
     recentlyAdded: families
-      .sort((a, b) => b.metadata.uploadDate - a.metadata.uploadDate)
+      .sort((a, b) => b.metadata.uploadDate.getTime() - a.metadata.uploadDate.getTime())
       .slice(0, 6)
   };
   
-  return Promise.resolve(stats);
+  return stats;
 }
 
 /**
  * Obtiene las familias más populares
  */
-export async function getPopularFamilies(limit = 6) {
+export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
   const families = getMockFamilies();
   const popular = families
     .sort((a, b) => b.metadata.downloads - a.metadata.downloads)
     .slice(0, limit);
   
-  return Promise.resolve(popular);
+  return popular;
 }
 
 /**
  * Obtiene familias relacionadas (por categoría)
  */
-export async function getRelatedFamilies(familyId, limit = 4) {
+export async function getRelatedFamilies(familyId: string, limit: number = 4): Promise<Family[]> {
   const currentFamily = getMockFamilyById(familyId);
   if (!currentFamily) {
-    return Promise.resolve([]);
+    return [];
   }
   
   const families = getMockFamiliesByCategory(currentFamily.category);
@@ -131,18 +122,17 @@ export async function getRelatedFamilies(familyId, limit = 4) {
     .filter(f => f.id !== familyId)
     .slice(0, limit);
   
-  return Promise.resolve(related);
+  return related;
 }
 
 /**
  * Obtiene una familia por categoría y slug
  * Nueva estructura: /revit/[category]/[slug]
- * 
- * @param {string} category - Categoría (furniture, doors, windows, lighting)
- * @param {string} slug - Slug de la familia
- * @returns {Promise<Object|null>} - Familia encontrada o null
  */
-export async function getFamilyBySlug(category, slug) {
+export async function getFamilyBySlug(
+  category: FamilyCategory, 
+  slug: string
+): Promise<Family | null> {
   try {
     if (!category || !slug) {
       throw new Error('Category and slug are required');
@@ -161,17 +151,15 @@ export async function getFamilyBySlug(category, slug) {
     console.error('Error fetching family by slug:', error);
     return null;
   }
-
 }
 
 /**
  * Obtiene una familia por su ID (para redirects)
  * Usada por el middleware para convertir URLs antiguas
- * 
- * @param {string} id - ID de la familia
- * @returns {Promise<Object|null>} - Familia con category y slug
  */
-export async function getFamilyByIdForRedirect(id) {
+export async function getFamilyByIdForRedirect(
+  id: string
+): Promise<{ category: FamilyCategory; slug: string } | null> {
   try {
     if (!id) {
       throw new Error('ID is required');
