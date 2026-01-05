@@ -9,7 +9,7 @@ export default async function sitemap() {
   
   // Family pages
   const familyUrls = families.map((family) => ({
-    url: `${baseUrl}/family/${family.id}`,
+    url: `${baseUrl}/revit/${family.category}/${family.slug}`,
     lastModified: family.updatedAt || new Date(),
     changeFrequency: 'weekly',
     priority: 0.8,
@@ -24,25 +24,31 @@ export default async function sitemap() {
       priority: 1,
     },
     {
-      url: `${baseUrl}/categories/furniture`,
+      url: `${baseUrl}/revit`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/revit/furniture`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/categories/doors`,
+      url: `${baseUrl}/revit/doors`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/categories/windows`,
+      url: `${baseUrl}/revit/windows`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/categories/lighting`,
+      url: `${baseUrl}/revit/lighting`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,

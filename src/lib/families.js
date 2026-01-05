@@ -149,7 +149,7 @@ export async function getFamilyBySlug(category, slug) {
     }
     
     const families = getMockFamiliesByCategory(category);
-    const family = families.find(f => f.id === slug);
+    const family = families.find(f => f.slug === slug);
     
     if (!family) {
       console.warn(`Family not found: ${category}/${slug}`);
@@ -159,6 +159,39 @@ export async function getFamilyBySlug(category, slug) {
     return family;
   } catch (error) {
     console.error('Error fetching family by slug:', error);
+    return null;
+  }
+
+}
+
+/**
+ * Obtiene una familia por su ID (para redirects)
+ * Usada por el middleware para convertir URLs antiguas
+ * 
+ * @param {string} id - ID de la familia
+ * @returns {Promise<Object|null>} - Familia con category y slug
+ */
+export async function getFamilyByIdForRedirect(id) {
+  try {
+    if (!id) {
+      throw new Error('ID is required');
+    }
+    
+    const families = getMockFamilies();
+    const family = families.find(f => f.id === id);
+    
+    if (!family) {
+      console.warn(`Family not found for redirect: ${id}`);
+      return null;
+    }
+    
+    // Retornar solo lo necesario para el redirect
+    return {
+      category: family.category,
+      slug: family.slug
+    };
+  } catch (error) {
+    console.error('Error fetching family for redirect:', error);
     return null;
   }
 }
