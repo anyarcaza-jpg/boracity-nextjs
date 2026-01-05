@@ -14,10 +14,13 @@ export default function FamilyCard({ family }: FamilyCardProps) {
     >
       {/* Imagen */}
       <div className="relative h-48 bg-gray-100 overflow-hidden">
-        <img
-          src={family.images.thumbnail}
-          alt={family.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        <Image
+         src={family.images.thumbnail}
+         alt={family.name}
+         width={400}
+         height={300}
+         className="w-full h-48 object-cover"
+         loading="lazy"
         />
         
         {/* Category Badge */}

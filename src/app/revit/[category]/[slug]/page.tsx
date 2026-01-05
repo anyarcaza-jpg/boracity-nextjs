@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { isValidCategory } from '@/lib/validators';
 import Link from 'next/link';
 import { getFamilyBySlug, getRelatedFamilies } from '@/lib/families';
@@ -76,21 +77,27 @@ export default async function FamilyDetailPage({ params }: { params: { category:
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white p-8 rounded-lg shadow-md">
           {/* Image Section */}
           <div>
-            <img 
-              src={family.images.thumbnail} 
-              alt={family.name} 
+            <Image
+              src={family.images.thumbnail}
+              alt={family.name}
+              width={800}
+              height={600}
               className="w-full rounded-lg shadow-sm"
+              priority={true}
             />
             
             {/* Image Gallery */}
             {family.images.gallery && family.images.gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-4 mt-4">
                 {family.images.gallery.map((img, idx) => (
-                  <img 
-                    key={idx}
-                    src={img} 
-                    alt={`${family.name} - View ${idx + 1}`}
-                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  <Image
+                   key={idx}
+                   src={img}
+                   alt={`${family.name} - View ${idx + 1}`}
+                   width={200}
+                   height={200}
+                   className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                   loading="lazy"
                   />
                 ))}
               </div>
