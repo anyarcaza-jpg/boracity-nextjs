@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { getFamilyById, getRelatedFamilies } from '@/lib/families';
 import { ProductSchema, BreadcrumbSchema } from '@/components/SchemaOrg';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
   const resolvedParams = await params;
   const family = await getFamilyById(resolvedParams.id);
   

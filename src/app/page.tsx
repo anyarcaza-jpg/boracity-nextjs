@@ -1,8 +1,8 @@
+import type { Family, FamilyCategory } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllFamilies, getFamiliesStats } from '@/lib/families';
 import FamilyCard from '@/components/FamilyCard';
-import type { Family } from '@/types';
 
 export const metadata = {
   title: 'Boracity - Free Revit Families, SketchUp Models & 3D Assets',
@@ -266,8 +266,6 @@ export default async function HomePage() {
 }
 
 // Helper function
-function getFamilyCountByCategory(category, families) {
-  return families.filter(f => 
-    f.category.toLowerCase() === category.toLowerCase()
-  ).length;
+function getFamilyCountByCategory(category: FamilyCategory, families: Family[]): number {
+  return families.filter((f: Family) => f.category === category).length;
 }

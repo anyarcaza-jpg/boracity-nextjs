@@ -9,7 +9,7 @@
     ], // APIs disponibles
     "allowJs": true, // Permite .js y .ts juntos (IMPORTANTE para migración)
     "skipLibCheck": true, // Más rápido
-    "strict": false, // ❌ Desactivado al inicio (lo activamos al final)
+    "strict": true, // ❌ Desactivado al inicio (lo activamos al final)
     "noEmit": true, // Next.js maneja la compilación
     "esModuleInterop": true, // Compatibilidad imports
     "module": "esnext", // Módulos modernos

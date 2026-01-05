@@ -328,21 +328,21 @@ export function getAllFamilies() {
 /**
  * Función para obtener una familia por ID
  */
-export function getFamilyById(id) {
-  return mockFamilies.find(family => family.id === id);
+export function getFamilyById(id: string): Family | null {
+  return mockFamilies.find(f => f.id === id) || null;
 }
 
 /**
  * Función para obtener familias por categoría
  */
-export function getFamiliesByCategory(category) {
+export function getFamiliesByCategory(category: FamilyCategory): Family[] {
   return mockFamilies.filter(family => family.category === category);
 }
 
 /**
  * Función para buscar familias por término
  */
-export function searchFamilies(searchTerm) {
+export function searchFamilies(searchTerm: string): Family[] {
   const term = searchTerm.toLowerCase();
   return mockFamilies.filter(family => 
     family.name.toLowerCase().includes(term) ||
