@@ -100,3 +100,87 @@ export function BreadcrumbSchema({ items }) {
     />
   );
 }
+
+/**
+ * CollectionPage Schema
+ * Para páginas de categorías (ej: /revit/furniture)
+ * Le dice a Google que es una colección de productos relacionados
+ */
+export function CollectionPageSchema({ category, families, url }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `${category.charAt(0).toUpperCase() + category.slice(1)} Revit Families`,
+    "description": `Free ${category} Revit families for architects and BIM professionals. Download high-quality parametric families.`,
+    "url": url,
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": families.map((family, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `https://boracity.com/revit/${category}/${family.slug}`,
+        "name": family.name
+      }))
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://boracity.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Revit",
+          "item": "https://boracity.com/revit"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": category.charAt(0).toUpperCase() + category.slice(1),
+          "item": url
+        }
+      ]
+    }
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+/**
+ * ItemList Schema
+ * Para landing page /revit (lista de categorías)
+ * Ayuda a Google entender la estructura de productos
+ */
+export function ItemListSchema({ items, title, description, url }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": title,
+    "description": description,
+    "url": url,
+    "numberOfItems": items.length,
+    "itemListElement": items.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": item.url,
+      "name": item.name,
+      "description": item.description
+    }))
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
