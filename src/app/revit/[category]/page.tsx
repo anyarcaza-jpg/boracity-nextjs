@@ -3,6 +3,8 @@
  * URL: /revit/[category]
  * Example: /revit/furniture
  */
+import { isValidCategory } from '@/lib/validators';
+import { notFound } from 'next/navigation';
 
 import Link from 'next/link';
 import { getFamiliesByCategory } from '@/lib/families';
@@ -22,7 +24,13 @@ export async function generateMetadata({ params }: { params: { category: string 
 
 export default async function CategoryPage({ params }: { params: { category: string } }) {
   const { category } = await params;
-  const families = await getFamiliesByCategory(category as any);
+
+  // Validar que la categoría sea válida
+  if (!isValidCategory(category)) {
+    notFound();
+  }
+
+  const families = await getFamiliesByCategory(category);
 
   return (
     <>

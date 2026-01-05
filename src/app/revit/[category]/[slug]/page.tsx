@@ -1,3 +1,4 @@
+import { isValidCategory } from '@/lib/validators';
 import Link from 'next/link';
 import { getFamilyBySlug, getRelatedFamilies } from '@/lib/families';
 import { CATEGORY_METADATA } from '@/data/models/family.model';
@@ -7,7 +8,13 @@ import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
   const { category, slug } = await params;
-  const family = await getFamilyBySlug(category as any, slug);
+
+  // Validar categoría
+  if (!isValidCategory(category)) {
+    return { title: 'Category Not Found | Boracity' };
+  }
+
+  const family = await getFamilyBySlug(category, slug);
   
   if (!family) {
     return { title: 'Family Not Found | Boracity' };
@@ -22,7 +29,12 @@ export async function generateMetadata({ params }: { params: { category: string;
 
 export default async function FamilyDetailPage({ params }: { params: { category: string; slug: string } }) {
   const { category, slug } = await params;
-  const family = await getFamilyBySlug(category as any, slug);
+  // Validar categoría
+  if (!isValidCategory(category)) {
+    notFound();
+  }
+
+  const family = await getFamilyBySlug(category, slug);
   
   if (!family) {
     notFound();
