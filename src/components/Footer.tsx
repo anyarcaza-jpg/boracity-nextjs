@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -101,16 +102,16 @@ export default function Footer() {
             </div>
             <div className="flex gap-3">
               <a href="#" className="w-10 h-10 flex items-center justify-center bg-[#2a2a2a] rounded-md text-gray-400 hover:bg-primary hover:text-white hover:-translate-y-1 transition-all">
-                <i className="fab fa-facebook text-base"></i>
+                <Facebook className="w-4 h-4" />
               </a>
               <a href="#" className="w-10 h-10 flex items-center justify-center bg-[#2a2a2a] rounded-md text-gray-400 hover:bg-primary hover:text-white hover:-translate-y-1 transition-all">
-                <i className="fab fa-twitter text-base"></i>
+                <Twitter className="w-4 h-4" />
               </a>
               <a href="#" className="w-10 h-10 flex items-center justify-center bg-[#2a2a2a] rounded-md text-gray-400 hover:bg-primary hover:text-white hover:-translate-y-1 transition-all">
-                <i className="fab fa-instagram text-base"></i>
+                <Instagram className="w-4 h-4" />
               </a>
               <a href="#" className="w-10 h-10 flex items-center justify-center bg-[#2a2a2a] rounded-md text-gray-400 hover:bg-primary hover:text-white hover:-translate-y-1 transition-all">
-                <i className="fab fa-linkedin text-base"></i>
+                <Linkedin className="w-4 h-4" />
               </a>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,16 +13,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-[70px]">
           <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-         
-
-<Image 
-  src="/assets/images/logo.svg" 
-  alt="Boracity" 
-  width={40}
-  height={40}
-  className="object-contain"
-  priority
-/> 
+            <Image 
+              src="/assets/images/logo.svg" 
+              alt="Boracity" 
+              width={40}
+              height={40}
+              className="object-contain"
+              priority
+            /> 
             <span className="text-secondary text-[22px] font-bold tracking-tight">
               Boracity
             </span>
@@ -64,7 +63,11 @@ export default function Navbar() {
             className="lg:hidden p-2 text-gray-700"
             aria-label="Toggle menu"
           >
-            <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>

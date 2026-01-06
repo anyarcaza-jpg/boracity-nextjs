@@ -1,8 +1,8 @@
 import type { Family, FamilyCategory } from '@/types';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getAllFamilies, getFamiliesStats } from '@/lib/families';
 import FamilyCard from '@/components/FamilyCard';
+import { Search, Download, CheckCircle, Rocket, ArrowRight, Sofa, DoorOpen, Square, Lightbulb } from 'lucide-react';
 
 export const metadata = {
   title: 'Boracity - Free Revit Families, SketchUp Models & 3D Assets',
@@ -43,8 +43,8 @@ export default async function HomePage() {
                 placeholder="Search families (e.g., office chair, door, window...)"
                 className="w-full px-6 py-4 pr-32 rounded-lg border-2 border-gray-200 focus:border-primary focus:outline-none text-base shadow-sm"
               />
-              <button className="absolute right-2 top-2 px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-all">
-                <i className="fas fa-search mr-2"></i>
+              <button className="absolute right-2 top-2 px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-all flex items-center gap-2">
+                <Search className="w-4 h-4" />
                 Search
               </button>
             </div>
@@ -101,17 +101,17 @@ export default async function HomePage() {
           {/* Categories Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {[
-              { name: 'Furniture', icon: 'fa-couch', count: getFamilyCountByCategory('furniture', families) },
-              { name: 'Doors', icon: 'fa-door-open', count: getFamilyCountByCategory('doors', families) },
-              { name: 'Windows', icon: 'fa-window-maximize', count: getFamilyCountByCategory('windows', families) },
-              { name: 'Lighting', icon: 'fa-lightbulb', count: getFamilyCountByCategory('lighting', families) },
+              { name: 'Furniture', Icon: Sofa, count: getFamilyCountByCategory('furniture', families) },
+              { name: 'Doors', Icon: DoorOpen, count: getFamilyCountByCategory('doors', families) },
+              { name: 'Windows', Icon: Square, count: getFamilyCountByCategory('windows', families) },
+              { name: 'Lighting', Icon: Lightbulb, count: getFamilyCountByCategory('lighting', families) },
             ].map((category) => (
               <Link
                 key={category.name}
                 href={`/category/${category.name.toLowerCase()}`}
                 className="group bg-gray-50 rounded-xl p-6 sm:p-8 text-center hover:bg-primary hover:shadow-xl transition-all duration-300"
               >
-                <i className={`fas ${category.icon} text-4xl sm:text-5xl text-primary group-hover:text-white mb-4 transition-colors`}></i>
+                <category.Icon className="w-12 h-12 sm:w-14 sm:h-14 text-primary group-hover:text-white mb-4 transition-colors mx-auto" />
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
                   {category.name}
                 </h3>
@@ -129,7 +129,7 @@ export default async function HomePage() {
               className="inline-flex items-center gap-2 px-8 py-3 text-primary border-2 border-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all"
             >
               View All Categories
-              <i className="fas fa-arrow-right"></i>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default async function HomePage() {
               className="hidden sm:flex items-center gap-2 text-primary hover:text-primary-dark font-semibold transition-colors"
             >
               View All
-              <i className="fas fa-arrow-right"></i>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -173,7 +173,7 @@ export default async function HomePage() {
               className="inline-flex items-center gap-2 px-6 py-3 text-primary border-2 border-primary rounded-lg font-semibold"
             >
               View All Families
-              <i className="fas fa-arrow-right"></i>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -197,7 +197,7 @@ export default async function HomePage() {
             {/* Feature 1 */}
             <div className="text-center p-8 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="fas fa-download text-2xl text-primary"></i>
+                <Download className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 100% Free Downloads
@@ -210,7 +210,7 @@ export default async function HomePage() {
             {/* Feature 2 */}
             <div className="text-center p-8 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="fas fa-check-circle text-2xl text-primary"></i>
+                <CheckCircle className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Professional Quality
@@ -223,7 +223,7 @@ export default async function HomePage() {
             {/* Feature 3 */}
             <div className="text-center p-8 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="fas fa-rocket text-2xl text-primary"></i>
+                <Rocket className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Regular Updates

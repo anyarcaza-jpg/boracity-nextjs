@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
+import { Download, Eye } from 'lucide-react';
 import type { Family } from '@/types';
 
 interface FamilyCardProps {
@@ -14,13 +15,12 @@ export default function FamilyCard({ family }: FamilyCardProps) {
     >
       {/* Imagen */}
       <div className="relative h-48 bg-gray-100 overflow-hidden">
-        <Image
+        <OptimizedImage
          src={family.images.thumbnail}
+         category={family.category}
+         variant="thumbnail"
          alt={family.name}
-         width={400}
-         height={300}
          className="w-full h-48 object-cover"
-         loading="lazy"
         />
         
         {/* Category Badge */}
@@ -44,12 +44,12 @@ export default function FamilyCard({ family }: FamilyCardProps) {
         {/* Footer Stats */}
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-1">
-            <i className="fas fa-download text-xs"></i>
+            <Download className="w-3.5 h-3.5" />
             <span>{family.metadata.downloads.toLocaleString()}</span>
           </div>
           
           <div className="flex items-center gap-1">
-            <i className="fas fa-eye text-xs"></i>
+            <Eye className="w-3.5 h-3.5" />
             <span>{family.metadata.views.toLocaleString()}</span>
           </div>
           

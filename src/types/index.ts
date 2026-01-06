@@ -39,6 +39,7 @@ export interface Family {
 
 export interface FamilyImages {
   thumbnail: string;
+  category: FamilyCategory;
   gallery: string[];
 }
 

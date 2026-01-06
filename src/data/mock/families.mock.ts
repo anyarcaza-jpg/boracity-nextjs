@@ -3,6 +3,8 @@ import type { Family, FamilyCategory } from '@/types';
  * MOCK DATA - Familias de Revit para desarrollo
  * Estos datos simulan lo que vendrá de la API
  * Representan familias reales y profesionales
+ * 
+ * ✅ ACTUALIZADO: Usando imágenes reales de ImageKit
  */
 
 import { FAMILY_CATEGORIES, REVIT_VERSIONS } from '../models/family.model';
@@ -13,306 +15,254 @@ import { FAMILY_CATEGORIES, REVIT_VERSIONS } from '../models/family.model';
  */
 export const mockFamilies = [
   // ============================================
-  // FURNITURE - Muebles
+  // FURNITURE - Muebles (2 familias reales)
   // ============================================
   {
     id: 'fam_001',
-    slug: 'modern-office-chair-ergonomic',
-    name: 'Modern Office Chair - Ergonomic',
+    slug: 'bar-chair-modern',
+    name: 'ALUNVA Bar Chair - Modern Design',
     category: FAMILY_CATEGORIES.FURNITURE,
-    description: 'High-quality ergonomic office chair with adjustable height, lumbar support, and armrests. Perfect for modern office spaces and coworking environments. Features breathable mesh back and comfortable cushioned seat. Fully parametric with multiple finish options.',
+    description: 'Modern bar chair with sleek design, perfect for kitchen islands and high counters. Features adjustable height, comfortable seating, and contemporary aesthetic. Fully parametric with multiple finish options.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/furniture/office-chair-1.jpg',
-        '/images/families/furniture/office-chair-2.jpg',
-        '/images/families/furniture/office-chair-3.jpg'
-      ]
+      thumbnail: 'bar-chair.png',
+      category: FAMILY_CATEGORIES.FURNITURE,
+      gallery: []
     },
     file: {
       size: '245 KB',
       revitVersions: [REVIT_VERSIONS[0], REVIT_VERSIONS[1], REVIT_VERSIONS[2]], // 2025, 2024, 2023
-      downloadUrl: '/downloads/modern-office-chair-ergonomic.rfa'
+      downloadUrl: '/downloads/bar-chair-modern.rfa'
     },
     metadata: {
-      tags: ['office', 'chair', 'furniture', 'ergonomic', 'modern', 'workspace', 'seating'],
+      tags: ['bar', 'chair', 'furniture', 'modern', 'kitchen', 'counter', 'seating'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-01-15'),
       downloads: 1247,
       views: 3891
     },
     seo: {
-      title: 'Modern Ergonomic Office Chair - Free Revit Family',
-      description: 'Download free high-quality ergonomic office chair Revit family. Fully parametric with adjustable height, lumbar support. Compatible with Revit 2023-2025.',
-      keywords: ['office chair revit family', 'ergonomic chair bim', 'modern office furniture', 'revit seating', 'workspace furniture']
+      title: 'Modern Bar Chair - Free Revit Family | Boracity',
+      description: 'Download free modern bar chair Revit family. Perfect for kitchen islands and counters. Fully parametric. Compatible with Revit 2023-2025.',
+      keywords: ['bar chair revit family', 'modern bar stool bim', 'kitchen furniture', 'revit seating', 'counter chair']
     }
   },
   
   {
     id: 'fam_002',
-    slug: 'conference-table-rectangular-8-person',
-    name: 'Conference Table - Rectangular 8 Person',
+    slug: 'armchair-ottoman-set',
+    name: 'Armchair 78 with Ottoman - Living Room Set',
     category: FAMILY_CATEGORIES.FURNITURE,
-    description: 'Professional conference table designed for 8 people. Features cable management system, premium wood finish options, and modular design. Ideal for meeting rooms, boardrooms, and collaborative spaces. Includes parametric dimensions for custom sizing.',
+    description: 'Elegant armchair with matching ottoman, perfect for living rooms and lounges. Features comfortable cushioning, premium fabric options, and classic design. Ideal for residential and hospitality projects.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/furniture/conference-table-1.jpg',
-        '/images/families/furniture/conference-table-2.jpg'
-      ]
+      thumbnail: 'armchair-ottoman.png',
+      category: FAMILY_CATEGORIES.FURNITURE,
+      gallery: []
     },
     file: {
       size: '312 KB',
       revitVersions: [REVIT_VERSIONS[0], REVIT_VERSIONS[1], REVIT_VERSIONS[2], REVIT_VERSIONS[3]], // 2025-2022
-      downloadUrl: '/downloads/conference-table-rectangular-8-person.rfa'
+      downloadUrl: '/downloads/armchair-ottoman-set.rfa'
     },
     metadata: {
-      tags: ['conference', 'table', 'furniture', 'meeting room', 'boardroom', 'office', '8 person'],
+      tags: ['armchair', 'ottoman', 'furniture', 'living room', 'lounge', 'residential', 'hospitality'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-02-01'),
       downloads: 892,
       views: 2134
     },
     seo: {
-      title: '8-Person Conference Table - Free Revit Family Download',
-      description: 'Professional rectangular conference table for 8 people. Free Revit family with cable management and parametric sizing. Perfect for meeting rooms and offices.',
-      keywords: ['conference table revit', 'meeting table bim', 'boardroom furniture', '8 person table', 'office furniture revit']
+      title: 'Armchair with Ottoman - Free Revit Family | Living Room',
+      description: 'Elegant armchair and ottoman set Revit family. Perfect for living rooms and lounges. Free download with multiple fabric options.',
+      keywords: ['armchair revit family', 'ottoman bim', 'living room furniture', 'lounge chair revit', 'residential furniture']
     }
   },
 
+  // ============================================
+  // DOORS - Puertas (2 familias reales)
+  // ============================================
   {
     id: 'fam_003',
-    slug: 'modern-sofa-3-seater-fabric',
-    name: 'Modern Sofa - 3 Seater Fabric',
-    category: FAMILY_CATEGORIES.FURNITURE,
-    description: 'Contemporary 3-seater sofa with clean lines and comfortable cushioning. Features multiple fabric and color options through parameters. Ideal for residential living rooms, office lounges, and hospitality projects. High-detail model with realistic materials.',
-    images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/furniture/sofa-3seater-1.jpg',
-        '/images/families/furniture/sofa-3seater-2.jpg',
-        '/images/families/furniture/sofa-3seater-3.jpg'
-      ]
-    },
-    file: {
-      size: '428 KB',
-      revitVersions: [REVIT_VERSIONS[0], REVIT_VERSIONS[1], REVIT_VERSIONS[2]], // 2025-2023
-      downloadUrl: '/downloads/modern-sofa-3-seater-fabric.rfa'
-    },
-    metadata: {
-      tags: ['sofa', 'furniture', 'living room', '3 seater', 'modern', 'residential', 'lounge', 'hospitality'],
-      author: 'Boracity Team',
-      uploadDate: new Date('2024-01-20'),
-      downloads: 1567,
-      views: 4203
-    },
-    seo: {
-      title: 'Modern 3-Seater Sofa - Free Revit Family for Living Rooms',
-      description: 'Download free modern 3-seater sofa Revit family. Multiple fabric options, parametric design. Perfect for residential and hospitality projects.',
-      keywords: ['sofa revit family', '3 seater sofa bim', 'living room furniture', 'modern sofa revit', 'residential furniture']
-    }
-  },
-
-  // ============================================
-  // DOORS - Puertas
-  // ============================================
-  {
-      id: 'fam_004',
-    slug: 'single-flush-door-wood-36x80',
-    name: 'Single Flush Door - Wood 36"x80"',
+    slug: 'exterior-door-two-lite-single',
+    name: 'Exterior Door - Two Lite Single',
     category: FAMILY_CATEGORIES.DOORS,
-    description: 'Standard single flush door with wood finish. Parametric family with adjustable dimensions, swing direction, and hardware options. Includes door frame, casing, and handles. Suitable for residential and commercial interior applications.',
+    description: 'Exterior single door with two glass lites for natural light. Perfect for residential entrances, back doors, and patio access. Features weather stripping, insulated core, and multiple finish options.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/doors/flush-door-1.jpg',
-        '/images/families/doors/flush-door-2.jpg'
-      ]
+      thumbnail: 'exterior-door-two-lite.png',
+      category: FAMILY_CATEGORIES.DOORS,
+      gallery: []
     },
     file: {
       size: '189 KB',
       revitVersions: REVIT_VERSIONS.slice(0, 5), // 2025-2021
-      downloadUrl: '/downloads/single-flush-door-wood-36x80.rfa'
+      downloadUrl: '/downloads/exterior-door-two-lite-single.rfa'
     },
     metadata: {
-      tags: ['door', 'single door', 'flush door', 'wood door', 'interior', 'residential', 'commercial'],
+      tags: ['door', 'exterior', 'single door', 'two lite', 'glass', 'residential', 'entry'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-01-10'),
       downloads: 2134,
       views: 5678
     },
     seo: {
-      title: 'Single Flush Wood Door 36"x80" - Free Revit Family',
-      description: 'Download free parametric single flush door Revit family. Adjustable dimensions and swing direction. Perfect for residential and commercial interiors.',
-      keywords: ['wood door revit', 'flush door family', 'single door bim', 'interior door revit', 'parametric door']
+      title: 'Exterior Two Lite Door - Free Revit Family | Single Entry',
+      description: 'Download free exterior single door with two glass lites. Perfect for residential entrances. Parametric Revit family with weather sealing.',
+      keywords: ['exterior door revit', 'two lite door family', 'entry door bim', 'residential door', 'glass door revit']
     }
   },
 
   {
-    id: 'fam_005',
-    slug: 'double-glass-door-aluminum-frame-72x84',
-    name: 'Double Glass Door - Aluminum Frame 72"x84"',
+    id: 'fam_004',
+    slug: 'exterior-door-glass-wood-clad',
+    name: 'Exterior Entry Door - Half Glass Wood Clad',
     category: FAMILY_CATEGORIES.DOORS,
-    description: 'Modern double glass door with sleek aluminum frame. Perfect for office entrances, commercial buildings, and contemporary residential projects. Features full-height glazing, panic hardware, and accessibility compliance. Parametric width and height adjustments.',
+    description: 'Modern exterior entry door with half glass panel and wood cladding. Combines natural aesthetics with functionality. Features energy-efficient glazing, solid wood construction, and contemporary design.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/doors/glass-door-double-1.jpg',
-        '/images/families/doors/glass-door-double-2.jpg',
-        '/images/families/doors/glass-door-double-3.jpg'
-      ]
+      thumbnail: 'exterior-door-glass-wood.png',
+      category: FAMILY_CATEGORIES.DOORS,
+      gallery: []
     },
     file: {
       size: '367 KB',
       revitVersions: REVIT_VERSIONS.slice(0, 4), // 2025-2022
-      downloadUrl: '/downloads/double-glass-door-aluminum-frame-72x84.rfa'
+      downloadUrl: '/downloads/exterior-door-glass-wood-clad.rfa'
     },
     metadata: {
-      tags: ['door', 'double door', 'glass door', 'aluminum', 'commercial', 'entrance', 'modern', 'accessibility'],
+      tags: ['door', 'exterior', 'glass', 'wood', 'entry', 'modern', 'residential'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-02-05'),
       downloads: 1456,
       views: 3421
     },
     seo: {
-      title: 'Double Glass Aluminum Door 72"x84" - Free Revit Family',
-      description: 'Modern double glass door with aluminum frame. Free Revit family for commercial entrances. ADA compliant with panic hardware options.',
-      keywords: ['glass door revit', 'double door bim', 'aluminum door family', 'commercial entrance', 'modern door revit']
+      title: 'Exterior Glass Wood Door - Free Revit Family | Modern Entry',
+      description: 'Modern exterior entry door with half glass and wood cladding. Energy-efficient, contemporary design. Free Revit family download.',
+      keywords: ['glass wood door revit', 'exterior entry door bim', 'modern door family', 'residential entrance', 'wood clad door']
     }
   },
 
   // ============================================
-  // WINDOWS - Ventanas
+  // WINDOWS - Ventanas (2 familias reales)
   // ============================================
   {
-    id: 'fam_006',
-    slug: 'casement-window-single-hung-36x48',
-    name: 'Casement Window - Single Hung 36"x48"',
+    id: 'fam_005',
+    slug: 'awning-window-triple-vertical',
+    name: 'Awning Window - Triple Vertical Configuration',
     category: FAMILY_CATEGORIES.WINDOWS,
-    description: 'Energy-efficient single-hung casement window with vinyl frame. Features double-pane glazing, weather stripping, and easy operation. Parametric design allows custom sizing and configuration. Includes detailed trim and sill components.',
+    description: 'Triple vertical awning window configuration for maximum ventilation and natural light. Features energy-efficient glazing, smooth operation, and modern aesthetic. Perfect for contemporary residential projects.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/windows/casement-window-1.jpg',
-        '/images/families/windows/casement-window-2.jpg'
-      ]
+      thumbnail: 'awning-window-triple.png',
+      category: FAMILY_CATEGORIES.WINDOWS,
+      gallery: []
     },
     file: {
       size: '278 KB',
       revitVersions: REVIT_VERSIONS.slice(0, 6), // 2025-2020
-      downloadUrl: '/downloads/casement-window-single-hung-36x48.rfa'
+      downloadUrl: '/downloads/awning-window-triple-vertical.rfa'
     },
     metadata: {
-      tags: ['window', 'casement', 'single hung', 'vinyl', 'residential', 'energy efficient', 'double pane'],
+      tags: ['window', 'awning', 'triple', 'vertical', 'residential', 'energy efficient', 'modern'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-01-25'),
       downloads: 1789,
       views: 4234
     },
     seo: {
-      title: 'Single Hung Casement Window 36"x48" - Free Revit Family',
-      description: 'Energy-efficient single-hung casement window Revit family. Double-pane glazing, parametric sizing. Free download for residential projects.',
-      keywords: ['casement window revit', 'single hung window bim', 'vinyl window family', 'residential window', 'energy efficient window']
+      title: 'Triple Awning Window - Free Revit Family | Vertical Config',
+      description: 'Energy-efficient triple vertical awning window Revit family. Perfect for modern homes. Free download with parametric sizing.',
+      keywords: ['awning window revit', 'triple window bim', 'vertical window family', 'residential window', 'energy efficient window']
     }
   },
 
   {
-    id: 'fam_007',
-    slug: 'sliding-window-aluminum-60x36-commercial',
-    name: 'Sliding Window - Aluminum 60"x36" Commercial',
+    id: 'fam_006',
+    slug: 'casement-window-double-sidelight',
+    name: 'Casement Window - Double with Sidelight',
     category: FAMILY_CATEGORIES.WINDOWS,
-    description: 'Commercial-grade sliding window with thermally-broken aluminum frame. Designed for office buildings and commercial applications. Features high-performance glazing, smooth sliding operation, and multiple color finishes. Meets commercial building codes.',
+    description: 'Double casement window with fixed sidelight panel. Provides excellent ventilation and views while maintaining energy efficiency. Features high-performance glazing and durable construction.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/windows/sliding-window-1.jpg',
-        '/images/families/windows/sliding-window-2.jpg'
-      ]
+      thumbnail: 'casement-window-double.png',
+      category: FAMILY_CATEGORIES.WINDOWS,
+      gallery: []
     },
     file: {
       size: '321 KB',
       revitVersions: REVIT_VERSIONS.slice(0, 4), // 2025-2022
-      downloadUrl: '/downloads/sliding-window-aluminum-60x36-commercial.rfa'
+      downloadUrl: '/downloads/casement-window-double-sidelight.rfa'
     },
     metadata: {
-      tags: ['window', 'sliding', 'aluminum', 'commercial', 'office', 'thermally broken', 'high performance'],
+      tags: ['window', 'casement', 'double', 'sidelight', 'residential', 'ventilation', 'modern'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-02-10'),
       downloads: 934,
       views: 2156
     },
     seo: {
-      title: 'Commercial Sliding Window 60"x36" - Free Revit Family',
-      description: 'Commercial-grade aluminum sliding window for office buildings. Thermally-broken frame, high-performance glazing. Free Revit family download.',
-      keywords: ['sliding window revit', 'commercial window bim', 'aluminum window family', 'office building window', 'thermally broken window']
+      title: 'Double Casement Window with Sidelight - Free Revit Family',
+      description: 'Double casement window with sidelight panel. Energy-efficient, excellent ventilation. Free Revit family for residential projects.',
+      keywords: ['casement window revit', 'double window bim', 'sidelight window family', 'residential window', 'ventilation window']
     }
   },
 
   // ============================================
-  // LIGHTING - Iluminación
+  // LIGHTING - Iluminación (2 familias reales)
   // ============================================
   {
-    id: 'fam_008',
-    slug: 'led-recessed-downlight-6inch-retrofit',
-    name: 'LED Recessed Downlight - 6" Retrofit',
+    id: 'fam_007',
+    slug: 'ceiling-lamp-modern-pendant',
+    name: 'Ceiling Lamp - Modern Pendant',
     category: FAMILY_CATEGORIES.LIGHTING,
-    description: 'Energy-efficient 6-inch LED recessed downlight perfect for retrofit applications. Features adjustable color temperature (2700K-5000K), dimmable driver, and high CRI. Ideal for residential and commercial spaces. Includes photometric data for lighting calculations.',
+    description: 'Contemporary ceiling pendant lamp with elegant design. Perfect for dining rooms, living areas, and commercial spaces. Features adjustable cable length and multiple finish options.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/lighting/led-downlight-1.jpg',
-        '/images/families/lighting/led-downlight-2.jpg'
-      ]
+      thumbnail: 'ceiling-lamp.png',
+      category: FAMILY_CATEGORIES.LIGHTING,
+      gallery: []
     },
     file: {
       size: '156 KB',
       revitVersions: REVIT_VERSIONS.slice(0, 5), // 2025-2021
-      downloadUrl: '/downloads/led-recessed-downlight-6inch-retrofit.rfa'
+      downloadUrl: '/downloads/ceiling-lamp-modern-pendant.rfa'
     },
     metadata: {
-      tags: ['lighting', 'LED', 'recessed', 'downlight', 'retrofit', 'energy efficient', 'dimmable', '6 inch'],
+      tags: ['lighting', 'pendant', 'ceiling', 'modern', 'dining', 'decorative', 'residential'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-01-30'),
       downloads: 2456,
       views: 6123
     },
     seo: {
-      title: '6" LED Recessed Downlight - Free Revit Family with IES',
-      description: 'Energy-efficient 6-inch LED downlight Revit family. Includes photometric data, adjustable CCT, dimmable. Free download for residential and commercial.',
-      keywords: ['LED downlight revit', 'recessed lighting bim', '6 inch downlight family', 'retrofit lighting', 'energy efficient lighting']
+      title: 'Modern Ceiling Pendant Lamp - Free Revit Family',
+      description: 'Contemporary pendant ceiling lamp Revit family. Adjustable height, multiple finishes. Perfect for dining and living areas. Free download.',
+      keywords: ['pendant lamp revit', 'ceiling light bim', 'modern lighting family', 'dining room light', 'decorative pendant']
     }
   },
 
   {
-    id: 'fam_009',
-    slug: 'pendant-light-modern-geometric-industrial',
-    name: 'Pendant Light - Modern Geometric Industrial',
+    id: 'fam_008',
+    slug: 'ceiling-fan-with-light',
+    name: 'Ceiling Fan with Integrated Light',
     category: FAMILY_CATEGORIES.LIGHTING,
-    description: 'Contemporary geometric pendant light with industrial aesthetic. Features matte black finish, exposed bulb design, and adjustable cable length. Perfect for kitchen islands, dining areas, and commercial spaces. Multiple size options available through parameters.',
+    description: 'Ceiling fan with integrated lighting fixture. Combines air circulation with illumination. Features reversible motor, multiple speed settings, and energy-efficient LED lights. Perfect for residential and commercial spaces.',
     images: {
-      thumbnail: 'https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Revit+Family',
-      gallery: [
-        '/images/families/lighting/pendant-geometric-1.jpg',
-        '/images/families/lighting/pendant-geometric-2.jpg',
-        '/images/families/lighting/pendant-geometric-3.jpg'
-      ]
+      thumbnail: 'ceiling-fan.png',
+      category: FAMILY_CATEGORIES.LIGHTING,
+      gallery: []
     },
     file: {
       size: '234 KB',
       revitVersions: REVIT_VERSIONS.slice(0, 4), // 2025-2022
-      downloadUrl: '/downloads/pendant-light-modern-geometric-industrial.rfa'
+      downloadUrl: '/downloads/ceiling-fan-with-light.rfa'
     },
     metadata: {
-      tags: ['lighting', 'pendant', 'modern', 'geometric', 'industrial', 'kitchen', 'dining', 'decorative'],
+      tags: ['lighting', 'ceiling fan', 'fan', 'LED', 'residential', 'commercial', 'ventilation'],
       author: 'Boracity Team',
       uploadDate: new Date('2024-02-15'),
       downloads: 1678,
       views: 3892
     },
     seo: {
-      title: 'Modern Geometric Pendant Light - Free Revit Family',
-      description: 'Industrial geometric pendant light Revit family. Adjustable cable length, multiple sizes. Perfect for kitchens and dining areas. Free download.',
-      keywords: ['pendant light revit', 'geometric lighting bim', 'industrial light family', 'kitchen lighting', 'modern pendant revit']
+      title: 'Ceiling Fan with Light - Free Revit Family | LED Integrated',
+      description: 'Ceiling fan with integrated LED lighting Revit family. Energy-efficient, multiple speeds. Free download for residential and commercial.',
+      keywords: ['ceiling fan revit', 'fan with light bim', 'LED fan family', 'residential fan', 'ventilation lighting']
     }
   }
 ];

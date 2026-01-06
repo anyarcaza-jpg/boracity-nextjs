@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import { isValidCategory } from '@/lib/validators';
 import Link from 'next/link';
 import { getFamilyBySlug, getRelatedFamilies } from '@/lib/families';
@@ -6,6 +6,7 @@ import { CATEGORY_METADATA } from '@/data/models/family.model';
 import FamilyCard from '@/components/FamilyCard';
 import { ProductSchema, BreadcrumbSchema } from '@/components/SchemaOrg';
 import { notFound } from 'next/navigation';
+import { File, Download, Eye, User } from 'lucide-react';
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
   const { category, slug } = await params;
@@ -77,8 +78,10 @@ export default async function FamilyDetailPage({ params }: { params: { category:
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white p-8 rounded-lg shadow-md">
           {/* Image Section */}
           <div>
-            <Image
+            <OptimizedImage
               src={family.images.thumbnail}
+              category={family.category}
+              variant="detail"
               alt={family.name}
               width={800}
               height={600}
@@ -90,14 +93,15 @@ export default async function FamilyDetailPage({ params }: { params: { category:
             {family.images.gallery && family.images.gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-4 mt-4">
                 {family.images.gallery.map((img, idx) => (
-                  <Image
-                   key={idx}
-                   src={img}
-                   alt={`${family.name} - View ${idx + 1}`}
-                   width={200}
-                   height={200}
-                   className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                   loading="lazy"
+                  <OptimizedImage
+                    key={idx}
+                    src={img}
+                    category={family.category}
+                    variant="gallery"
+                    alt={`${family.name} - View ${idx + 1}`}
+                    width={200}
+                    height={200}
+                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                   />
                 ))}
               </div>
@@ -119,28 +123,28 @@ export default async function FamilyDetailPage({ params }: { params: { category:
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center py-2 border-b border-gray-200">
                   <span className="text-gray-600 flex items-center gap-2">
-                    <i className="fas fa-file text-primary"></i>
+                    <File className="w-4 h-4 text-primary" />
                     File Size:
                   </span>
                   <span className="font-medium">{family.file.size}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-200">
                   <span className="text-gray-600 flex items-center gap-2">
-                    <i className="fas fa-download text-primary"></i>
+                    <Download className="w-4 h-4 text-primary" />
                     Downloads:
                   </span>
                   <span className="font-medium">{family.metadata.downloads.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-200">
                   <span className="text-gray-600 flex items-center gap-2">
-                    <i className="fas fa-eye text-primary"></i>
+                    <Eye className="w-4 h-4 text-primary" />
                     Views:
                   </span>
                   <span className="font-medium">{family.metadata.views.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-600 flex items-center gap-2">
-                    <i className="fas fa-user text-primary"></i>
+                    <User className="w-4 h-4 text-primary" />
                     Author:
                   </span>
                   <span className="font-medium">{family.metadata.author}</span>
@@ -183,9 +187,9 @@ export default async function FamilyDetailPage({ params }: { params: { category:
             {/* Download Button */}
             <a 
               href={family.file.downloadUrl} 
-              className="block w-full bg-primary hover:bg-primary-dark text-white text-center font-bold py-4 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/30"
+              className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white text-center font-bold py-4 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/30"
             >
-              <i className="fas fa-download mr-2"></i>
+              <Download className="w-5 h-5" />
               Download Revit Family
             </a>
           </div>
