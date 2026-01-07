@@ -2,15 +2,7 @@
 
 import type { Family, FamilyCategory, FamilyStats } from '@/types';
 import { config } from './config';
-
-/**
- * FAMILIES SERVICE - Boracity
- * Capa de abstracción para obtener datos de familias
- * 
- * IMPORTANTE: Este archivo es el único que importa los datos mock
- * Cuando conectemos la API, solo modificaremos este archivo
- * y el resto del código seguirá funcionando sin cambios
- */
+import { logger } from './logger';
 
 import { 
   getAllFamilies as getMockFamilies,
@@ -19,167 +11,230 @@ import {
   searchFamilies as searchMockFamilies
 } from '@/data/mock/families.mock';
 
-/**
- * Obtiene todas las familias
- */
+/* ============================================
+   CORE FUNCTIONS
+   ============================================ */
+
 export async function getAllFamilies(): Promise<Family[]> {
   try {
+    logger.info('Obteniendo todas las familias');
     const families = getMockFamilies();
+    logger.info('Familias obtenidas', { count: families.length });
     return families;
   } catch (error) {
-    console.error('Error fetching families:', error);
+    logger.error('Error al obtener familias', { 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
     return [];
   }
 }
 
-/**
- * Obtiene una familia específica por su ID
- */
 export async function getFamilyById(id: string): Promise<Family | null> {
   try {
-    if (!id) throw new Error('ID is required');
+    if (!id || id.trim().length < 3) {
+      logger.warn('ID inválido', { id });
+      return null;
+    }
+    
     const family = getMockFamilyById(id);
-    if (!family) throw new Error(`Family not found: ${id}`);
+    
+    if (!family) {
+      logger.warn('Familia no encontrada', { familyId: id });
+      return null;
+    }
+    
+    logger.info('Familia recuperada', { familyId: id, name: family.name });
     return family;
+    
   } catch (error) {
-    console.error('Error fetching family:', error);
+    logger.error('Error al buscar familia', { 
+      familyId: id, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
     return null;
   }
 }
 
-/**
- * Obtiene familias por categoría
- */
 export async function getFamiliesByCategory(category: FamilyCategory): Promise<Family[]> {
   try {
-    if (!category) throw new Error('Category is required');
-    const families = getMockFamiliesByCategory(category);
-    return families;
-  } catch (error) {
-    console.error('Error fetching families by category:', error);
-    return [];
-  }
-}
-
-/**
- * Busca familias por término de búsqueda
- */
-export async function searchFamilies(searchTerm: string): Promise<Family[]> {
-  try {
-    if (!searchTerm || searchTerm.trim() === '') {
+    if (!category) {
+      logger.warn('Categoría vacía');
       return [];
     }
-    const results = searchMockFamilies(searchTerm);
-    return results;
+    
+    const families = getMockFamiliesByCategory(category);
+    logger.info('Familias por categoría', { category, count: families.length });
+    return families;
+    
   } catch (error) {
-    console.error('Error searching families:', error);
+    logger.error('Error al buscar por categoría', { 
+      category, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
     return [];
   }
 }
 
-/**
- * Obtiene estadísticas generales
- */
-export async function getFamiliesStats(): Promise<FamilyStats> {
-  const families = getMockFamilies();
-  
-  const stats: FamilyStats = {
-    totalFamilies: families.length,
-    totalDownloads: families.reduce((sum, f) => sum + f.metadata.downloads, 0),
-    totalViews: families.reduce((sum, f) => sum + f.metadata.views, 0),
-    categoriesCount: new Set(families.map(f => f.category)).size,
-    recentlyAdded: families
-      .sort((a, b) => b.metadata.uploadDate.getTime() - a.metadata.uploadDate.getTime())
-      .slice(0, 6)
-  };
-  
-  return stats;
-}
-
-/**
- * Obtiene las familias más populares
- */
-export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
-  const families = getMockFamilies();
-  const popular = families
-    .sort((a, b) => b.metadata.downloads - a.metadata.downloads)
-    .slice(0, limit);
-  
-  return popular;
-}
-
-/**
- * Obtiene familias relacionadas (por categoría)
- */
-export async function getRelatedFamilies(familyId: string, limit: number = 4): Promise<Family[]> {
-  const currentFamily = getMockFamilyById(familyId);
-  if (!currentFamily) {
+export async function searchFamilies(searchTerm: string): Promise<Family[]> {
+  try {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      logger.debug('Búsqueda muy corta', { searchTerm });
+      return [];
+    }
+    
+    const results = searchMockFamilies(searchTerm);
+    logger.info('Búsqueda ejecutada', { searchTerm, count: results.length });
+    return results;
+    
+  } catch (error) {
+    logger.error('Error en búsqueda', { 
+      searchTerm, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
     return [];
   }
-  
-  const families = getMockFamiliesByCategory(currentFamily.category);
-  const related = families
-    .filter(f => f.id !== familyId)
-    .slice(0, limit);
-  
-  return related;
 }
 
-/**
- * Obtiene una familia por categoría y slug
- * Nueva estructura: /revit/[category]/[slug]
- */
 export async function getFamilyBySlug(
   category: FamilyCategory, 
   slug: string
 ): Promise<Family | null> {
   try {
-    if (!category || !slug) {
-      throw new Error('Category and slug are required');
+    if (!category || !slug || slug.trim().length < 3) {
+      logger.warn('Parámetros inválidos', { category, slug });
+      return null;
     }
     
     const families = getMockFamiliesByCategory(category);
     const family = families.find(f => f.slug === slug);
     
     if (!family) {
-      console.warn(`Family not found: ${category}/${slug}`);
+      logger.warn('Familia no encontrada por slug', { category, slug });
       return null;
     }
     
+    logger.info('Familia encontrada', { category, slug, name: family.name });
     return family;
+    
   } catch (error) {
-    console.error('Error fetching family by slug:', error);
+    logger.error('Error al buscar por slug', { 
+      category, 
+      slug, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
     return null;
   }
 }
 
-/**
- * Obtiene una familia por su ID (para redirects)
- * Usada por el middleware para convertir URLs antiguas
- */
+/* ============================================
+   UTILITY FUNCTIONS
+   ============================================ */
+
+export async function getFamiliesStats(): Promise<FamilyStats> {
+  try {
+    const families = getMockFamilies();
+    
+    const stats: FamilyStats = {
+      totalFamilies: families.length,
+      totalDownloads: families.reduce((sum, f) => sum + f.metadata.downloads, 0),
+      totalViews: families.reduce((sum, f) => sum + f.metadata.views, 0),
+      categoriesCount: new Set(families.map(f => f.category)).size,
+      recentlyAdded: families
+        .sort((a, b) => b.metadata.uploadDate.getTime() - a.metadata.uploadDate.getTime())
+        .slice(0, 6)
+    };
+    
+    logger.debug('Stats calculadas', { totalFamilies: stats.totalFamilies });
+    return stats;
+    
+  } catch (error) {
+    logger.error('Error calculando stats', { 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
+    return {
+      totalFamilies: 0,
+      totalDownloads: 0,
+      totalViews: 0,
+      categoriesCount: 0,
+      recentlyAdded: []
+    };
+  }
+}
+
+export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
+  try {
+    const families = getMockFamilies();
+    const popular = families
+      .sort((a, b) => b.metadata.downloads - a.metadata.downloads)
+      .slice(0, limit);
+    
+    logger.debug('Familias populares obtenidas', { count: popular.length });
+    return popular;
+    
+  } catch (error) {
+    logger.error('Error obteniendo populares', { 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
+    return [];
+  }
+}
+
+export async function getRelatedFamilies(familyId: string, limit: number = 4): Promise<Family[]> {
+  try {
+    if (!familyId || familyId.trim().length < 3) {
+      return [];
+    }
+    
+    const currentFamily = getMockFamilyById(familyId);
+    if (!currentFamily) {
+      return [];
+    }
+    
+    const families = getMockFamiliesByCategory(currentFamily.category);
+    const related = families
+      .filter(f => f.id !== familyId)
+      .slice(0, limit);
+    
+    logger.debug('Relacionadas obtenidas', { familyId, count: related.length });
+    return related;
+    
+  } catch (error) {
+    logger.error('Error obteniendo relacionadas', { 
+      familyId, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
+    return [];
+  }
+}
+
 export async function getFamilyByIdForRedirect(
   id: string
 ): Promise<{ category: FamilyCategory; slug: string } | null> {
   try {
-    if (!id) {
-      throw new Error('ID is required');
+    if (!id || id.trim().length < 3) {
+      logger.warn('ID inválido para redirect', { id });
+      return null;
     }
     
     const families = getMockFamilies();
     const family = families.find(f => f.id === id);
     
     if (!family) {
-      console.warn(`Family not found for redirect: ${id}`);
+      logger.warn('Familia no encontrada para redirect', { id });
       return null;
     }
     
-    // Retornar solo lo necesario para el redirect
+    logger.info('Redirect generado', { id, category: family.category, slug: family.slug });
     return {
       category: family.category,
       slug: family.slug
     };
+    
   } catch (error) {
-    console.error('Error fetching family for redirect:', error);
+    logger.error('Error generando redirect', { 
+      id, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
     return null;
   }
 }

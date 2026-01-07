@@ -1,266 +1,288 @@
 # 🚀 PRÓXIMA SESIÓN - PLAN DE ACCIÓN
 
-**Proyecto:** Boracity v0.7.0 (próxima)  
-**Estado Actual:** ✅ Críticos completados (4/4)  
-**Próximo Objetivo:** Mejoras Importantes (UX + Robustez)
+**Proyecto:** Boracity v0.8.0  
+**Última sesión:** ✅ Sesión 11 - Código Robusto (7 Enero 2026)  
+**Estado Actual:** 8.5/10 (Senior Level)  
+**Próximo Objetivo:** Testing + Features Avanzadas
 
 ---
 
-## 📊 ESTADO ACTUAL DEL PROYECTO
+## 📊 ESTADO ACTUAL
 
-### ✅ **COMPLETADO:**
-- [x] Crítico #1: Type assertions eliminados
-- [x] Crítico #2: Strict mode activado
-- [x] Crítico #3: Image optimization
-- [x] Crítico #4: @types/node instalado
+### ✅ **COMPLETADO (Sesión 11):**
+- [x] Logger profesional con metadata
+- [x] Validación robusta con Zod
+- [x] Error handling completo
+- [x] TypeScript strict mode
+- [x] Breadcrumbs corregidos (URLs relativas)
 
 ### ⬜ **PENDIENTE:**
-- [ ] Error boundaries (30 min)
-- [ ] Loading states (1 hora)
-- [ ] Búsqueda funcional (1.5 horas)
-- [ ] Logging estructurado (1 hora)
-- [ ] Unit tests básicos (3-4 horas)
+- [ ] Testing básico (Jest + Playwright)
+- [ ] Búsqueda funcional
+- [ ] API real integration
+- [ ] Sistema de autenticación
+- [ ] Monitoreo (Sentry/Datadog)
 
 ---
 
-## 🎯 OBJETIVOS PRÓXIMA SESIÓN
+## 🎯 OPCIONES PARA PRÓXIMA SESIÓN
 
-### **OPCIÓN A: Sesión Corta (2 horas)**
-
-Completar las mejoras rápidas para mejor UX:
-```
-✅ Error boundaries (30 min)
-✅ Loading states (1 hora)
-✅ Fix búsqueda decorativa (30 min)
-```
-
-**Resultado:** UX mejorada + app más robusta
-
----
-
-### **OPCIÓN B: Sesión Media (3-4 horas)**
-
-Todo de Opción A + features avanzadas:
-```
-✅ Error boundaries (30 min)
-✅ Loading states (1 hora)
-✅ Búsqueda funcional completa (1.5 horas)
-✅ Logging estructurado (1 hora)
-```
-
-**Resultado:** App profesional con todas las features UX
-
----
-
-### **OPCIÓN C: Sesión Larga (5-6 horas)**
-
-Todo de Opción B + testing:
-```
-✅ Error boundaries (30 min)
-✅ Loading states (1 hora)
-✅ Búsqueda funcional (1.5 horas)
-✅ Logging estructurado (1 hora)
-✅ Unit tests básicos (3-4 horas)
-```
-
-**Resultado:** App completa con cobertura de tests
-
----
-
-## 📋 DETALLES DE CADA TAREA
-
-### **1. ERROR BOUNDARIES** ⏱️ 30 min | 🎯 Prioridad: ALTA
+### **OPCIÓN A: Testing Básico** ⏱️ 3-4 horas | 🎯 Prioridad: ALTA
 
 **¿Qué es?**
-Componentes que capturan errores y muestran UI de fallback en vez de pantalla blanca.
+Agregar tests automatizados para prevenir bugs.
 
-**Por qué es importante:**
-- Sin error boundaries: Cualquier error → pantalla blanca
-- Con error boundaries: Error → Mensaje amigable + opción "Try again"
+**Setup:**
+```bash
+npm install -D jest @testing-library/react @testing-library/jest-dom
+npm install -D @playwright/test
+```
+
+**Tests a implementar:**
+- Unit tests para `families.ts`
+- Unit tests para `validators.ts`
+- E2E test de flujo completo
 
 **Archivos a crear:**
-- `src/app/error.tsx`
-- `src/app/global-error.tsx`
+```
+jest.config.js
+src/lib/__tests__/families.test.ts
+src/lib/__tests__/validators.test.ts
+e2e/homepage.spec.ts
+```
 
 **Beneficio:**
-- ✅ Mejor UX cuando algo falla
-- ✅ Usuario puede recuperarse
-- ✅ Logging de errores centralizado
-
-**Estimación:** 30 minutos
+- ✅ Previene regresiones
+- ✅ Refactoring seguro
+- ✅ CI/CD ready
 
 ---
 
-### **2. LOADING STATES** ⏱️ 1 hora | 🎯 Prioridad: ALTA
-
-**¿Qué es?**
-Skeletons/spinners que se muestran mientras carga la data.
-
-**Por qué es importante:**
-- Actualmente: Mock data carga instantáneo (irreal)
-- Cuando conectes API: Habrá delay de 200-500ms
-- Sin loading: Página en blanco mientras carga
-- Con loading: Skeleton animado (mejor UX)
-
-**Archivos a crear:**
-- `src/app/loading.tsx`
-- `src/app/revit/loading.tsx`
-- `src/app/revit/[category]/loading.tsx`
-- `src/app/revit/[category]/[slug]/loading.tsx`
-
-**Beneficio:**
-- ✅ UX profesional
-- ✅ Feedback visual
-- ✅ Listo para API real
-
-**Estimación:** 1 hora
-
----
-
-### **3. BÚSQUEDA FUNCIONAL** ⏱️ 1.5 horas | 🎯 Prioridad: MEDIA
-
-**¿Qué es?**
-Hacer que el input de búsqueda realmente funcione.
+### **OPCIÓN B: Búsqueda Funcional** ⏱️ 2 horas | 🎯 Prioridad: MEDIA
 
 **Estado actual:**
-- Input existe pero es decorativo
-- No hace nada cuando escribes
+Input decorativo que no hace nada.
 
-**Funcionalidad a implementar:**
+**Implementar:**
 - Búsqueda en tiempo real
 - Dropdown con resultados
-- Click navega a detalle
-- Ver todos los resultados
+- Navegación a detalle
+- Debounce (evitar búsquedas excesivas)
 
 **Archivo a modificar:**
 - `src/components/Navbar.tsx`
 
 **Beneficio:**
 - ✅ Feature funcional (no decorativa)
-- ✅ Mejor UX de navegación
-- ✅ SEO indirecto (usuarios encuentran contenido)
-
-**Estimación:** 1.5 horas
+- ✅ Mejor UX
+- ✅ SEO boost
 
 ---
 
-### **4. LOGGING ESTRUCTURADO** ⏱️ 1 hora | 🎯 Prioridad: MEDIA
+### **OPCIÓN C: API Integration** ⏱️ 4-5 horas | 🎯 Prioridad: MEDIA
 
 **¿Qué es?**
-Sistema centralizado para logs con metadata.
+Conectar tu API/Plugin y reemplazar mock data.
 
-**Estado actual:**
-- `console.log()` manual sin estructura
-- Difícil filtrar o buscar logs
-- No hay niveles (info, warn, error)
-
-**Funcionalidad a implementar:**
-- Logger class con niveles
-- Metadata automática (timestamp, etc)
-- Preparado para Sentry/DataDog
-
-**Archivo a crear:**
-- `src/lib/logger.ts`
+**Cambios necesarios:**
+- Modificar solo `src/lib/families.ts`
+- Implementar `fetch()` calls
+- Error handling con logger
+- Loading states
 
 **Beneficio:**
-- ✅ Debugging más fácil
-- ✅ Logs estructurados
-- ✅ Listo para monitoring tools
-
-**Estimación:** 1 hora
+- ✅ Data real
+- ✅ Lista para producción
+- ✅ Base para webhook de tu plugin
 
 ---
 
-### **5. UNIT TESTS BÁSICOS** ⏱️ 3-4 horas | 🎯 Prioridad: BAJA
+## 🗓️ ROADMAP SUGERIDO
 
-**¿Qué es?**
-Tests automatizados para funciones críticas.
+### **Sesión 12 (Próxima - 3-4 horas):**
+```
+✅ Setup Jest + Testing Library
+✅ Tests unitarios para families.ts
+✅ Tests unitarios para validators.ts
+✅ Setup Playwright
+✅ Test E2E básico
+```
 
-**Estado actual:**
-- 0 tests
-- Todo testing es manual
-
-**Tests a implementar:**
-- Service layer (`src/lib/families.ts`)
-- Type guards (`src/lib/validators.ts`)
-- Helpers (`src/app/page.tsx`)
-
-**Setup necesario:**
-- Jest
-- @testing-library/react
-- @testing-library/jest-dom
-
-**Beneficio:**
-- ✅ Previene regresiones
-- ✅ Refactoring seguro
-- ✅ Documentación viva
-- ✅ CI/CD ready
-
-**Estimación:** 3-4 horas
+**Resultado:** Cobertura de tests ~50%
 
 ---
 
-## 🗺️ ROADMAP SUGERIDO
-
-### **Sesión 10 (Próxima - 2 horas):**
-```
-✅ Error boundaries
-✅ Loading states
-✅ Quick fix búsqueda
-```
-
-### **Sesión 11 (2-3 horas):**
+### **Sesión 13 (2-3 horas):**
 ```
 ✅ Búsqueda funcional completa
-✅ Logging estructurado
+✅ Loading states mejorados
+✅ Error boundaries adicionales
 ```
 
-### **Sesión 12 (3-4 horas):**
-```
-✅ Unit tests setup
-✅ Tests para service layer
-✅ Tests para type guards
-```
+**Resultado:** UX pulida + features completas
 
-### **Sesión 13+ (Cuando esté lista API):**
+---
+
+### **Sesión 14 (4-5 horas):**
 ```
 ✅ Conectar API real
 ✅ Reemplazar mock data
-✅ Testing integración
-✅ Deployment
+✅ Testing de integración
+✅ Preparar deployment
+```
+
+**Resultado:** 100% production-ready
+
+---
+
+## 📋 DETALLE: TESTING BÁSICO (Recomendado)
+
+### **1. Setup Jest** ⏱️ 30 min
+
+**Instalar:**
+```bash
+npm install -D jest @testing-library/react @testing-library/jest-dom
+npm install -D @types/jest
+```
+
+**Configurar** `jest.config.js`:
+```javascript
+const nextJest = require('next/jest')
+
+const createJestConfig = nextJest({
+  dir: './',
+})
+
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jest-environment-jsdom',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+}
+
+module.exports = createJestConfig(customJestConfig)
 ```
 
 ---
 
-## 📚 RECURSOS PARA PREPARAR
+### **2. Tests Unitarios** ⏱️ 2 horas
 
-### **Error Boundaries:**
-- [Next.js Error Handling](https://nextjs.org/docs/app/building-your-application/routing/error-handling)
+**Test 1: families.ts**
+```typescript
+// src/lib/__tests__/families.test.ts
+import { getFamilyById, getAllFamilies } from '../families';
 
-### **Loading UI:**
-- [Next.js Loading UI](https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming)
+describe('families', () => {
+  test('getAllFamilies returns array', async () => {
+    const families = await getAllFamilies();
+    expect(Array.isArray(families)).toBe(true);
+    expect(families.length).toBeGreaterThan(0);
+  });
+
+  test('getFamilyById returns null for invalid ID', async () => {
+    const family = await getFamilyById('invalid-id');
+    expect(family).toBeNull();
+  });
+
+  test('getFamilyById returns family for valid ID', async () => {
+    const family = await getFamilyById('modern-office-chair');
+    expect(family).toBeDefined();
+    expect(family?.name).toBeTruthy();
+  });
+});
+```
+
+**Test 2: validators.ts**
+```typescript
+// src/lib/__tests__/validators.test.ts
+import { isValidCategory, validateFamilyId } from '../validators';
+
+describe('validators', () => {
+  test('isValidCategory accepts valid categories', () => {
+    expect(isValidCategory('furniture')).toBe(true);
+    expect(isValidCategory('doors')).toBe(true);
+  });
+
+  test('isValidCategory rejects invalid categories', () => {
+    expect(isValidCategory('invalid')).toBe(false);
+    expect(isValidCategory('')).toBe(false);
+  });
+
+  test('validateFamilyId accepts valid IDs', () => {
+    const result = validateFamilyId('modern-chair-01');
+    expect(result.success).toBe(true);
+  });
+
+  test('validateFamilyId rejects invalid IDs', () => {
+    const result = validateFamilyId('ab'); // Too short
+    expect(result.success).toBe(false);
+  });
+});
+```
+
+**Correr tests:**
+```bash
+npm test
+```
+
+---
+
+### **3. E2E Tests con Playwright** ⏱️ 1 hora
+
+**Instalar:**
+```bash
+npm install -D @playwright/test
+npx playwright install
+```
+
+**Test básico:**
+```typescript
+// e2e/homepage.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('homepage loads correctly', async ({ page }) => {
+  await page.goto('http://localhost:3000');
+  
+  // Verificar título
+  await expect(page).toHaveTitle(/Boracity/);
+  
+  // Verificar stats
+  await expect(page.getByText(/Free Revit Families/i)).toBeVisible();
+  
+  // Verificar categorías
+  await expect(page.getByText(/Furniture/i)).toBeVisible();
+});
+
+test('can navigate to family detail', async ({ page }) => {
+  await page.goto('http://localhost:3000');
+  
+  // Click en primera familia
+  await page.click('a[href*="/revit/"]');
+  
+  // Verificar navegación
+  await expect(page.url()).toContain('/revit/');
+  await expect(page.getByText(/Download Family/i)).toBeVisible();
+});
+```
+
+**Correr E2E:**
+```bash
+npx playwright test
+```
+
+---
+
+## 📚 RECURSOS
 
 ### **Testing:**
 - [Jest with Next.js](https://nextjs.org/docs/app/building-your-application/testing/jest)
-- [Testing Library React](https://testing-library.com/docs/react-testing-library/intro/)
+- [Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Playwright](https://playwright.dev/docs/intro)
 
----
-
-## 🎯 OBJETIVO FINAL (Sesiones 10-12)
-
-Transformar Boracity de:
-```
-✅ Código profesional (Sesión 9)
-```
-
-A:
-```
-✅ Código profesional
-✅ UX profesional
-✅ Error handling robusto
-✅ Testing coverage >50%
-✅ 100% production-ready
-```
+### **Búsqueda:**
+- [React debounce hook](https://usehooks.com/useDebounce/)
+- [Combobox pattern](https://www.radix-ui.com/primitives/docs/components/combobox)
 
 ---
 
@@ -268,114 +290,82 @@ A:
 
 **Para próxima sesión:**
 
-Si tienes **2 horas** → Opción A (Error boundaries + Loading)
+✅ **Opción A (Testing)** - Si tienes 3-4 horas  
+Razón: Es la base para todo lo demás. Necesario antes de agregar más features.
 
-Si tienes **3-4 horas** → Opción B (+ Búsqueda + Logging)
+✅ **Opción B (Búsqueda)** - Si tienes 2 horas  
+Razón: Feature visible que mejora UX inmediatamente.
 
-Si tienes **todo el día** → Opción C (+ Tests)
-
-**Sugerencia personal:** Opción A o B son las más valiosas para UX inmediata.
+⚠️ **Opción C (API)** - Solo cuando API esté lista  
+Razón: Requiere que tu plugin/backend esté funcionando.
 
 ---
 
-## 🔥 QUICK START PRÓXIMA SESIÓN
+## 🎯 OBJETIVO FINAL (Sesiones 12-14)
 
-### **Comandos iniciales:**
-```bash
-# 1. Abrir proyecto
-cd D:\DISEÑO\BORACITY\boracity-nextjs
-
-# 2. Actualizar dependencias (por si acaso)
-npm install
-
-# 3. Arrancar servidor
-npm run dev
-
-# 4. Verificar que todo funciona
-npx tsc --noEmit
+Transformar Boracity de:
+```
+✅ Código profesional (8.5/10)
 ```
 
-### **Archivos a revisar:**
-- `docs/SESION_9_COMPLETE.md` (lo que hicimos)
-- `docs/NEXT_SESSION.md` (este documento)
-- `AUDITORIA_CRITICA.md` (estado general)
+A:
+```
+✅ Código profesional (8.5/10)
+✅ Testing coverage >50%
+✅ Todas las features funcionales
+✅ API real conectada
+✅ 100% production-ready (10/10)
+```
 
 ---
 
 ## 📊 MÉTRICAS OBJETIVO
 
-Al terminar todas las tareas importantes:
-
-| Métrica | Actual | Objetivo |
-|---------|--------|----------|
+| Métrica | Actual (S11) | Objetivo (S14) |
+|---------|--------------|----------------|
 | Type Safety | 95/100 | 95/100 |
 | Performance | 90/100 | 95/100 |
 | Code Quality | 90/100 | 95/100 |
-| UX | 70/100 | 90/100 |
-| Robustez | 75/100 | 95/100 |
-| Testing | 0/100 | 50/100 |
+| Testing | 0/100 | 60/100 |
+| Features | 70/100 | 95/100 |
+| Production-Ready | 75/100 | 100/100 |
 
-**Promedio: 90/100 → 95/100**
+**Promedio: 70/100 → 90/100**
 
 ---
 
 ## ✅ CHECKLIST PRE-PRÓXIMA SESIÓN
 
-Antes de empezar la próxima sesión, verifica:
+Antes de empezar Sesión 12:
 ```
 [ ] Proyecto funciona (`npm run dev`)
 [ ] TypeScript sin errores (`npx tsc --noEmit`)
 [ ] Git está limpio (commits hechos)
-[ ] Leíste SESION_9_COMPLETE.md
+[ ] Leíste SESSION_11_COMPLETE.md
 [ ] Decidiste qué opción hacer (A, B o C)
-[ ] Tienes tiempo suficiente
-[ ] ☕ Café listo
+[ ] Tienes tiempo suficiente (3-4h recomendado)
 ```
-
----
-
-## 🎓 NOTAS IMPORTANTES
-
-### **¿Por qué estas tareas son "Importantes" no "Críticas"?**
-
-**Críticas:** Sin ellas, el código puede crashear o tener bugs severos.
-
-**Importantes:** Sin ellas, la UX es peor pero el código funciona.
-
-### **¿Puedo saltarme alguna?**
-
-Sí, pero considera:
-
-- **Error boundaries:** Muy recomendado (30 min vale la pena)
-- **Loading states:** Necesario cuando conectes API
-- **Búsqueda:** Nice to have
-- **Logging:** Nice to have
-- **Tests:** Importante pero puede esperar
-
-### **¿Qué pasa si no hago nada más?**
-
-Tu proyecto **YA está production-ready** en términos de:
-- ✅ Calidad de código
-- ✅ Type safety
-- ✅ Performance
-
-Lo que falta es:
-- ⚠️ UX pulida
-- ⚠️ Robustez ante errores
-- ⚠️ Testing
 
 ---
 
 ## 🚀 MOTIVACIÓN
 
-Has llegado MUY lejos. De código Junior-Mid a Senior en una sesión.
+**Lo que has logrado:**
+- ✅ Código de nivel Senior (8.5/10)
+- ✅ Logger profesional production-ready
+- ✅ Validación robusta contra ataques
+- ✅ Error handling completo
+- ✅ TypeScript strict mode
 
-Lo que queda son **detalles de pulido** que llevan tu app de "muy buena" a "excelente".
+**Lo que falta:**
+- ⏳ Testing (prevenir bugs futuros)
+- ⏳ Features finales (búsqueda, etc.)
+- ⏳ API real (cuando esté lista)
 
-**¡Sigue así!** 💪🔥
+**Estás a 3 sesiones de tener una plataforma 100% profesional.** 💪🔥
 
 ---
 
-**Documento generado:** 5 Enero 2026  
-**Versión:** 1.0  
-**Próxima revisión:** Sesión 10
+**Documento actualizado:** 7 Enero 2026  
+**Versión:** 2.0 (post-Sesión 11)  
+**Próxima revisión:** Sesión 12

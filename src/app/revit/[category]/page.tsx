@@ -1,11 +1,7 @@
-/**
- * CATEGORY PAGE
- * URL: /revit/[category]
- * Example: /revit/furniture
- */
+// src/app/revit/[category]/page.tsx
+
 import { isValidCategory } from '@/lib/validators';
 import { notFound } from 'next/navigation';
-
 import Link from 'next/link';
 import { getFamiliesByCategory } from '@/lib/families';
 import { CATEGORY_METADATA } from '@/data/models/family.model';
@@ -25,7 +21,6 @@ export async function generateMetadata({ params }: { params: { category: string 
 export default async function CategoryPage({ params }: { params: { category: string } }) {
   const { category } = await params;
 
-  // Validar que la categoría sea válida
   if (!isValidCategory(category)) {
     notFound();
   }
@@ -34,7 +29,6 @@ export default async function CategoryPage({ params }: { params: { category: str
 
   return (
     <>
-      {/* Schema.org structured data */}
       <CollectionPageSchema 
         category={category}
         families={families}
@@ -43,16 +37,14 @@ export default async function CategoryPage({ params }: { params: { category: str
 
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container mx-auto px-6">
-          {/* Breadcrumbs */}
           <nav className="text-sm text-gray-600 mb-6">
             <Link href="/" className="hover:text-primary">Home</Link>
             <span className="mx-2">/</span>
-            <Link href="/revit" className="hover:text-primary">Revit</Link>
+            <Link href="/revit" className="hover:text-primary">Revit Families</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900 capitalize">{category}</span>
           </nav>
 
-          {/* Header */}
           <div className="mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4 capitalize">
               {category} - Revit Families
@@ -62,7 +54,6 @@ export default async function CategoryPage({ params }: { params: { category: str
             </p>
           </div>
           
-          {/* Families Grid */}
           {families.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {families.map(family => (

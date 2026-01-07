@@ -99,37 +99,49 @@ export default async function HomePage() {
           </div>
 
           {/* Categories Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {[
-              { name: 'Furniture', Icon: Sofa, count: getFamilyCountByCategory('furniture', families) },
-              { name: 'Doors', Icon: DoorOpen, count: getFamilyCountByCategory('doors', families) },
-              { name: 'Windows', Icon: Square, count: getFamilyCountByCategory('windows', families) },
-              { name: 'Lighting', Icon: Lightbulb, count: getFamilyCountByCategory('lighting', families) },
-            ].map((category) => (
-              <Link
-                key={category.name}
-                href={`/category/${category.name.toLowerCase()}`}
-                className="group bg-gray-50 rounded-xl p-6 sm:p-8 text-center hover:bg-primary hover:shadow-xl transition-all duration-300"
-              >
-                <category.Icon className="w-12 h-12 sm:w-14 sm:h-14 text-primary group-hover:text-white mb-4 transition-colors mx-auto" />
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-gray-600 group-hover:text-white/80 transition-colors">
-                  {category.count} families
-                </p>
-              </Link>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Furniture */}
+            <Link href="/revit/furniture" className="group bg-gradient-to-br from-orange-50 to-white p-8 rounded-2xl border-2 border-gray-100 hover:border-primary hover:shadow-xl transition-all">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Sofa className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Furniture</h3>
+                <p className="text-sm text-gray-600">Chairs, tables, desks & more</p>
+              </div>
+            </Link>
 
-          {/* View All Categories Button */}
-          <div className="text-center mt-10">
-            <Link
-              href="/categories"
-              className="inline-flex items-center gap-2 px-8 py-3 text-primary border-2 border-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all"
-            >
-              View All Categories
-              <ArrowRight className="w-4 h-4" />
+            {/* Doors */}
+            <Link href="/revit/doors" className="group bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl border-2 border-gray-100 hover:border-primary hover:shadow-xl transition-all">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <DoorOpen className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Doors</h3>
+                <p className="text-sm text-gray-600">Interior & exterior doors</p>
+              </div>
+            </Link>
+
+            {/* Windows */}
+            <Link href="/revit/windows" className="group bg-gradient-to-br from-green-50 to-white p-8 rounded-2xl border-2 border-gray-100 hover:border-primary hover:shadow-xl transition-all">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Square className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Windows</h3>
+                <p className="text-sm text-gray-600">Modern & traditional styles</p>
+              </div>
+            </Link>
+
+            {/* Lighting */}
+            <Link href="/revit/lighting" className="group bg-gradient-to-br from-yellow-50 to-white p-8 rounded-2xl border-2 border-gray-100 hover:border-primary hover:shadow-xl transition-all">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Lightbulb className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Lighting</h3>
+                <p className="text-sm text-gray-600">Fixtures & luminaires</p>
+              </div>
             </Link>
           </div>
         </div>
@@ -138,44 +150,29 @@ export default async function HomePage() {
       {/* ========================================
           RECENT FAMILIES SECTION
           ======================================== */}
-      <section className="py-16 lg:py-20 bg-gray-50" id="explore">
+      <section className="py-16 lg:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                Recently Added
-              </h2>
-              <p className="text-gray-600">
-                Latest professional BIM families
-              </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Recently Added
+            </h2>
+            <p className="text-lg text-gray-600">
+              Fresh content added this week
+            </p>
+          </div>
+
+          {/* Grid de familias */}
+          {recentFamilies.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentFamilies.map((family) => (
+                <FamilyCard key={family.id} family={family} />
+              ))}
             </div>
-            <Link 
-              href="/families" 
-              className="hidden sm:flex items-center gap-2 text-primary hover:text-primary-dark font-semibold transition-colors"
-            >
-              View All
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {/* Families Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-           {recentFamilies.map((family) => (
-  <FamilyCard key={family.id} family={family} />
-))}
-          </div>
-
-          {/* Mobile View All Button */}
-          <div className="text-center mt-10 sm:hidden">
-            <Link
-              href="/families"
-              className="inline-flex items-center gap-2 px-6 py-3 text-primary border-2 border-primary rounded-lg font-semibold"
-            >
-              View All Families
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No families available at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -188,84 +185,35 @@ export default async function HomePage() {
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Why Choose Boracity?
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Professional BIM resources designed for architects and designers
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="text-center p-8 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Download className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                100% Free Downloads
-              </h3>
-              <p className="text-gray-600">
-                All families are completely free. No hidden fees, no premium tiers. Just download and use.
-              </p>
+              <h3 className="text-xl font-bold mb-2">100% Free</h3>
+              <p className="text-gray-600">All families are completely free to download and use in your projects</p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="text-center p-8 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Professional Quality
-              </h3>
-              <p className="text-gray-600">
-                Every family is tested and optimized for Revit 2020-2025. Industry-standard quality.
-              </p>
+              <h3 className="text-xl font-bold mb-2">High Quality</h3>
+              <p className="text-gray-600">Professional-grade BIM content created by experienced designers</p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="text-center p-8 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Rocket className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Regular Updates
-              </h3>
-              <p className="text-gray-600">
-                New families added weekly. SketchUp, D5 Render, and textures coming soon.
-              </p>
+              <h3 className="text-xl font-bold mb-2">Fast Downloads</h3>
+              <p className="text-gray-600">Instant download with no registration required</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================
-          CTA SECTION
-          ======================================== */}
-      <section className="py-20 lg:py-24 bg-gradient-to-r from-primary to-primary-dark">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Ready to Start Your Next Project?
-          </h2>
-          <p className="text-lg sm:text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-            Join thousands of architects downloading professional BIM content every day
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/families"
-              className="px-8 py-4 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 hover:shadow-xl transition-all"
-            >
-              Browse All Families
-            </Link>
-            <button className="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-all">
-              Sign Up Free
-            </button>
           </div>
         </div>
       </section>
     </div>
   );
-}
-
-// Helper function
-function getFamilyCountByCategory(category: FamilyCategory, families: Family[]): number {
-  return families.filter((f: Family) => f.category === category).length;
 }

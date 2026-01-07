@@ -1,3 +1,5 @@
+// src/app/revit/[category]/[slug]/page.tsx
+
 import OptimizedImage from '@/components/OptimizedImage';
 import { isValidCategory } from '@/lib/validators';
 import Link from 'next/link';
@@ -11,7 +13,6 @@ import { File, Download, Eye, User } from 'lucide-react';
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
   const { category, slug } = await params;
 
-  // Validar categoría
   if (!isValidCategory(category)) {
     return { title: 'Category Not Found | Boracity' };
   }
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: { params: { category: string;
 
 export default async function FamilyDetailPage({ params }: { params: { category: string; slug: string } }) {
   const { category, slug } = await params;
-  // Validar categoría
+  
   if (!isValidCategory(category)) {
     notFound();
   }
@@ -41,172 +42,129 @@ export default async function FamilyDetailPage({ params }: { params: { category:
   if (!family) {
     notFound();
   }
-  
+
   const relatedFamilies = await getRelatedFamilies(family.id, 3);
   const baseUrl = 'https://boracity.com';
   const currentUrl = `${baseUrl}/revit/${category}/${slug}`;
 
-  // Breadcrumb data
+  // Breadcrumb data - CORREGIDO: URLs relativas
   const breadcrumbItems = [
-    { name: 'Home', url: baseUrl },
-    { name: 'Revit', url: `${baseUrl}/revit` },
-    { name: CATEGORY_METADATA[category]?.name || category, url: `${baseUrl}/revit/${category}` },
+    { name: 'Home', url: '/' },
+    { name: 'Revit Families', url: '/revit' },
+    { name: CATEGORY_METADATA[category]?.name || category, url: `/revit/${category}` },
     { name: family.name, url: currentUrl }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      {/* Schema.org structured data */}
+    <>
       <ProductSchema family={family} url={currentUrl} />
       <BreadcrumbSchema items={breadcrumbItems} />
 
-      <div className="container mx-auto px-6">
-        {/* Breadcrumb Navigation */}
-        <nav className="text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-primary">Home</Link>
-          <span className="mx-2">/</span>
-          <Link href="/revit" className="hover:text-primary">Revit</Link>
-          <span className="mx-2">/</span>
-          <Link href={`/revit/${category}`} className="hover:text-primary capitalize">
-            {CATEGORY_METADATA[category]?.name || category}
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900">{family.name}</span>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <ol className="flex items-center gap-2 text-sm">
+              {breadcrumbItems.map((item, index) => (
+                <li key={item.url} className="flex items-center gap-2">
+                  {index > 0 && <span className="text-gray-400">/</span>}
+                  {index === breadcrumbItems.length - 1 ? (
+                    <span className="text-gray-900 font-medium">{item.name}</span>
+                  ) : (
+                    <Link href={item.url} className="text-gray-600 hover:text-primary">
+                      {item.name}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
         </nav>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white p-8 rounded-lg shadow-md">
-          {/* Image Section */}
-          <div>
-            <OptimizedImage
-              src={family.images.thumbnail}
-              category={family.category}
-              variant="detail"
-              alt={family.name}
-              width={800}
-              height={600}
-              className="w-full rounded-lg shadow-sm"
-              priority={true}
-            />
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
-            {/* Image Gallery */}
-            {family.images.gallery && family.images.gallery.length > 0 && (
-              <div className="grid grid-cols-3 gap-4 mt-4">
-                {family.images.gallery.map((img, idx) => (
-                  <OptimizedImage
-                    key={idx}
-                    src={img}
-                    category={family.category}
-                    variant="gallery"
-                    alt={`${family.name} - View ${idx + 1}`}
-                    width={200}
-                    height={200}
-                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                  />
-                ))}
+            <div className="space-y-4">
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg">
+                <OptimizedImage
+                  src={family.images.thumbnail}
+                  category={family.category}
+                  variant="detail"
+                  alt={family.name}
+                  className="w-full aspect-[4/3] object-cover"
+                />
               </div>
-            )}
-          </div>
-
-          {/* Details Section */}
-          <div>
-            <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold uppercase mb-4">
-              {CATEGORY_METADATA[category]?.name || category}
             </div>
-            
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{family.name}</h1>
-            <p className="text-gray-600 mb-6 text-lg leading-relaxed">{family.description}</p>
 
-            {/* File Information */}
-            <div className="bg-gray-50 p-6 rounded-lg mb-6">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">File Information</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600 flex items-center gap-2">
-                    <File className="w-4 h-4 text-primary" />
-                    File Size:
-                  </span>
-                  <span className="font-medium">{family.file.size}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600 flex items-center gap-2">
-                    <Download className="w-4 h-4 text-primary" />
-                    Downloads:
-                  </span>
+            <div className="space-y-6">
+              <div>
+                <Link 
+                  href={`/revit/${family.category}`}
+                  className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-semibold rounded-full hover:bg-primary/20 transition-colors"
+                >
+                  {CATEGORY_METADATA[family.category]?.name || family.category}
+                </Link>
+              </div>
+
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">
+                {family.name}
+              </h1>
+
+              <p className="text-lg text-gray-600 leading-relaxed">
+                {family.description}
+              </p>
+
+              <div className="flex items-center gap-6 py-4 border-y">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Download className="w-5 h-5" />
                   <span className="font-medium">{family.metadata.downloads.toLocaleString()}</span>
+                  <span className="text-sm">downloads</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-primary" />
-                    Views:
-                  </span>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Eye className="w-5 h-5" />
                   <span className="font-medium">{family.metadata.views.toLocaleString()}</span>
+                  <span className="text-sm">views</span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-600 flex items-center gap-2">
-                    <User className="w-4 h-4 text-primary" />
-                    Author:
-                  </span>
-                  <span className="font-medium">{family.metadata.author}</span>
+              </div>
+
+              <button className="w-full py-4 bg-primary text-white font-bold text-lg rounded-xl hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3">
+                <Download className="w-6 h-6" />
+                Download Family (.rfa)
+              </button>
+
+              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+                <div className="flex items-start gap-3">
+                  <File className="w-5 h-5 text-gray-400 mt-1" />
+                  <div>
+                    <div className="font-semibold text-gray-900">File Size</div>
+                    <div className="text-gray-600">{family.file.size}</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <User className="w-5 h-5 text-gray-400 mt-1" />
+                  <div>
+                    <div className="font-semibold text-gray-900">Author</div>
+                    <div className="text-gray-600">{family.metadata.author}</div>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Revit Versions */}
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <h4 className="font-semibold text-gray-900 mb-2 text-sm">Compatible Revit Versions:</h4>
-              <div className="flex flex-wrap gap-2">
-                {family.file.revitVersions.map((version) => (
-                  <span 
-                    key={version}
-                    className="px-3 py-1 bg-white border border-blue-200 text-blue-700 rounded-md text-xs font-medium"
-                  >
-                    Revit {version}
-                  </span>
+          {relatedFamilies.length > 0 && (
+            <section className="mt-20">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                Related Families
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {relatedFamilies.map((related) => (
+                  <FamilyCard key={related.id} family={related} />
                 ))}
               </div>
-            </div>
-
-            {/* Tags */}
-            {family.metadata.tags && family.metadata.tags.length > 0 && (
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm">Tags:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {family.metadata.tags.map((tag) => (
-                    <span 
-                      key={tag}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Download Button */}
-            <a 
-              href={family.file.downloadUrl} 
-              className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white text-center font-bold py-4 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/30"
-            >
-              <Download className="w-5 h-5" />
-              Download Revit Family
-            </a>
-          </div>
+            </section>
+          )}
         </div>
-
-        {/* Related Families */}
-        {relatedFamilies.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Related Families</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedFamilies.map(related => (
-                <FamilyCard key={related.id} family={related} />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
+    </>
   );
 }

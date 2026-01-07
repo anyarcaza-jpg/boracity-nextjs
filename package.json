@@ -1,18 +1,22 @@
 {
   "name": "boracity-nextjs",
-  "version": "0.6.1",
+  "version": "0.8.0",
   "private": true,
+  "description": "Production-ready platform for free BIM & 3D assets with professional logging and validation",
+  "author": "Fernando (BIMShares.com)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
@@ -25,5 +29,19 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.9.3"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "revit",
+    "bim",
+    "families",
+    "sketchup",
+    "d5-render",
+    "architecture",
+    "nextjs",
+    "typescript"
+  ]
 }

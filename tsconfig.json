@@ -1,38 +1,75 @@
 {
   "compilerOptions": {
-    /* CONFIGURACIÓN BÁSICA */
-    "target": "ES2017", // JavaScript moderno
+    /* ============================================
+       CONFIGURACIÓN BÁSICA
+       ============================================ */
+    "target": "ES2017",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
-    ], // APIs disponibles
-    "allowJs": true, // Permite .js y .ts juntos (IMPORTANTE para migración)
-    "skipLibCheck": true, // Más rápido
-    "strict": true, // ❌ Desactivado al inicio (lo activamos al final)
-    "noEmit": true, // Next.js maneja la compilación
-    "esModuleInterop": true, // Compatibilidad imports
-    "module": "esnext", // Módulos modernos
-    "moduleResolution": "bundler", // Next.js 15 usa bundler
-    "resolveJsonModule": true, // Permite importar JSON
-    "isolatedModules": true, // Cada archivo se compila solo
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true, // Compilación más rápida
-    /* RUTAS */
-    "baseUrl": ".", // Base para imports
+    "incremental": true,
+    /* ============================================
+       MODO ESTRICTO (TYPE SAFETY)
+       ============================================ */
+    "strict": true,
+    // ✅ Ya activo - Incluye:
+    //    - noImplicitAny: true
+    //    - strictNullChecks: true
+    //    - strictFunctionTypes: true
+    //    - strictBindCallApply: true
+    //    - strictPropertyInitialization: true
+    //    - noImplicitThis: true
+    //    - alwaysStrict: true
+    /* ============================================
+       REGLAS ADICIONALES ESTRICTAS (CÓDIGO SENIOR)
+       ============================================ */
+    // 🔍 Detecta variables declaradas pero nunca usadas
+    // Ejemplo: const x = 5; // ❌ Error si nunca usas 'x'
+    "noUnusedLocals": true,
+    // 🔍 Detecta parámetros de función que nunca usas
+    // Ejemplo: function test(a, b, c) { return a + b; } // ❌ Error por 'c'
+    "noUnusedParameters": true,
+    // 🔍 Obliga a que TODAS las ramas de una función retornen un valor
+    // Previene: function getPrice(x) { if (x > 0) return 10; } // ❌ ¿Y si x <= 0?
+    "noImplicitReturns": true,
+    // 🔍 Previene olvidar 'break' en switch statements
+    // Previene bugs donde un case "cae" al siguiente sin querer
+    "noFallthroughCasesInSwitch": true,
+    // 🔍 Fuerza consistencia en nombres de archivos (mayúsculas/minúsculas)
+    // Previene: import X from './Component' vs './component' (error en Linux)
+    "forceConsistentCasingInFileNames": true,
+    /* ============================================
+       RUTAS Y ALIAS
+       ============================================ */
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
-      ] // @ = src/
+      ]
     },
-    /* NEXT.JS ESPECÍFICO */
+    /* ============================================
+       NEXT.JS 16 ESPECÍFICO
+       ============================================ */
     "plugins": [
       {
         "name": "next"
       }
     ]
   },
-  /* ARCHIVOS A INCLUIR */
+  /* ============================================
+     ARCHIVOS A INCLUIR
+     ============================================ */
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -40,7 +77,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  /* ARCHIVOS A EXCLUIR */
+  /* ============================================
+     ARCHIVOS A EXCLUIR
+     ============================================ */
   "exclude": [
     "node_modules"
   ]
