@@ -17,10 +17,10 @@ export function isValidCategory(value: string): value is FamilyCategory {
 
 export const FamilyIdSchema = z
   .string()
+  .trim()
   .min(3)
   .max(100)
-  .regex(/^[a-z0-9-]+$/)
-  .trim();
+  .regex(/^[a-z0-9-]+$/);
 
 export const FamilySlugSchema = FamilyIdSchema;
 

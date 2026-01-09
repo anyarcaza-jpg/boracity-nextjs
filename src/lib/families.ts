@@ -3,6 +3,8 @@
 import type { Family, FamilyCategory, FamilyStats } from '@/types';
 import { config } from './config';
 import { logger } from './logger';
+import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 
 import { 
   getAllFamilies as getMockFamilies,
@@ -15,19 +17,28 @@ import {
    CORE FUNCTIONS
    ============================================ */
 
-export async function getAllFamilies(): Promise<Family[]> {
-  try {
-    logger.info('Obteniendo todas las familias');
-    const families = getMockFamilies();
-    logger.info('Familias obtenidas', { count: families.length });
-    return families;
-  } catch (error) {
-    logger.error('Error al obtener familias', { 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return [];
-  }
-}
+export const getAllFamilies = cache(async (): Promise<Family[]> => {
+  return unstable_cache(
+    async () => {
+      try {
+        logger.info('Obteniendo todas las familias (sin cache)');
+        const families = getMockFamilies();
+        logger.info('Familias obtenidas', { count: families.length });
+        return families;
+      } catch (error) {
+        logger.error('Error al obtener familias', { 
+          error: error instanceof Error ? error.message : 'Unknown' 
+        });
+        return [];
+      }
+    },
+    ['all-families'],
+    {
+      revalidate: 3600,
+      tags: ['families']
+    }
+  )();
+});
 
 export async function getFamilyById(id: string): Promise<Family | null> {
   try {
@@ -55,45 +66,63 @@ export async function getFamilyById(id: string): Promise<Family | null> {
   }
 }
 
-export async function getFamiliesByCategory(category: FamilyCategory): Promise<Family[]> {
-  try {
-    if (!category) {
-      logger.warn('Categoría vacía');
-      return [];
+export const getFamiliesByCategory = cache(async (category: FamilyCategory): Promise<Family[]> => {
+  return unstable_cache(
+    async () => {
+      try {
+        if (!category) {
+          logger.warn('Categoría vacía');
+          return [];
+        }
+        
+        const families = getMockFamiliesByCategory(category);
+        logger.info('Familias por categoría (sin cache)', { category, count: families.length });
+        return families;
+        
+      } catch (error) {
+        logger.error('Error al buscar por categoría', { 
+          category, 
+          error: error instanceof Error ? error.message : 'Unknown' 
+        });
+        return [];
+      }
+    },
+    ['families-by-category', category],
+    {
+      revalidate: 3600,
+      tags: ['families', `category-${category}`]
     }
-    
-    const families = getMockFamiliesByCategory(category);
-    logger.info('Familias por categoría', { category, count: families.length });
-    return families;
-    
-  } catch (error) {
-    logger.error('Error al buscar por categoría', { 
-      category, 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return [];
-  }
-}
+  )();
+});
 
-export async function searchFamilies(searchTerm: string): Promise<Family[]> {
-  try {
-    if (!searchTerm || searchTerm.trim().length < 2) {
-      logger.debug('Búsqueda muy corta', { searchTerm });
-      return [];
+export const searchFamilies = cache(async (searchTerm: string): Promise<Family[]> => {
+  return unstable_cache(
+    async () => {
+      try {
+        if (!searchTerm || searchTerm.trim().length < 2) {
+          logger.debug('Búsqueda muy corta', { searchTerm });
+          return [];
+        }
+        
+        const results = searchMockFamilies(searchTerm);
+        logger.info('Búsqueda ejecutada (sin cache)', { searchTerm, count: results.length });
+        return results;
+        
+      } catch (error) {
+        logger.error('Error en búsqueda', { 
+          searchTerm, 
+          error: error instanceof Error ? error.message : 'Unknown' 
+        });
+        return [];
+      }
+    },
+    ['search-families', searchTerm.toLowerCase()],
+    {
+      revalidate: 1800,
+      tags: ['search', 'families']
     }
-    
-    const results = searchMockFamilies(searchTerm);
-    logger.info('Búsqueda ejecutada', { searchTerm, count: results.length });
-    return results;
-    
-  } catch (error) {
-    logger.error('Error en búsqueda', { 
-      searchTerm, 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return [];
-  }
-}
+  )();
+});
 
 export async function getFamilyBySlug(
   category: FamilyCategory, 
@@ -237,4 +266,16 @@ export async function getFamilyByIdForRedirect(
     });
     return null;
   }
+}
+
+/* ============================================
+   CACHE MANAGEMENT
+   ============================================ */
+
+export function invalidateFamiliesCache(): void {
+  logger.info('Cache invalidation requested - requires server restart in development');
+}
+
+export function invalidateCategoryCache(category: FamilyCategory): void {
+  logger.info('Category cache invalidation requested', { category });
 }

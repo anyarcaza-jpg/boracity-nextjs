@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Configuración optimizada de Inter
 const inter = Inter({ 
@@ -28,12 +29,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       {/* ✅ Font Awesome CDN ELIMINADO - Ahora usamos Lucide React */}
       <body className={inter.className}>
-        <Navbar />
-        <main className="pt-[70px]">
-          {children}
-        </main>
-        <Footer />
-      </body>
+  <ErrorBoundary>
+    <Navbar />
+    <main className="pt-[70px]">
+      {children}
+    </main>
+    <Footer />
+  </ErrorBoundary>
+</body>
     </html>
   );
 }
