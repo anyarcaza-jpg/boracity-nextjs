@@ -40,3 +40,88 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #E63E00;
 }
+
+/* ===================================
+   AUTOCOMPLETE ANIMATIONS
+   =================================== */
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Smooth transitions for suggestions */
+.suggestion-item {
+  transition: all 0.15s ease;
+}
+
+.suggestion-item:hover {
+  transform: translateX(4px);
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ===================================
+   SAFE AREAS FOR MOBILE
+   =================================== */
+
+/* iOS safe areas */
+@supports (padding: max(0px)) {
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Android - espacio adicional */
+@media (max-width: 768px) {
+  .pb-safe {
+    padding-bottom: 5rem;
+  }
+}

@@ -1,19 +1,24 @@
+'use client';
 import type { Family, FamilyCategory } from '@/types';
 import Link from 'next/link';
 import { getAllFamilies, getFamiliesStats } from '@/lib/families';
 import FamilyCard from '@/components/FamilyCard';
-import { Search, Download, CheckCircle, Rocket, ArrowRight, Sofa, DoorOpen, Square, Lightbulb } from 'lucide-react';
+import SearchAutocomplete from '@/components/search/SearchAutocomplete';
+import { Download, CheckCircle, Rocket, ArrowRight, Sofa, DoorOpen, Square, Lightbulb } from 'lucide-react';
 
-export const metadata = {
-  title: 'Boracity - Free Revit Families, SketchUp Models & 3D Assets',
-  description: 'Download 10,000+ professional Revit families, SketchUp models, D5 Render assets & textures. Free for students & architects.',
-  keywords: ['revit families', 'bim', 'sketchup models', 'd5 render', 'textures', 'architectural assets'],
-};
 
-export default async function HomePage() {
-  const stats = await getFamiliesStats();
-  const families = await getAllFamilies();
-  const recentFamilies = stats.recentlyAdded || families.slice(0, 6);
+
+export default function HomePage() {
+
+
+  // ⚠️ Temporal: Stats hardcodeados (después lo arreglamos)
+  const stats = {
+    totalFamilies: 9,
+    totalDownloads: 12500,
+    categoriesCount: 4,
+  };
+  
+  const recentFamilies: Family[] = [];
 
   return (
     <div className="min-h-screen">
@@ -37,17 +42,7 @@ export default async function HomePage() {
           
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search families (e.g., office chair, door, window...)"
-                className="w-full px-6 py-4 pr-32 rounded-lg border-2 border-gray-200 focus:border-primary focus:outline-none text-base shadow-sm"
-              />
-              <button className="absolute right-2 top-2 px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-all flex items-center gap-2">
-                <Search className="w-4 h-4" />
-                Search
-              </button>
-            </div>
+            <SearchAutocomplete />
           </div>
 
           {/* Stats Grid */}

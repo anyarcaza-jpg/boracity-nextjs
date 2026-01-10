@@ -7,8 +7,8 @@ import Image from 'next/image';
 import { getImageKitUrl, getThumbnailUrl, getDetailUrl, isImageKitUrl } from '@/lib/imagekit';
 
 interface OptimizedImageProps {
-  // Imagen de ImageKit
-  src?: string; // Filename: "bar-chair.png"
+  // Imagen de ImageKit o URL completa
+  src?: string;
   category?: 'furniture' | 'doors' | 'windows' | 'lighting';
   
   // O URL completa (para imágenes locales o externas)
@@ -57,7 +57,13 @@ export default function OptimizedImage({
     finalWidth = width || 800;
     finalHeight = height || 600;
   }
-  // Si es imagen de ImageKit (necesita src y category)
+  // Si src ya es una URL completa (empieza con http o /)
+  else if (src && (src.startsWith('http') || src.startsWith('/'))) {
+    finalUrl = src;
+    finalWidth = width || 400;
+    finalHeight = height || 300;
+  }
+  // Si es imagen de ImageKit (filename solamente)
   else if (src && category) {
     // Determinar tamaño según variant
     switch (variant) {
