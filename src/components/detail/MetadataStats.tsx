@@ -1,6 +1,10 @@
 // src/components/detail/MetadataStats.tsx
-import { formatNumber } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+
+// Función para formatear números con separadores de miles
+function formatNumber(num: number): string {
+  return new Intl.NumberFormat('en-US').format(num);
+}
 
 interface MetadataStatsProps {
   stats: {
