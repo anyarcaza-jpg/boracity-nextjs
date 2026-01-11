@@ -1,5 +1,5 @@
 'use client';
-import type { Family, FamilyCategory } from '@/types';
+import type { Family } from '@/types';
 import Link from 'next/link';
 import { getAllFamilies, getFamiliesStats } from '@/lib/families';
 import FamilyCard from '@/components/FamilyCard';
