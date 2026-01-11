@@ -9,19 +9,19 @@ import FamilyCard from '@/components/FamilyCard';
 import { CollectionPageSchema } from '@/components/SchemaOrg';
 import type { FamilyCategory } from '@/types';
 
-export async function generateMetadata({ params }: { params: { category: string } }) {
+interface PageProps {
+  params: Promise<{
+    category: string;
+  }>;
+}
+
+export async function generateMetadata({ params }: PageProps) {
   const { category } = await params;
   
   return {
     title: `Free Revit ${category.charAt(0).toUpperCase() + category.slice(1)} Families | Boracity`,
     description: `Download free Revit ${category} families. Professional BIM content for architects and designers.`
   };
-}
-
-interface PageProps {
-  params: Promise<{
-    category: string;
-  }>;
 }
 
 export default async function CategoryPage({ params }: PageProps) {
