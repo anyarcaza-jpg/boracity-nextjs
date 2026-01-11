@@ -11,7 +11,15 @@ import { UserInfo } from '@/components/detail/UserInfo';
 import { MetadataStats } from '@/components/detail/MetadataStats';
 import { DownloadButton } from '@/components/detail/DownloadButton';
 
-export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
+interface PageProps {
+  params: Promise<{
+    category: string;
+    slug: string;
+  }>;
+}
+
+export default async function FamilyDetailPage({ params }: PageProps) {
+  const { category, slug } = await params;
   const { category, slug } = await params;
   if (!isValidCategory(category)) {
     return { title: 'Category Not Found | Boracity' };
