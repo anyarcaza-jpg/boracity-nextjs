@@ -1,10 +1,9 @@
 'use client';
 import type { Family } from '@/types';
 import Link from 'next/link';
-import { getAllFamilies, getFamiliesStats } from '@/lib/families';
 import FamilyCard from '@/components/FamilyCard';
 import SearchAutocomplete from '@/components/search/SearchAutocomplete';
-import { Download, CheckCircle, Rocket, ArrowRight, Sofa, DoorOpen, Square, Lightbulb } from 'lucide-react';
+import { Download, CheckCircle, Rocket, Sofa, DoorOpen, Square, Lightbulb } from 'lucide-react';
 
 
 
