@@ -1,12 +1,14 @@
 # 🏛️ Boracity - Free Revit Families & 3D Assets
 
-![Version](https://img.shields.io/badge/version-0.12.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.13.0-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-15.1.3-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-Production--Ready-success)
 
 > Professional BIM content library for architects, designers, and students. Download high-quality Revit families, SketchUp models, and 3D assets — 100% free.
+
+**🆕 NEW in v0.13.0:** Redesigned detail pages with minimalist UI, image gallery with zoom magnifier, and liquid glass effects!
 
 ---
 
@@ -18,8 +20,17 @@
 - **🖼️ Optimized Images** - ImageKit CDN with automatic optimization
 - **📱 Fully Responsive** - Desktop, tablet, and mobile optimized
 - **⚡ Fast Performance** - Next.js 15 with App Router, optimized builds
-- **🎨 Modern UI/UX** - Clean, intuitive interface with smooth animations
+- **🎨 Modern UI/UX** - Clean, minimalist interface with liquid glass effects
 - **♿ Accessible** - Keyboard navigation, ARIA labels, semantic HTML
+
+### 🆕 Detail Pages v2.0 (v0.13.0)
+- **🖼️ Image Gallery** - Navigate through multiple images with arrows and thumbnails
+- **🔍 Zoom Magnifier** - Interactive x2.5 zoom with liquid glass lupa effect
+- **👤 User Info** - Author profile with Follow, Like, Save, and Share actions
+- **📊 Minimalist Stats** - Clean horizontal stats display (Likes, Downloads, Views, Collections)
+- **🎯 Enhanced Download** - Prominent button with gradient and loading states
+- **🏷️ Visual Tags** - Clickable tags for easy navigation
+- **✨ Liquid Glass** - Subtle glass effects on key interactive elements
 
 ### 🔍 Autocomplete PRO (v0.12.0)
 - **Real-time Suggestions** - Instant results as you type (300ms debounce)
@@ -171,11 +182,21 @@ boracity-nextjs/
 │   │   ├── page.tsx           # Homepage
 │   │   ├── search/            # Search results page
 │   │   ├── revit/             # Category pages
+│   │   │   └── [category]/
+│   │   │       └── [slug]/
+│   │   │           └── page.tsx  # ✨ Detail page (v0.13.0)
 │   │   ├── api/               # API routes
 │   │   ├── layout.tsx         # Root layout
 │   │   └── globals.css        # Global styles
 │   │
 │   ├── components/            # React components
+│   │   ├── ui/                # ✨ NEW: Base UI components
+│   │   │   └── GlassCard.tsx
+│   │   ├── detail/            # ✨ NEW: Detail page components
+│   │   │   ├── ImageGallery.tsx      # Gallery with zoom
+│   │   │   ├── UserInfo.tsx          # User + actions
+│   │   │   ├── MetadataStats.tsx     # Stats display
+│   │   │   └── DownloadButton.tsx    # Download CTA
 │   │   ├── search/            # Search components
 │   │   │   ├── SearchAutocomplete.tsx
 │   │   │   ├── SearchSuggestion.tsx
@@ -189,6 +210,7 @@ boracity-nextjs/
 │   │   └── useClickOutside.ts
 │   │
 │   ├── lib/                   # Utilities & helpers
+│   │   ├── utils.ts           # ✨ NEW: CN helper & formatters
 │   │   ├── families.ts        # Family service layer
 │   │   ├── searchHistory.ts   # LocalStorage manager
 │   │   ├── imagekit.ts        # Image optimization
@@ -206,8 +228,9 @@ boracity-nextjs/
 │   └── fonts/
 │
 ├── docs/                      # Documentation
-│   ├── SESSION_15_COMPLETE.md
+│   ├── SESSION_17_UX_REDESIGN_COMPLETE.md  # ✨ NEW
 │   ├── SESSION_16_AUTOCOMPLETE_PRO.md
+│   ├── SESSION_15_COMPLETE.md
 │   └── ARCHITECTURE.md
 │
 ├── next.config.js            # Next.js config
@@ -320,7 +343,7 @@ const url = getThumbnailUrl('bar-chair.png', 'furniture');
 
 ## 🗺️ Roadmap
 
-### Phase 1: Foundation ✅ (v0.1.0 - v0.12.0)
+### Phase 1: Foundation ✅ (v0.1.0 - v0.13.0)
 - [x] Project setup & architecture
 - [x] Homepage with hero
 - [x] Category browsing
@@ -329,8 +352,14 @@ const url = getThumbnailUrl('bar-chair.png', 'furniture');
 - [x] Autocomplete PRO
 - [x] Mobile responsive
 - [x] Image optimization
+- [x] **Detail page redesign with gallery** ✨ NEW
+- [x] **Zoom magnifier with liquid glass** ✨ NEW
+- [x] **User interactions (Follow, Like, Save, Share)** ✨ NEW
 
-### Phase 2: Enhancement 🚧 (v0.13.0 - v0.20.0)
+### Phase 2: Enhancement 🚧 (v0.14.0 - v0.20.0)
+- [ ] SEO advanced (FAQ Schema, HowTo Schema)
+- [ ] Related families improved
+- [ ] Responsive mobile optimization
 - [ ] User authentication
 - [ ] Favorites system
 - [ ] Download history
@@ -374,8 +403,9 @@ We welcome contributions! Please follow these steps:
 ## 📝 Documentation
 
 ### Available Docs
-- [SESSION_15_COMPLETE.md](docs/SESSION_15_COMPLETE.md) - Search system implementation
+- [SESSION_17_UX_REDESIGN_COMPLETE.md](docs/SESSION_17_UX_REDESIGN_COMPLETE.md) - ✨ Detail page redesign (v0.13.0)
 - [SESSION_16_AUTOCOMPLETE_PRO.md](docs/SESSION_16_AUTOCOMPLETE_PRO.md) - Autocomplete features
+- [SESSION_15_COMPLETE.md](docs/SESSION_15_COMPLETE.md) - Search system implementation
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Technical architecture
 - [SEO_STRATEGY.md](docs/SEO_STRATEGY.md) - SEO guidelines
 
@@ -446,4 +476,4 @@ If you find this project useful, please consider giving it a ⭐ on GitHub!
 
 **Built with ❤️ for architects and designers worldwide**
 
-Last updated: January 10, 2026 | Version 0.12.0
+Last updated: January 11, 2026 | Version 0.13.0

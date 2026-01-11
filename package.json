@@ -1,7 +1,7 @@
 {
   "name": "boracity-nextjs",
-  "version": "0.12.0",
-  "description": "Free Revit Families & 3D Assets platform with professional autocomplete search",
+  "version": "0.13.0",
+  "description": "Free Revit Families & 3D Assets platform with professional autocomplete search and liquid glass UI",
   "keywords": [
     "revit",
     "bim",
@@ -11,7 +11,10 @@
     "autocomplete",
     "nextjs",
     "typescript",
-    "tailwind"
+    "tailwind",
+    "liquid-glass",
+    "image-gallery",
+    "zoom-magnifier"
   ],
   "author": "Boracity Team",
   "license": "MIT",
@@ -26,7 +29,10 @@
     "next": "^15.1.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.263.1"
+    "lucide-react": "^0.263.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.7.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^20",

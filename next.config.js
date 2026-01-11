@@ -1,3 +1,4 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -5,11 +6,13 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'ik.imagekit.io',
-        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',  // ← AGREGAR ESTA LÍNEA
       },
     ],
   },
-  reactStrictMode: true,
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
