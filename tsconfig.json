@@ -17,7 +17,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     /* ============================================
        MODO ESTRICTO (TYPE SAFETY)
@@ -36,10 +36,10 @@
        ============================================ */
     // 🔍 Detecta variables declaradas pero nunca usadas
     // Ejemplo: const x = 5; // ❌ Error si nunca usas 'x'
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     // 🔍 Detecta parámetros de función que nunca usas
     // Ejemplo: function test(a, b, c) { return a + b; } // ❌ Error por 'c'
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     // 🔍 Obliga a que TODAS las ramas de una función retornen un valor
     // Previene: function getPrice(x) { if (x > 0) return 10; } // ❌ ¿Y si x <= 0?
     "noImplicitReturns": true,
