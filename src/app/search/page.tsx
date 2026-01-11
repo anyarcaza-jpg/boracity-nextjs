@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, ArrowLeft, Loader2 } from 'lucide-react';
@@ -8,7 +8,7 @@ import FamilyCard from '@/components/FamilyCard';
 import SearchSkeleton from '@/components/SearchSkeleton';
 import type { Family } from '@/types';
 
-export default function SearchPage() {
+function SearchContent() {
   // 🔹 Obtener parámetros de la URL
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -279,5 +279,20 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading search...</p>
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
