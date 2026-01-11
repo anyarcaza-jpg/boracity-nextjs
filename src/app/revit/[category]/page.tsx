@@ -18,7 +18,13 @@ export async function generateMetadata({ params }: { params: { category: string 
   };
 }
 
-export default async function CategoryPage({ params }: { params: { category: string } }) {
+interface PageProps {
+  params: Promise<{
+    category: string;
+  }>;
+}
+
+export default async function CategoryPage({ params }: PageProps) {
   const { category } = await params;
 
   if (!isValidCategory(category)) {
