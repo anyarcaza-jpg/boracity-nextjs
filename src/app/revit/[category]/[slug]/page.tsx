@@ -20,39 +20,28 @@ interface PageProps {
 
 export default async function FamilyDetailPage({ params }: PageProps) {
   const { category, slug } = await params;
-  const { category, slug } = await params;
-  if (!isValidCategory(category)) {
-    return { title: 'Category Not Found | Boracity' };
-  }
-  const family = await getFamilyBySlug(category, slug);
-  if (!family) {
-    return { title: 'Family Not Found | Boracity' };
-  }
-  return {
-    title: family.seo.title,
-    description: family.seo.description,
-    keywords: family.seo.keywords.join(', ')
-  };
-}
-
-export default async function FamilyDetailPage({ params }: { params: { category: string; slug: string } }) {
-  const { category, slug } = await params;
+  
   if (!isValidCategory(category)) {
     notFound();
   }
+  
   const family = await getFamilyBySlug(category, slug);
+  
   if (!family) {
     notFound();
   }
+  
   const relatedFamilies = await getRelatedFamilies(family.id, 4);
   const baseUrl = 'https://boracity.com';
   const currentUrl = `${baseUrl}/revit/${category}/${slug}`;
+  
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
     { name: 'Revit Families', url: '/revit' },
     { name: CATEGORY_METADATA[category]?.name || category, url: `/revit/${category}` },
     { name: family.name, url: currentUrl }
   ];
+  
   const galleryImages = [
     family.images.thumbnail,
     `https://via.placeholder.com/800x600/FF4500/ffffff?text=Image+2`,
@@ -126,19 +115,18 @@ export default async function FamilyDetailPage({ params }: { params: { category:
                 downloadUrl={family.file.downloadUrl}
               />
               {/* TAGS */}
-{family.metadata.tags && family.metadata.tags.length > 0 && (
-  <div className="flex flex-wrap gap-2">
-    {family.metadata.tags.slice(0, 6).map((tag) => (
-      <span
-        key={tag}
-        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-full transition-colors cursor-pointer"
-      >
-        {tag}
-      </span>
-    ))}
-  </div>
-)}
-
+              {family.metadata.tags && family.metadata.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {family.metadata.tags.slice(0, 6).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-full transition-colors cursor-pointer"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 space-y-4 border border-gray-200/50">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
