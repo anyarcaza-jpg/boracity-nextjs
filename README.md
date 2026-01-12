@@ -1,153 +1,165 @@
-# 🏛️ Boracity - Free Revit Families & 3D Assets
+# Boracity - Revit Family Library Platform
 
-![Version](https://img.shields.io/badge/version-0.13.0-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15.1.3-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-Production--Ready-success)
-![Deployed](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)
+> Professional platform for downloading free Revit families for architecture and BIM projects.
 
-**🌐 Live Site:** [boracity-nextjs.vercel.app](https://boracity-nextjs.vercel.app)
-
-> Professional BIM content library for architects, designers, and students. Download high-quality Revit families, SketchUp models, and 3D assets — 100% free.
-
-**🆕 NEW in v0.13.0:** Redesigned detail pages with minimalist UI, image gallery with zoom magnifier, and liquid glass effects!
+[![Next.js](https://img.shields.io/badge/Next.js-15.1.4-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue)](https://neon.tech/)
+[![Cloudflare R2](https://img.shields.io/badge/Storage-R2-orange)](https://www.cloudflare.com/products/r2/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
-## 🚀 Features
+## 🚀 Project Status
 
-### ✨ Core Features
-- **🔍 Smart Search Autocomplete** - Real-time suggestions with keyboard navigation
-- **📦 Professional BIM Content** - Curated Revit families, SketchUp models, D5 Render assets
-- **🖼️ Optimized Images** - ImageKit CDN with automatic optimization
-- **📱 Fully Responsive** - Desktop, tablet, and mobile optimized
-- **⚡ Fast Performance** - Next.js 15 with App Router, optimized builds
-- **🎨 Modern UI/UX** - Clean, minimalist interface with liquid glass effects
-- **♿ Accessible** - Keyboard navigation, ARIA labels, semantic HTML
+**Current Version:** v0.14.0  
+**Status:** ✅ Production (Backend Implemented)
 
-### 🆕 Detail Pages v2.0 (v0.13.0)
-- **🖼️ Image Gallery** - Navigate through multiple images with arrows and thumbnails
-- **🔍 Zoom Magnifier** - Interactive x2.5 zoom with liquid glass lupa effect
-- **👤 User Info** - Author profile with Follow, Like, Save, and Share actions
-- **📊 Minimalist Stats** - Clean horizontal stats display (Likes, Downloads, Views, Collections)
-- **🎯 Enhanced Download** - Prominent button with gradient and loading states
-- **🏷️ Visual Tags** - Clickable tags for easy navigation
-- **✨ Liquid Glass** - Subtle glass effects on key interactive elements
+### Implementation Progress
 
-### 🔍 Autocomplete PRO (v0.12.0)
-- **Real-time Suggestions** - Instant results as you type (300ms debounce)
-- **Keyboard Navigation** - Full control with ↑↓ Enter Esc
-- **Recent Searches** - LocalStorage-based history (max 5)
-- **Thumbnails Preview** - See family previews before clicking
-- **Mobile Optimized** - Bottom sheet UI for mobile devices
-- **Smart Loading** - Spinner states and empty state handling
-- **Click Outside Close** - Intuitive UX patterns
-- **Smooth Animations** - CSS transitions and keyframes
+- ✅ **Frontend** (v0.13.0) - Complete
+  - Modern UI with Next.js 15 + React 19
+  - Responsive design
+  - Category system (Furniture, Doors, Windows, Lighting)
+  - Search and filters
+  - Individual family pages
+  - SEO optimized
 
-### 🗂️ Content Features
-- **Category Browsing** - Furniture, Doors, Windows, Lighting, and more
-- **Advanced Filters** - Filter by category, sort by relevance/downloads/date
-- **Search Results** - Fast search with highlighted results
-- **Family Details** - Complete specs, downloads, metadata
-- **Download Tracking** - View counts and download statistics
+- ✅ **Backend** (v0.14.0) - Complete ⭐ NEW
+  - PostgreSQL database (Neon)
+  - Cloudflare R2 for file storage
+  - 8 families in production
+  - RESTful APIs
+  - Signed URLs for secure downloads
+  - Cost: $0/month (free tiers)
 
-### 🎨 Design System
-- **Tailwind CSS** - Utility-first styling
-- **Custom Components** - Reusable, type-safe components
-- **Dark Mode Ready** - Infrastructure for theme switching
-- **Animations** - Smooth transitions and micro-interactions
-- **Icons** - Lucide React icon library
+- 🟡 **Admin Panel** (v0.15.0) - Next Session
+  - Authentication system
+  - CRUD for families
+  - File upload to R2
+  - Dashboard with statistics
 
 ---
 
-## 📸 Screenshots
+## 📊 Current Data
 
-### Desktop - Autocomplete
-```
-┌────────────────────────────────────────────┐
-│ Free Revit Families & 3D Assets           │
-│        for Architects                      │
-│                                            │
-│ [chair________________] [🔍 Search]        │
-│    ↓                                       │
-│ ┌──────────────────────────────────────┐  │
-│ │ RECENT SEARCHES        Clear all     │  │
-│ ├──────────────────────────────────────┤  │
-│ │ 🕒 door                               │  │
-│ │ 🕒 window                             │  │
-│ ├──────────────────────────────────────┤  │
-│ │ [img] ALUNVA Bar Chair      1,247    │  │
-│ │       Furniture                       │  │
-│ │ [img] Armchair Ottoman        892    │  │
-│ │       Furniture                       │  │
-│ └──────────────────────────────────────┘  │
-└────────────────────────────────────────────┘
-```
-
-### Mobile - Bottom Sheet
-```
-┌──────────────────────┐
-│                      │
-│   [Hero Content]     │
-│                      │
-│ [chair___] [Search]  │
-│                      │
-├──────────────────────┤
-│       ─────          │ ← Drag handle
-│ [img] Bar Chair      │
-│       Furniture      │
-│ [img] Armchair       │
-│       Furniture      │
-│                      │
-└──────────────────────┘
-```
+- **Families:** 8 (migrated from mock data)
+- **Categories:** 4 (Furniture, Doors, Windows, Lighting)
+- **Database:** PostgreSQL (Neon serverless)
+- **Storage:** Cloudflare R2
+- **CDN:** ImageKit for images
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework:** Next.js 15.1.3 (App Router)
-- **Language:** TypeScript 5.7
+- **Framework:** Next.js 15.1.4 (App Router)
+- **Language:** TypeScript 5.x
 - **Styling:** Tailwind CSS 3.4
+- **UI Components:** shadcn/ui
 - **Icons:** Lucide React
-- **Images:** Next.js Image + ImageKit CDN
+- **Forms:** React Hook Form + Zod
+- **State:** React 19 (RSC + Server Actions)
 
 ### Backend
-- **API Routes:** Next.js API Routes
-- **Data:** TypeScript mock data (ready for database)
-- **Storage:** LocalStorage (search history)
-
-### Development
-- **Package Manager:** npm
-- **Linting:** ESLint
-- **Type Checking:** TypeScript strict mode
-- **Git Hooks:** Pre-commit validation
+- **Database:** PostgreSQL (Neon serverless)
+- **ORM:** Native SQL with `@neondatabase/serverless`
+- **File Storage:** Cloudflare R2 (S3-compatible)
+- **Image CDN:** ImageKit
+- **Authentication:** (Pending - Session 20)
 
 ### Infrastructure
-- **CDN:** ImageKit (image optimization)
-- **Hosting:** Vercel (recommended)
-- **Domain:** Custom domain ready
+- **Hosting:** Vercel (Free tier)
+- **Database:** Neon (Free tier - 0.5GB)
+- **Storage:** Cloudflare R2 (Free tier - 10GB)
+- **CI/CD:** GitHub Actions + Vercel auto-deploy
+
+### Development Tools
+- **Package Manager:** npm
+- **Linting:** ESLint
+- **Formatting:** Prettier
+- **Type Checking:** TypeScript strict mode
+- **Git Hooks:** Husky (optional)
+
+---
+
+## 🏗️ Architecture
+```
+┌─────────────────────────────────────────────────┐
+│           FRONTEND (Next.js 15)                 │
+│  • App Router (RSC)                             │
+│  • Server Components                            │
+│  • Client Components                            │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│         SERVICE LAYER (lib/families.ts)         │
+│  • React cache (request-level)                  │
+│  • Next.js cache (data-level)                   │
+│  • Error handling                               │
+└──────────────────┬──────────────────────────────┘
+                   │
+       ┌───────────┴───────────┐
+       │                       │
+       ▼                       ▼
+┌─────────────┐      ┌──────────────────┐
+│  DATABASE   │      │   FILE STORAGE   │
+│  (Neon)     │      │   (R2)           │
+├─────────────┤      ├──────────────────┤
+│ PostgreSQL  │      │ Cloudflare R2    │
+│ 8 families  │      │ .rfa files       │
+│ Serverless  │      │ Signed URLs      │
+└─────────────┘      └──────────────────┘
+```
 
 ---
 
 ## 📦 Installation
 
 ### Prerequisites
-- Node.js 18+ or 20+
+- Node.js 18.x or higher
 - npm or yarn
+- Git
 
-### Clone & Install
+### Setup
+
+1. **Clone the repository**
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/boracity-nextjs.git
+git clone https://github.com/anyarcaza-jpg/boracity-nextjs.git
 cd boracity-nextjs
+```
 
-# Install dependencies
+2. **Install dependencies**
+```bash
 npm install
+```
 
-# Run development server
+3. **Configure environment variables**
+
+Create a `.env.local` file in the root:
+```bash
+# URLs
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# ImageKit CDN
+NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=your_imagekit_endpoint
+NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+
+# Neon Database
+DATABASE_URL=postgresql://user:password@host/database
+
+# Cloudflare R2
+R2_ACCOUNT_ID=your_account_id
+R2_ACCESS_KEY_ID=your_access_key_id
+R2_SECRET_ACCESS_KEY=your_secret_access_key
+R2_BUCKET_NAME=boracity-files
+```
+
+4. **Run development server**
+```bash
 npm run dev
 ```
 
@@ -155,365 +167,233 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🚀 Quick Start
+## 🗄️ Database Setup
 
-### Development
+### Neon PostgreSQL
+
+1. Create account at [neon.tech](https://neon.tech)
+2. Create project "Boracity"
+3. Get connection string
+4. Run migration:
 ```bash
-npm run dev          # Start dev server (http://localhost:3000)
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
+# Execute SQL schema
+psql $DATABASE_URL < migrations/001_initial.sql
 ```
 
-### Environment Variables
-Create `.env.local`:
-```env
-# ImageKit (optional, for image optimization)
-NEXT_PUBLIC_IMAGEKIT_ID=your_imagekit_id
-
-# Analytics (optional)
-NEXT_PUBLIC_GA_ID=your_google_analytics_id
+5. Seed initial data:
+```bash
+npx tsx scripts/seed.ts
 ```
 
 ---
 
-## 🌐 Deployment
-
-### Quick Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/anyarcaza-jpg/boracity-nextjs)
-
-### Manual Deployment
-
-1. **Push to GitHub:**
-```bash
-git add .
-git commit -m "Ready for deployment"
-git push origin main
-```
-
-2. **Connect to Vercel:**
-- Go to [vercel.com](https://vercel.com)
-- Import your GitHub repository
-- Vercel auto-detects Next.js
-- Click "Deploy"
-
-3. **Done!** Your site will be live in ~2-3 minutes
-
-### Important Notes
-
-⚠️ **Before deploying, ensure:**
-- All unused imports are removed
-- `npm run build` succeeds locally
-- No TypeScript errors
-- Environment variables set in Vercel dashboard
-
-📚 **For detailed deployment guide and troubleshooting:**
-- See [DEPLOYMENT.md](./DEPLOYMENT.md)
-- See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
-
----
-
-## 📁 Project Structure
+## 📂 Project Structure
 ```
 boracity-nextjs/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── page.tsx           # Homepage
-│   │   ├── search/            # Search results page
-│   │   ├── revit/             # Category pages
-│   │   │   └── [category]/
-│   │   │       └── [slug]/
-│   │   │           └── page.tsx  # ✨ Detail page (v0.13.0)
-│   │   ├── api/               # API routes
-│   │   ├── layout.tsx         # Root layout
-│   │   └── globals.css        # Global styles
-│   │
+│   │   ├── (marketing)/       # Public pages
+│   │   ├── revit/             # Family pages
+│   │   └── api/               # API routes
 │   ├── components/            # React components
-│   │   ├── ui/                # ✨ NEW: Base UI components
-│   │   │   └── GlassCard.tsx
-│   │   ├── detail/            # ✨ NEW: Detail page components
-│   │   │   ├── ImageGallery.tsx      # Gallery with zoom
-│   │   │   ├── UserInfo.tsx          # User + actions
-│   │   │   ├── MetadataStats.tsx     # Stats display
-│   │   │   └── DownloadButton.tsx    # Download CTA
-│   │   ├── search/            # Search components
-│   │   │   ├── SearchAutocomplete.tsx
-│   │   │   ├── SearchSuggestion.tsx
-│   │   │   └── SearchRecent.tsx
-│   │   ├── FamilyCard.tsx
-│   │   ├── Navbar.tsx
-│   │   └── Footer.tsx
-│   │
-│   ├── hooks/                 # Custom React hooks
-│   │   ├── useDebounce.ts
-│   │   └── useClickOutside.ts
-│   │
-│   ├── lib/                   # Utilities & helpers
-│   │   ├── utils.ts           # ✨ NEW: CN helper & formatters
-│   │   ├── families.ts        # Family service layer
-│   │   ├── searchHistory.ts   # LocalStorage manager
-│   │   ├── imagekit.ts        # Image optimization
-│   │   └── validators.ts      # Input validation
-│   │
-│   ├── data/                  # Data layer
-│   │   ├── mock/              # Mock data (dev)
-│   │   └── models/            # TypeScript models
-│   │
-│   └── types/                 # TypeScript types
-│       └── index.ts
-│
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── layout/           # Layout components
+│   │   └── features/         # Feature components
+│   ├── lib/                   # Utilities
+│   │   ├── db/               # Database queries
+│   │   │   ├── families.ts   # Family queries
+│   │   │   └── adapters.ts   # DB ↔ Frontend adapter
+│   │   ├── r2/               # Cloudflare R2
+│   │   │   ├── client.ts     # R2 client
+│   │   │   └── download.ts   # Signed URLs
+│   │   ├── neon.ts           # Database connection
+│   │   ├── families.ts       # Service layer
+│   │   └── utils.ts          # Utilities
+│   ├── types/                 # TypeScript types
+│   └── data/                  # Static data
 ├── public/                    # Static assets
-│   ├── images/
-│   └── fonts/
-│
 ├── docs/                      # Documentation
-│   ├── SESSION_17_UX_REDESIGN_COMPLETE.md  # ✨ NEW
-│   ├── SESSION_16_AUTOCOMPLETE_PRO.md
-│   ├── SESSION_15_COMPLETE.md
-│   └── ARCHITECTURE.md
-│
-├── next.config.js            # Next.js config
-├── tailwind.config.js        # Tailwind config
-├── tsconfig.json             # TypeScript config
-└── package.json              # Dependencies
+├── scripts/                   # Utility scripts
+│   └── seed.ts               # Data seeding
+├── migrations/                # SQL migrations
+│   └── 001_initial.sql       # Initial schema
+└── tests/                     # Tests (pending)
 ```
 
 ---
 
-## 🎯 Key Features Explained
+## 🚀 Deployment
 
-### 1. Autocomplete System
+### Vercel (Recommended)
 
-**Performance Optimization:**
-```typescript
-// Debounce reduces API calls by 80%
-const debouncedQuery = useDebounce(query, 300);
-
-// Without debounce: 5 API calls for "chair"
-// With debounce: 1 API call when user stops typing
+1. **Connect GitHub repository**
+```bash
+# Push to GitHub
+git push origin main
 ```
 
-**Keyboard Navigation:**
-- `↓` Next suggestion
-- `↑` Previous suggestion  
-- `Enter` Select/Search
-- `Esc` Close dropdown
+2. **Configure on Vercel**
+- Go to [vercel.com](https://vercel.com)
+- Import repository
+- Add environment variables
+- Deploy
 
-**LocalStorage Persistence:**
-```typescript
-SearchHistory.addSearch('chair');    // Save search
-SearchHistory.getHistory();          // ['chair', 'door']
-SearchHistory.clearHistory();        // Clear all
-```
+3. **Environment Variables in Vercel**
 
-### 2. Image Optimization
-
-**ImageKit Integration:**
-```typescript
-// Automatic format selection (WebP, AVIF)
-// Lazy loading
-// Responsive sizing
-const url = getThumbnailUrl('bar-chair.png', 'furniture');
-// → https://ik.imagekit.io/.../bar-chair.png?tr=w-400,q-80,f-auto
-```
-
-### 3. Responsive Design
-
-**Breakpoints:**
-- Mobile: `< 768px` (Bottom sheet UI)
-- Tablet: `768px - 1024px` (Hybrid)
-- Desktop: `> 1024px` (Dropdown UI)
-
-**Mobile-First Approach:**
-```css
-/* Mobile by default */
-.dropdown { position: fixed; bottom: 0; }
-
-/* Desktop override */
-@media (min-width: 768px) {
-  .dropdown { position: absolute; top: 100%; }
-}
-```
-
----
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-- [ ] Homepage loads correctly
-- [ ] Search autocomplete appears on typing
-- [ ] Keyboard navigation works (↑↓ Enter Esc)
-- [ ] Recent searches persist after reload
-- [ ] Click outside closes dropdown
-- [ ] Mobile bottom sheet works
-- [ ] Images load from ImageKit
-- [ ] Loading states appear
-- [ ] Empty states show correctly
-- [ ] Search results page works
-
-### Browser Testing
-- [x] Chrome 120+
-- [x] Firefox 120+
-- [x] Safari 17+
-- [x] Edge 120+
-- [x] Mobile Chrome
-- [x] Mobile Safari
+All variables from `.env.local` must be configured in:
+**Settings → Environment Variables**
 
 ---
 
 ## 📊 Performance
 
-### Lighthouse Scores (Target)
-- **Performance:** 95+
-- **Accessibility:** 100
-- **Best Practices:** 95+
-- **SEO:** 100
+- **Homepage load:** ~800ms (with cache)
+- **Individual page:** ~400ms (with cache)
+- **Database query:** ~50-100ms
+- **Build time:** ~90 seconds
+- **Lighthouse score:** 95+ (mobile)
 
-### Optimizations Applied
-- ✅ Next.js Image optimization
-- ✅ ImageKit CDN with auto-format
-- ✅ Debounced search (80% fewer API calls)
-- ✅ Code splitting (automatic)
-- ✅ Lazy loading components
-- ✅ Optimized fonts (local)
-- ✅ Minimal JavaScript bundle
+---
+
+## 💰 Costs
+
+### Current (with free tiers)
+- **Neon PostgreSQL:** $0/month
+- **Cloudflare R2:** $0/month
+- **Vercel Hosting:** $0/month
+- **ImageKit CDN:** $0/month
+- **Total:** $0/month 🎉
+
+### Projected (with growth)
+- **Neon:** $0-19/month
+- **R2:** $0-5/month
+- **Vercel:** $0-20/month
+- **Total:** $0-44/month (scalable)
+
+---
+
+## 🧪 Testing
+```bash
+# Run tests (pending implementation)
+npm run test
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+
+# Format code
+npm run format
+```
+
+---
+
+## 📖 Documentation
+
+Full documentation available in `/docs`:
+
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture
+- **[BACKEND.md](docs/BACKEND.md)** - Backend technical manual
+- **[API.md](docs/API.md)** - API documentation
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Deployment guide
+- **[SESSION_19_BACKEND.md](docs/SESSION_19_BACKEND.md)** - Backend implementation session
 
 ---
 
 ## 🗺️ Roadmap
 
-### Phase 1: Foundation ✅ (v0.1.0 - v0.13.0)
-- [x] Project setup & architecture
-- [x] Homepage with hero
-- [x] Category browsing
-- [x] Search functionality
-- [x] Family detail pages
-- [x] Autocomplete PRO
-- [x] Mobile responsive
-- [x] Image optimization
-- [x] **Detail page redesign with gallery** ✨ NEW
-- [x] **Zoom magnifier with liquid glass** ✨ NEW
-- [x] **User interactions (Follow, Like, Save, Share)** ✨ NEW
-
-### Phase 2: Enhancement 🚧 (v0.14.0 - v0.20.0)
-- [ ] SEO advanced (FAQ Schema, HowTo Schema)
-- [ ] Related families improved
-- [ ] Responsive mobile optimization
-- [ ] User authentication
-- [ ] Favorites system
-- [ ] Download history
-- [ ] Advanced filters
-- [ ] Search analytics
-- [ ] Voice search
-- [ ] Collections/Playlists
-- [ ] Comments & ratings
-
-### Phase 3: Scale 📅 (v1.0.0+)
-- [ ] Database integration (Postgres)
-- [ ] Real file uploads
-- [ ] User-generated content
+### v0.15.0 - Admin Panel (Next)
+- [ ] Authentication system (Clerk/NextAuth)
 - [ ] Admin dashboard
-- [ ] API documentation
-- [ ] Mobile app (React Native)
-- [ ] Premium features
+- [ ] CRUD for families
+- [ ] File upload to R2
+- [ ] User management
+
+### v0.16.0 - User Features
+- [ ] User registration/login
+- [ ] Collections/Favorites
+- [ ] Download history
+- [ ] User profiles
+
+### v0.17.0 - Social Features
+- [ ] Comments on families
+- [ ] Ratings and reviews
+- [ ] Share functionality
+- [ ] Newsletter system
+
+### v0.18.0 - Advanced Features
+- [ ] Advanced search with filters
+- [ ] Family comparison tool
+- [ ] Recommendations engine
+- [ ] Analytics dashboard
+
+### v1.0.0 - Production Ready
+- [ ] Complete testing suite
+- [ ] Performance optimization
+- [ ] SEO optimization
+- [ ] Monitoring and alerts
+- [ ] Documentation complete
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+### Development Workflow
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-- Follow TypeScript strict mode
-- Use Tailwind CSS for styling
-- Write meaningful commit messages
-- Add comments for complex logic
-- Test on mobile before PR
-- Update documentation
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ---
 
-## 📝 Documentation
+## 📝 License
 
-### Available Docs
-- [SESSION_17_UX_REDESIGN_COMPLETE.md](docs/SESSION_17_UX_REDESIGN_COMPLETE.md) - ✨ Detail page redesign (v0.13.0)
-- [SESSION_16_AUTOCOMPLETE_PRO.md](docs/SESSION_16_AUTOCOMPLETE_PRO.md) - Autocomplete features
-- [SESSION_15_COMPLETE.md](docs/SESSION_15_COMPLETE.md) - Search system implementation
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Technical architecture
-- [SEO_STRATEGY.md](docs/SEO_STRATEGY.md) - SEO guidelines
-
-### Code Comments
-All major functions include JSDoc comments:
-```typescript
-/**
- * Fetch suggestions from API with debounce
- * @param searchTerm - User query string
- */
-const fetchSuggestions = async (searchTerm: string) => {
-  // Implementation
-}
-```
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🐛 Known Issues
+## 👨‍💻 Author
 
-### Current
-None! 🎉
-
-### Reported & Fixed
-- ~~URLs duplicating in OptimizedImage~~ (Fixed in v0.12.0)
-- ~~Mobile dropdown covering navbar~~ (Fixed in v0.12.0)
-- ~~ImageKit 404 errors~~ (Fixed in v0.12.0)
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details
-
----
-
-## 👥 Team
-
-**Lead Developer:** Your Name  
-**Architecture:** Claude (Anthropic)  
-**Design:** Tailwind Labs  
-**Icons:** Lucide Icons
+**Anyarcaza**
+- GitHub: [@anyarcaza-jpg](https://github.com/anyarcaza-jpg)
+- Website: [boracity.com](https://boracity.com)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- [Next.js](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - CSS framework
-- [ImageKit](https://imagekit.io/) - Image optimization CDN
-- [Lucide](https://lucide.dev/) - Icon library
-- [Vercel](https://vercel.com/) - Hosting platform
+- **Next.js team** for the amazing framework
+- **Vercel** for free hosting
+- **Neon** for serverless PostgreSQL
+- **Cloudflare** for R2 storage
+- **shadcn** for beautiful UI components
+- **Community** for support and feedback
 
 ---
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/boracity-nextjs/issues)
 - **Email:** support@boracity.com
-- **Docs:** [Documentation](docs/)
+- **Issues:** [GitHub Issues](https://github.com/anyarcaza-jpg/boracity-nextjs/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/anyarcaza-jpg/boracity-nextjs/discussions)
 
 ---
 
-## 🌟 Star Us!
+## 📈 Stats
 
-If you find this project useful, please consider giving it a ⭐ on GitHub!
+![GitHub stars](https://img.shields.io/github/stars/anyarcaza-jpg/boracity-nextjs?style=social)
+![GitHub forks](https://img.shields.io/github/forks/anyarcaza-jpg/boracity-nextjs?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/anyarcaza-jpg/boracity-nextjs?style=social)
 
 ---
 
-**Built with ❤️ for architects and designers worldwide**
+**Built with ❤️ for the BIM community**
 
-Last updated: January 11, 2026 | Version 0.13.0
+---
+
+*Last updated: January 11, 2026*

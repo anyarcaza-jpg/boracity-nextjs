@@ -859,3 +859,39 @@ ARCHITECTURE.md is now a **complete reference** for:
 - ✅ Monitoring and scaling (NEW)
 
 **Ready for implementation!** 🚀
+
+## [0.14.0] - 2026-01-11
+
+### Added
+- PostgreSQL database integration with Neon
+- Cloudflare R2 for file storage
+- Database adapter layer for data conversion
+- Migration script for mock data → database
+- R2 signed URLs for secure downloads
+- 8 families migrated to production database
+
+### Changed
+- Service layer now uses database instead of mock data
+- Download API updated for better security
+- Environment variables configuration expanded
+
+### Technical
+- Added @neondatabase/serverless
+- Added @aws-sdk/client-s3
+- Added @aws-sdk/s3-request-presigner
+- Updated lib/families.ts to use database
+- Created scripts/seed.ts for data migration
+
+### Infrastructure
+- Neon PostgreSQL configured (Free tier)
+- Cloudflare R2 bucket created
+- Vercel environment variables configured
+- Auto-deployment working with GitHub
+
+### Performance
+- Database queries: ~50-100ms
+- Cache strategy preserved
+- Build time: ~90 seconds
+
+### Cost
+- Monthly cost: $0 (all free tiers)
