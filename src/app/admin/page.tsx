@@ -43,7 +43,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <p className="text-sm font-medium text-gray-600">Total Families</p>
-          <p className="text-4xl font-bold text-blue-600 mt-2">
+          <p className="text-4xl font-bold text-orange-600 mt-2">
             {stats.total_families}
           </p>
         </div>
@@ -85,12 +85,12 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl shadow-lg p-6 text-white">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-4">
           <Link
             href="/admin/families/new"
-            className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition font-medium"
+            className="inline-flex items-center px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-gray-100 transition font-medium"
           >
             + Add New Family
           </Link>

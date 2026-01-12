@@ -17,7 +17,16 @@ export async function POST(request: NextRequest) {
 
     // Obtener datos del body
     const body = await request.json();
-    const { name, slug, category, description } = body;
+    const { 
+      name, 
+      slug, 
+      category, 
+      description,
+      revit_version,
+      rfa_url,
+      thumbnail_url,
+      file_size,
+    } = body;
 
     // Validaciones
     if (!name || !slug || !category || !description) {
@@ -41,8 +50,30 @@ export async function POST(request: NextRequest) {
 
     // Insertar en la base de datos
     const result = await sql`
-      INSERT INTO families (name, slug, category, description, downloads, views)
-      VALUES (${name}, ${slug}, ${category}, ${description}, 0, 0)
+      INSERT INTO families (
+        name, 
+        slug, 
+        category, 
+        description, 
+        revit_version,
+        rfa_url,
+        thumbnail_url,
+        file_size,
+        downloads, 
+        views
+      )
+      VALUES (
+        ${name}, 
+        ${slug}, 
+        ${category}, 
+        ${description},
+        ${revit_version || null},
+        ${rfa_url || null},
+        ${thumbnail_url || null},
+        ${file_size || null},
+        0, 
+        0
+      )
       RETURNING id, slug
     `;
 

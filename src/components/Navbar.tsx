@@ -50,12 +50,12 @@ export default function Navbar() {
           </ul>
 
           <div className="hidden lg:flex items-center gap-3.5">
-            <button className="px-5 py-2 text-[14px] font-semibold text-secondary border-[1.5px] border-gray-200 rounded-md hover:border-primary hover:text-primary transition-all">
+            <Link href="/login" className="px-5 py-2 text-[14px] font-semibold text-secondary border-[1.5px] border-gray-200 rounded-md hover:border-primary hover:text-primary transition-all">
               Sign In
-            </button>
-            <button className="px-6 py-2 text-[14px] font-semibold text-white bg-primary rounded-md hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/25 transition-all">
+            </Link>
+            <Link href="/login" className="px-6 py-2 text-[14px] font-semibold text-white bg-primary rounded-md hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/25 transition-all">
               Sign Up
-            </button>
+            </Link>
           </div>
 
           <button
@@ -88,12 +88,12 @@ export default function Navbar() {
               Pricing
             </Link>
             <div className="pt-4 space-y-2">
-              <button className="w-full px-5 py-2 text-[14px] font-semibold text-secondary border-[1.5px] border-gray-200 rounded-md">
+              <Link href="/login" className="block w-full px-5 py-2 text-[14px] font-semibold text-secondary border-[1.5px] border-gray-200 rounded-md text-center">
                 Sign In
-              </button>
-              <button className="w-full px-6 py-2 text-[14px] font-semibold text-white bg-primary rounded-md">
+              </Link>
+              <Link href="/login" className="block w-full px-6 py-2 text-[14px] font-semibold text-white bg-primary rounded-md text-center">
                 Sign Up
-              </button>
+              </Link>
             </div>
           </div>
         </div>
