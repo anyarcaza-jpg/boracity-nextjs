@@ -1,513 +1,260 @@
-# Boracity API Documentation
+---
 
-Complete documentation for Boracity REST API endpoints.
+## ADMIN ENDPOINTS
+
+### Autenticación requerida
+Todos los endpoints de admin requieren:
+- ✅ Usuario autenticado (sesión válida)
+- ✅ Rol de admin (`user.role === 'admin'`)
 
 ---
 
-## 📋 Table of Contents
+## POST `/api/admin/families`
 
-- [Overview](#overview)
-- [Base URL](#base-url)
-- [Rate Limiting](#rate-limiting)
-- [Response Format](#response-format)
-- [Endpoints](#endpoints)
-  - [Search Families](#search-families)
-  - [Register Download](#register-download)
-- [Error Codes](#error-codes)
-- [Examples](#examples)
+Crear una nueva familia.
 
----
-
-## 🌐 Overview
-
-The Boracity API provides programmatic access to search and download Revit families. All endpoints return JSON responses and implement rate limiting for security.
-
-**Current Version:** v1  
-**Protocol:** REST  
-**Format:** JSON  
-**Authentication:** None (public endpoints)
-
----
-
-## 🔗 Base URL
-
-### Development
-```
-http://localhost:3000/api
-```
-
-### Production
-```
-https://boracity.com/api
-```
-
----
-
-## ⏱️ Rate Limiting
-
-All endpoints are rate-limited to prevent abuse. Rate limits are applied per IP address.
-
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `/api/search` | 20 requests | 1 minute |
-| `/api/download` | 15 requests | 1 minute |
-| Other endpoints | 60 requests | 1 minute |
-
-### Rate Limit Headers
-
-Every response includes these headers:
-```
-X-RateLimit-Limit: 20
-X-RateLimit-Remaining: 15
-X-RateLimit-Reset: 1704822060000
-```
-
-### Rate Limit Exceeded Response
-
-When you exceed the rate limit, you'll receive a `429 Too Many Requests` response:
+**Request Body:**
 ```json
 {
-  "error": "Too many search requests. Please try again in a minute.",
-  "retryAfter": 45
+  "name": "Modern Office Chair",
+  "slug": "modern-office-chair",
+  "category": "furniture",
+  "description": "A modern office chair with ergonomic design",
+  "revit_version": "2024",
+  "rfa_url": "https://pub-xxx.r2.dev/rfa-files/123-file.rfa",
+  "thumbnail_url": "https://ik.imagekit.io/xxx/thumbnails/123-thumb.png",
+  "file_size": 2048000
 }
 ```
 
-**HTTP Status:** `429 Too Many Requests`  
-**Retry-After Header:** Seconds until rate limit resets
-
----
-
-## 📤 Response Format
-
-### Success Response
+**Response (200):**
 ```json
 {
   "success": true,
-  "data": { ... },
-  "count": 10
-}
-```
-
-### Error Response
-```json
-{
-  "success": false,
-  "error": "Error message here"
-}
-```
-
----
-
-## 🔍 Endpoints
-
----
-
-### Search Families
-
-Search for Revit families by name, category, or keywords.
-
-**Endpoint:** `GET /api/search`
-
-#### Request Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `q` | string | Yes | Search query (2-100 characters) |
-
-#### Example Request
-```bash
-GET /api/search?q=chair
-```
-```javascript
-// JavaScript
-const response = await fetch('http://localhost:3000/api/search?q=chair');
-const data = await response.json();
-```
-```python
-# Python
-import requests
-
-response = requests.get('http://localhost:3000/api/search', params={'q': 'chair'})
-data = response.json()
-```
-
-#### Success Response
-
-**HTTP Status:** `200 OK`
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "fam_001",
-      "slug": "bar-chair-modern",
-      "name": "ALUNIA Bar Chair - Modern Design",
-      "category": "furniture",
-      "description": "Modern bar chair with sleek design...",
-      "tags": ["bar", "chair", "furniture", "modern"],
-      "file": {
-        "size": "245 KB",
-        "revitVersions": ["2023", "2024"],
-        "downloadUrl": "/downloads/bar-chair-modern.rfa"
-      },
-      "metadata": {
-        "author": "Boracity Team",
-        "uploadDate": "2024-01-15T00:00:00.000Z",
-        "downloads": 1247,
-        "views": 3891
-      }
-    },
-    {
-      "id": "fam_002",
-      "slug": "armchair-ottoman-set",
-      "name": "Armchair 78 with Ottoman - Living Room Set",
-      "category": "furniture",
-      "description": "Elegant armchair with matching ottoman...",
-      "tags": ["armchair", "ottoman", "furniture", "living room"],
-      "file": {
-        "size": "312 KB",
-        "revitVersions": ["2023", "2024"],
-        "downloadUrl": "/downloads/armchair-ottoman-set.rfa"
-      },
-      "metadata": {
-        "author": "Boracity Team",
-        "uploadDate": "2024-02-10T00:00:00.000Z",
-        "downloads": 892,
-        "views": 2134
-      }
-    }
-  ],
-  "count": 2,
-  "query": "chair"
-}
-```
-
-#### Error Responses
-
-**Missing Query Parameter**
-
-**HTTP Status:** `400 Bad Request`
-```json
-{
-  "success": false,
-  "error": "Query parameter \"q\" is required",
-  "example": "/api/search?q=chair"
-}
-```
-
-**Invalid Query**
-
-**HTTP Status:** `400 Bad Request`
-```json
-{
-  "success": false,
-  "error": "Query must be 2-100 characters",
-  "hint": "Query must be 2-100 characters"
-}
-```
-
-**Rate Limit Exceeded**
-
-**HTTP Status:** `429 Too Many Requests`
-```json
-{
-  "error": "Too many search requests. Please try again in a minute.",
-  "retryAfter": 45
-}
-```
-
----
-
-### Register Download
-
-Register a download for analytics and get the download URL.
-
-**Endpoint:** `POST /api/download`
-
-#### Request Body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `familyId` | string | Yes | ID of the family to download |
-
-#### Example Request
-```bash
-POST /api/download
-Content-Type: application/json
-
-{
-  "familyId": "fam_001"
-}
-```
-```javascript
-// JavaScript
-const response = await fetch('http://localhost:3000/api/download', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    familyId: 'fam_001'
-  })
-});
-const data = await response.json();
-```
-```python
-# Python
-import requests
-
-response = requests.post(
-  'http://localhost:3000/api/download',
-  json={'familyId': 'fam_001'}
-)
-data = response.json()
-```
-
-#### Success Response
-
-**HTTP Status:** `200 OK`
-```json
-{
-  "success": true,
-  "downloadUrl": "/downloads/bar-chair-modern.rfa",
   "family": {
-    "id": "fam_001",
-    "name": "ALUNIA Bar Chair - Modern Design",
-    "category": "furniture",
-    "size": "245 KB",
-    "versions": ["2023", "2024"]
-  },
-  "message": "Download ready"
-}
-```
-
-#### Error Responses
-
-**Missing familyId**
-
-**HTTP Status:** `400 Bad Request`
-```json
-{
-  "success": false,
-  "error": "familyId is required in request body",
-  "example": {
-    "familyId": "modern-office-chair"
+    "id": "uuid",
+    "slug": "modern-office-chair"
   }
 }
 ```
 
-**Invalid familyId**
+**Validaciones:**
+- `name`, `slug`, `category`, `description` son requeridos
+- `slug` debe ser único
+- `rfa_url` y `thumbnail_url` son opcionales
 
-**HTTP Status:** `400 Bad Request`
+---
+
+## GET `/api/admin/families/[slug]`
+
+Obtener una familia por slug.
+
+**Response (200):**
 ```json
 {
-  "success": false,
-  "error": "Invalid familyId format"
+  "family": {
+    "id": "uuid",
+    "name": "Modern Office Chair",
+    "slug": "modern-office-chair",
+    "category": "furniture",
+    "description": "A modern office chair...",
+    "revit_version": "2024",
+    "rfa_url": "https://...",
+    "thumbnail_url": "https://...",
+    "file_size": 2048000,
+    "downloads": 0,
+    "views": 0,
+    "created_at": "2026-01-12T..."
+  }
 }
 ```
 
-**Family Not Found**
-
-**HTTP Status:** `404 Not Found`
+**Response (404):**
 ```json
 {
-  "success": false,
   "error": "Family not found"
 }
 ```
 
-**Rate Limit Exceeded**
+---
 
-**HTTP Status:** `429 Too Many Requests`
+## PUT `/api/admin/families/[slug]`
+
+Actualizar una familia existente.
+
+**Request Body:**
 ```json
 {
-  "error": "Download limit reached. Please try again in a minute.",
-  "retryAfter": 52
+  "name": "Updated Name",
+  "category": "furniture",
+  "description": "Updated description"
 }
 ```
 
----
-
-## ⚠️ Error Codes
-
-| HTTP Status | Meaning | Common Causes |
-|-------------|---------|---------------|
-| `200` | Success | Request completed successfully |
-| `400` | Bad Request | Missing or invalid parameters |
-| `404` | Not Found | Resource doesn't exist |
-| `429` | Too Many Requests | Rate limit exceeded |
-| `500` | Internal Server Error | Server error (contact support) |
-
----
-
-## 💡 Examples
-
-### Complete Search Workflow
-```javascript
-// 1. Search for families
-async function searchFamilies(query) {
-  try {
-    const response = await fetch(
-      `http://localhost:3000/api/search?q=${encodeURIComponent(query)}`
-    );
-    
-    if (!response.ok) {
-      if (response.status === 429) {
-        const error = await response.json();
-        console.log(`Rate limited. Retry after ${error.retryAfter} seconds`);
-        return null;
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log(`Found ${data.count} families`);
-    return data.data;
-    
-  } catch (error) {
-    console.error('Search failed:', error);
-    return null;
+**Response (200):**
+```json
+{
+  "success": true,
+  "family": {
+    "id": "uuid",
+    "slug": "modern-office-chair"
   }
 }
-
-// Usage
-const families = await searchFamilies('chair');
 ```
 
-### Complete Download Workflow
-```javascript
-// 2. Register download and get URL
-async function downloadFamily(familyId) {
-  try {
-    const response = await fetch('http://localhost:3000/api/download', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ familyId })
-    });
-    
-    if (!response.ok) {
-      if (response.status === 429) {
-        const error = await response.json();
-        console.log(`Rate limited. Retry after ${error.retryAfter} seconds`);
-        return null;
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log(`Download ready: ${data.downloadUrl}`);
-    
-    // 3. Trigger browser download
-    window.location.href = data.downloadUrl;
-    
-    return data;
-    
-  } catch (error) {
-    console.error('Download failed:', error);
-    return null;
-  }
+**Notas:**
+- El `slug` NO se puede modificar
+- Solo `name`, `category` y `description` son editables
+
+---
+
+## DELETE `/api/admin/families/[slug]`
+
+Eliminar una familia.
+
+**Response (200):**
+```json
+{
+  "success": true
 }
-
-// Usage
-await downloadFamily('fam_001');
 ```
 
-### Handle Rate Limiting with Retry
-```javascript
-async function searchWithRetry(query, maxRetries = 3) {
-  for (let i = 0; i < maxRetries; i++) {
-    const response = await fetch(
-      `http://localhost:3000/api/search?q=${encodeURIComponent(query)}`
-    );
-    
-    if (response.status === 429) {
-      const error = await response.json();
-      const retryAfter = error.retryAfter || 60;
-      
-      console.log(`Rate limited. Waiting ${retryAfter} seconds...`);
-      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-      
-      continue; // Retry
-    }
-    
-    if (response.ok) {
-      return await response.json();
-    }
-    
-    throw new Error(`HTTP ${response.status}`);
-  }
-  
-  throw new Error('Max retries exceeded');
+**Response (404):**
+```json
+{
+  "error": "Family not found"
 }
-
-// Usage
-const data = await searchWithRetry('chair');
 ```
 
-### Batch Operations with Rate Limiting
-```javascript
-async function batchSearch(queries) {
-  const results = [];
-  const RATE_LIMIT = 20; // 20 requests per minute
-  const BATCH_SIZE = 5;  // Process 5 at a time
-  
-  for (let i = 0; i < queries.length; i += BATCH_SIZE) {
-    const batch = queries.slice(i, i + BATCH_SIZE);
-    
-    const batchResults = await Promise.all(
-      batch.map(query => searchFamilies(query))
-    );
-    
-    results.push(...batchResults);
-    
-    // Wait if we're approaching rate limit
-    if (i + BATCH_SIZE < queries.length) {
-      console.log('Waiting to avoid rate limit...');
-      await new Promise(resolve => setTimeout(resolve, 15000)); // 15 seconds
-    }
-  }
-  
-  return results;
+---
+
+## POST `/api/admin/upload`
+
+Subir archivos a Cloudflare R2 o ImageKit.
+
+**Request (multipart/form-data):**
+```
+file: File (archivo .rfa o imagen)
+type: "rfa" | "thumbnail"
+```
+
+**Response (200) - RFA:**
+```json
+{
+  "success": true,
+  "url": "https://pub-xxx.r2.dev/rfa-files/1234567890-file.rfa",
+  "fileName": "file.rfa",
+  "fileSize": 2048000
 }
+```
 
-// Usage
-const queries = ['chair', 'table', 'lamp', 'sofa', 'desk'];
-const allResults = await batchSearch(queries);
+**Response (200) - Thumbnail:**
+```json
+{
+  "success": true,
+  "url": "https://ik.imagekit.io/xxx/thumbnails/1234567890-thumb.png",
+  "fileName": "thumb.png"
+}
+```
+
+**Validaciones:**
+- Si `type === 'rfa'`: el archivo debe terminar en `.rfa`
+- Si `type === 'thumbnail'`: el archivo debe ser una imagen (`image/*`)
+- `type` debe ser `"rfa"` o `"thumbnail"`
+
+**Errores comunes:**
+```json
+{
+  "error": "No file provided"
+}
+```
+```json
+{
+  "error": "File must be a .rfa file"
+}
+```
+```json
+{
+  "error": "File must be an image"
+}
+```
+```json
+{
+  "error": "Invalid type. Must be 'rfa' or 'thumbnail'"
+}
 ```
 
 ---
 
-## 🔒 Security Notes
+## Códigos de Estado
 
-- All endpoints implement rate limiting per IP address
-- Input validation is enforced on all parameters
-- SQL injection protection is built-in (parameterized queries)
-- XSS protection via Content-Security-Policy headers
-- HTTPS is enforced in production
-
----
-
-## 📞 Support
-
-For API support or questions:
-- Email: support@boracity.com
-- GitHub Issues: [github.com/boracity/issues](https://github.com/boracity/issues)
-- Documentation: [docs.boracity.com](https://docs.boracity.com)
+| Código | Descripción |
+|--------|-------------|
+| 200 | Éxito |
+| 400 | Bad Request (validación fallida) |
+| 401 | Unauthorized (no autenticado o no admin) |
+| 404 | Not Found (familia no existe) |
+| 500 | Internal Server Error |
 
 ---
 
-## 📝 Changelog
+## Servicios Externos
 
-### v1.0.0 (2024-01-15)
-- Initial API release
-- `/api/search` endpoint
-- `/api/download` endpoint
-- Rate limiting implementation
-- Security headers
+### Cloudflare R2
+- **Uso:** Almacenamiento de archivos .rfa
+- **Bucket:** `boracity-files`
+- **URL pública:** `https://pub-8ea99d5661d04c9fb5bd6dcaa871a261.r2.dev`
+
+### ImageKit
+- **Uso:** CDN de imágenes (thumbnails)
+- **URL endpoint:** `https://ik.imagekit.io/nbqxh22tq`
+- **Carpeta:** `thumbnails/`
 
 ---
 
-**Last Updated:** January 9, 2026  
-**Version:** 1.0.0
+## Ejemplo de Flujo Completo
+
+### 1. Upload de archivos
+```javascript
+// Upload RFA
+const rfaFormData = new FormData();
+rfaFormData.append('file', rfaFile);
+rfaFormData.append('type', 'rfa');
+
+const rfaResponse = await fetch('/api/admin/upload', {
+  method: 'POST',
+  body: rfaFormData,
+});
+const rfaData = await rfaResponse.json();
+
+// Upload Thumbnail
+const thumbFormData = new FormData();
+thumbFormData.append('file', thumbFile);
+thumbFormData.append('type', 'thumbnail');
+
+const thumbResponse = await fetch('/api/admin/upload', {
+  method: 'POST',
+  body: thumbFormData,
+});
+const thumbData = await thumbResponse.json();
+```
+
+### 2. Crear familia con URLs
+```javascript
+const createResponse = await fetch('/api/admin/families', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'Modern Office Chair',
+    slug: 'modern-office-chair',
+    category: 'furniture',
+    description: 'A modern office chair...',
+    revit_version: '2024',
+    rfa_url: rfaData.url,
+    thumbnail_url: thumbData.url,
+    file_size: rfaData.fileSize,
+  }),
+});
+```
+
+---

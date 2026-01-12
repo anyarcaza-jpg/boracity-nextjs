@@ -1,505 +1,398 @@
-# BACKEND BORACITY - MANUAL TÉCNICO
+---
 
-**Estado:** ✅ IMPLEMENTADO  
-**Versión:** v0.14.0  
-**Fecha completado:** 11 de enero de 2026  
-**Sesión:** #19
+## ADMIN PANEL BACKEND
+
+### Arquitectura Implementada
+
+El admin panel sigue una arquitectura de **Server Components + Client Components** para optimizar rendimiento y SEO.
 
 ---
 
-## 📊 RESUMEN EJECUTIVO
+## Sistema de Autenticación
 
-Backend profesional implementado con:
-- ✅ PostgreSQL (Neon) - Base de datos serverless
-- ✅ Cloudflare R2 - Object storage para archivos .rfa
-- ✅ 8 familias migradas y en producción
-- ✅ APIs funcionando en producción
-- ✅ Costo mensual: $0 (dentro de free tiers)
+### NextAuth v5 (Auth.js)
 
----
-
-## 🏗️ ARQUITECTURA IMPLEMENTADA
-```
-┌─────────────────────────────────────────────────┐
-│           FRONTEND (Next.js 14)                 │
-│  Components → Pages → App Router                │
-└──────────────────┬──────────────────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────────────────┐
-│         SERVICE LAYER (lib/families.ts)         │
-│  • Cache management (React + Next.js)           │
-│  • Error handling                               │
-│  • Business logic                               │
-└──────────────────┬──────────────────────────────┘
-                   │
-       ┌───────────┴───────────┐
-       │                       │
-       ▼                       ▼
-┌─────────────┐      ┌──────────────────┐
-│  DATABASE   │      │   FILE STORAGE   │
-│  (Neon)     │      │   (R2)           │
-├─────────────┤      ├──────────────────┤
-│ PostgreSQL  │      │ Cloudflare R2    │
-│ 8 familias  │      │ Signed URLs      │
-│ Serverless  │      │ S3 compatible    │
-└─────────────┘      └──────────────────┘
-```
-
----
-
-## 🗄️ BASE DE DATOS (NEON)
-
-### Conexión
+**Archivo:** `src/lib/auth.ts`
 ```typescript
-// src/lib/neon.ts
-import { neon } from '@neondatabase/serverless';
-
-export const sql = neon(process.env.DATABASE_URL);
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  providers: [
+    Credentials({
+      async authorize(credentials) {
+        // Validar contra PostgreSQL
+        const user = await sql`SELECT * FROM users WHERE email = ${email}`;
+        
+        // Verificar password con bcrypt
+        const isValid = await bcrypt.compare(password, user.password);
+        
+        if (isValid) {
+          return { id: user.id, email: user.email, role: user.role };
+        }
+        return null;
+      }
+    })
+  ],
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login' },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) token.role = user.role;
+      return token;
+    },
+    session({ session, token }) {
+      session.user.role = token.role;
+      return session;
+    }
+  }
+});
 ```
 
-### Schema
-```sql
-CREATE TABLE families (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  slug TEXT UNIQUE NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('furniture', 'doors', 'windows', 'lighting')),
-  name TEXT NOT NULL,
-  description TEXT,
-  thumbnail_url TEXT,
-  file_url TEXT,
-  file_size TEXT,
-  downloads INTEGER DEFAULT 0,
-  views INTEGER DEFAULT 0,
-  author TEXT DEFAULT 'Boracity Team',
-  tags TEXT[],
-  revit_versions TEXT[],
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+### Middleware de Protección
 
--- Indexes para performance
-CREATE INDEX idx_families_category ON families(category);
-CREATE INDEX idx_families_slug ON families(slug);
-CREATE INDEX idx_families_downloads ON families(downloads DESC);
-CREATE INDEX idx_families_created ON families(created_at DESC);
-```
-
-### Queries Principales
+**Archivo:** `src/middleware.ts`
 ```typescript
-// src/lib/db/families.ts
+export { auth as middleware } from '@/lib/auth';
 
-// Obtener todas las familias
-export async function getAllFamilies(): Promise<Family[]> {
-  const rows = await sql`SELECT * FROM families ORDER BY created_at DESC LIMIT 100`;
-  return rows.map(dbRowToFamily);
-}
-
-// Obtener por categoría
-export async function getFamiliesByCategory(category: FamilyCategory): Promise<Family[]> {
-  const rows = await sql`
-    SELECT * FROM families 
-    WHERE category = ${category}
-    ORDER BY downloads DESC LIMIT 50
-  `;
-  return rows.map(dbRowToFamily);
-}
-
-// Buscar familias
-export async function searchFamilies(query: string): Promise<Family[]> {
-  const rows = await sql`
-    SELECT * FROM families 
-    WHERE 
-      name ILIKE ${'%' + query + '%'} 
-      OR description ILIKE ${'%' + query + '%'}
-      OR ${query} = ANY(tags)
-    ORDER BY downloads DESC LIMIT 20
-  `;
-  return rows.map(dbRowToFamily);
-}
-
-// Incrementar descargas
-export async function incrementDownloads(category: FamilyCategory, slug: string): Promise<void> {
-  await sql`
-    UPDATE families 
-    SET downloads = downloads + 1 
-    WHERE category = ${category} AND slug = ${slug}
-  `;
-}
+export const config = {
+  matcher: ['/admin/:path*']
+};
 ```
+
+**Características:**
+- ✅ Todas las rutas `/admin/*` requieren autenticación
+- ✅ Redirección automática a `/login` si no está autenticado
+- ✅ Verificación de rol `admin` en el layout
 
 ---
 
-## 📦 FILE STORAGE (CLOUDFLARE R2)
+## Patrón Server + Client Components
 
-### Cliente R2
+### Server Component (Data Fetching)
+
+**Ejemplo:** `src/app/admin/families/page.tsx`
 ```typescript
-// src/lib/r2/client.ts
-import { S3Client } from '@aws-sdk/client-s3';
+// ✅ Server Component (por defecto en App Router)
+export default async function FamiliesPage() {
+  // Query directo a PostgreSQL
+  const result = await sql`SELECT * FROM families ORDER BY created_at DESC`;
+  const families = result;
 
-export const r2Client = new S3Client({
+  // Pasar datos al Client Component
+  return <FamiliesTableClient families={families} />;
+}
+```
+
+**Ventajas:**
+- Query directo a la base de datos (sin API route)
+- Código del servidor no se envía al cliente
+- Mejor rendimiento (menos JavaScript en el navegador)
+
+### Client Component (Interactividad)
+
+**Ejemplo:** `src/app/admin/families/FamiliesTableClient.tsx`
+```typescript
+'use client';
+
+export default function FamiliesTableClient({ families }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ show: false, family: null });
+
+  const handleDelete = async (slug) => {
+    await fetch(`/api/admin/families/${slug}`, { method: 'DELETE' });
+    router.refresh(); // Revalidar Server Component
+  };
+
+  return (
+    <div>
+      {/* UI interactiva */}
+    </div>
+  );
+}
+```
+
+**Ventajas:**
+- React hooks (useState, useEffect, etc.)
+- Event handlers (onClick, onChange, etc.)
+- Interactividad del lado del cliente
+
+---
+
+## Sistema de Upload de Archivos
+
+### Flow Completo
+```
+1. Usuario selecciona archivo
+   ↓
+2. FormData se envía a /api/admin/upload
+   ↓
+3. API valida tipo de archivo
+   ↓
+4. Si es RFA → Upload a Cloudflare R2
+   Si es imagen → Upload a ImageKit
+   ↓
+5. Retorna URL pública
+   ↓
+6. URL se guarda en PostgreSQL al crear/editar familia
+```
+
+### Cloudflare R2 Integration
+
+**Archivo:** `src/lib/r2/upload.ts`
+```typescript
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const r2Client = new S3Client({
   region: 'auto',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-  },
-});
-
-export const R2_BUCKET_NAME = 'boracity-files';
-```
-
-### Generar URLs de Descarga
-```typescript
-// src/lib/r2/download.ts
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-export async function getDownloadUrl(
-  category: string,
-  slug: string,
-  expiresIn: number = 300 // 5 minutos
-): Promise<string> {
-  const fileKey = `${category}/${slug}.rfa`;
-  
-  const command = new GetObjectCommand({
-    Bucket: R2_BUCKET_NAME,
-    Key: fileKey,
-  });
-  
-  const signedUrl = await getSignedUrl(r2Client, command, { expiresIn });
-  return signedUrl;
-}
-```
-
-**Ventajas de signed URLs:**
-- ✅ Seguras (expiran automáticamente)
-- ✅ No consumen bandwidth de Vercel
-- ✅ Descarga directa desde R2
-- ✅ No se pueden compartir (cada URL es única y temporal)
-
----
-
-## 🔄 ADAPTER PATTERN
-
-El adapter traduce entre la estructura flat de PostgreSQL y la estructura nested del frontend.
-```typescript
-// src/lib/db/adapters.ts
-
-export interface FamilyRow {
-  id: string;
-  slug: string;
-  name: string;
-  category: string;
-  description: string;
-  thumbnail_url: string;
-  file_url: string;
-  file_size: string;
-  downloads: number;
-  views: number;
-  author: string;
-  tags: string[];
-  revit_versions: string[];
-  created_at: Date;
-  updated_at: Date;
-}
-
-export function dbRowToFamily(row: FamilyRow): Family {
-  return {
-    id: row.slug,
-    slug: row.slug,
-    name: row.name,
-    category: row.category,
-    description: row.description || '',
-    
-    images: {
-      thumbnail: row.thumbnail_url || '',
-      category: row.category,
-      gallery: [],
-    },
-    
-    file: {
-      size: row.file_size || '0 KB',
-      revitVersions: row.revit_versions || ['2025', '2024', '2023'],
-      downloadUrl: row.file_url || '',
-    },
-    
-    metadata: {
-      tags: row.tags || [],
-      author: row.author || 'Boracity Team',
-      uploadDate: new Date(row.created_at),
-      downloads: row.downloads || 0,
-      views: row.views || 0,
-    },
-    
-    seo: {
-      title: `${row.name} - Free Revit Family | Boracity`,
-      description: row.description || '',
-      keywords: row.tags || [],
-    },
-  };
-}
-```
-
-**¿Por qué adapter?**
-- ✅ Frontend NO cambia (usa estructura nested)
-- ✅ DB usa estructura flat (más eficiente)
-- ✅ Conversión automática y transparente
-
----
-
-## 🔐 VARIABLES DE ENTORNO
-
-### Desarrollo (.env.local)
-```bash
-# URLs
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-# ImageKit
-NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/nbqxh22tq
-NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=public_IYrsU2dUqmFKkxQBybcI2s2P9FQ=
-
-# Neon Database
-DATABASE_URL=postgresql://neondb_owner:PASSWORD@HOST/neondb?sslmode=require&channel_binding=require
-
-# Cloudflare R2
-R2_ACCOUNT_ID=d19e6898d84c4d8c1ec79d9dbde1a772
-R2_ACCESS_KEY_ID=8f1e68191ee7f2bed7f5b3fb4740eb4f
-R2_SECRET_ACCESS_KEY=94008c3326bef07bd03b8e12fec38284842211b9c570519c7065105523d6945
-R2_BUCKET_NAME=boracity-files
-```
-
-### Producción (Vercel)
-Todas las variables configuradas en: **Settings → Environment Variables**
-
----
-
-## 📊 DATOS ACTUALES
-
-### Familias en Producción
-```
-✅ 8 familias migradas:
-1. ALUNVA Bar Chair - Modern Design (furniture)
-2. Armchair 78 with Ottoman (furniture)
-3. Exterior Door - Two Lite (doors)
-4. Exterior Glass Wood Door (doors)
-5. Awning Window - Triple Vertical (windows)
-6. Casement Window - Double (windows)
-7. Ceiling Lamp - Modern Pendant (lighting)
-8. Ceiling Fan with Integrated Light (lighting)
-```
-
-### Script de Migración
-```typescript
-// scripts/seed.ts
-import { config } from 'dotenv';
-import { neon } from '@neondatabase/serverless';
-
-config({ path: '.env.local' });
-
-const sql = neon(process.env.DATABASE_URL!);
-
-async function seed() {
-  for (const family of mockFamilies) {
-    await sql`
-      INSERT INTO families (
-        slug, category, name, description,
-        thumbnail_url, file_url, file_size,
-        downloads, views, author, tags, revit_versions, created_at
-      ) VALUES (
-        ${family.slug}, ${family.category}, ${family.name}, ${family.description},
-        ${family.images.thumbnail}, ${family.file.downloadUrl}, ${family.file.size},
-        ${family.metadata.downloads}, ${family.metadata.views}, ${family.metadata.author},
-        ${family.metadata.tags}, ${family.file.revitVersions}, ${family.metadata.uploadDate}
-      )
-      ON CONFLICT (slug) DO UPDATE SET
-        name = EXCLUDED.name,
-        downloads = EXCLUDED.downloads
-    `;
   }
+});
+
+export async function uploadToR2(file: File): Promise<string> {
+  const fileName = `${Date.now()}-${file.name}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  await r2Client.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME!,
+    Key: `rfa-files/${fileName}`,
+    Body: buffer,
+    ContentType: file.type,
+  }));
+
+  return `${process.env.R2_PUBLIC_URL}/rfa-files/${fileName}`;
 }
 ```
 
-**Ejecutar:** `npx tsx scripts/seed.ts`
+### ImageKit Integration
 
----
+**Archivo:** `src/lib/imagekit.ts`
+```typescript
+import ImageKit from 'imagekit';
 
-## 🚀 DEPLOYMENT
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT!,
+});
 
-### Build & Deploy
-```bash
-# 1. Commit cambios
-git add .
-git commit -m "feat: implement backend v0.14.0"
+export async function uploadToImageKit(file: File): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer());
 
-# 2. Push a GitHub
-git push origin main
+  const result = await imagekit.upload({
+    file: buffer,
+    fileName: `${Date.now()}-${file.name}`,
+    folder: '/thumbnails',
+  });
 
-# 3. Vercel auto-deploy
-# (automático al detectar push)
+  return result.url;
+}
 ```
 
-### Verificación Post-Deploy
-- ✅ Homepage carga 8 familias
-- ✅ Categorías funcionan (furniture, doors, windows, lighting)
-- ✅ Páginas individuales cargan correctamente
-- ✅ Metadata correcta (downloads, views, author)
-- ✅ Imágenes desde ImageKit
-- ✅ Sin errores en consola
+---
+
+## API Routes Structure
+```
+src/app/api/
+├── admin/
+│   ├── families/
+│   │   ├── route.ts              # POST (crear)
+│   │   └── [slug]/
+│   │       └── route.ts          # GET, PUT, DELETE
+│   └── upload/
+│       └── route.ts              # POST (upload a R2/ImageKit)
+└── auth/
+    └── [...nextauth]/
+        └── route.ts              # NextAuth handlers
+```
 
 ---
 
-## 💰 COSTOS MENSUALES
+## Validaciones Implementadas
 
-### Neon (PostgreSQL)
-- **Plan:** Free
-- **Límites:** 0.5GB storage, 192MB RAM
-- **Uso actual:** ~5MB (8 familias)
-- **Costo:** $0/mes
+### Server-Side
 
-### Cloudflare R2
-- **Plan:** Free
-- **Límites:** 10GB storage, 1M Class A ops/mes, 10M Class B ops/mes
-- **Uso actual:** 0GB (archivos aún no subidos)
-- **Costo:** $0/mes
-
-### Vercel
-- **Plan:** Hobby (Free)
-- **Límites:** 100GB bandwidth/mes
-- **Uso actual:** Bajo (imágenes en ImageKit, archivos en R2)
-- **Costo:** $0/mes
-
-**Total mensual:** $0 🎉
-
----
-
-## 📈 PERFORMANCE
-
-### Tiempos de Carga
-- Homepage: ~800ms (con cache)
-- Página individual: ~400ms (con cache)
-- Database query: ~50-100ms
-- R2 signed URL: ~200ms
-
-### Cache Strategy
+**En API routes:**
 ```typescript
-// React cache (request-level)
-export const getAllFamilies = cache(async () => {
-  // Next.js cache (data-level)
-  return unstable_cache(
-    async () => db.getAllFamilies(),
-    ['all-families'],
-    { revalidate: 3600 } // 1 hora
-  )();
+// Validar campos requeridos
+if (!name || !slug || !category) {
+  return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+}
+
+// Validar slug único
+const existing = await sql`SELECT id FROM families WHERE slug = ${slug}`;
+if (existing.length > 0) {
+  return NextResponse.json({ error: 'Slug already exists' }, { status: 400 });
+}
+
+// Validar tipo de archivo
+if (type === 'rfa' && !file.name.endsWith('.rfa')) {
+  return NextResponse.json({ error: 'File must be a .rfa file' }, { status: 400 });
+}
+```
+
+### Client-Side
+
+**En formularios:**
+```typescript
+// Validar antes de submit
+if (!formData.name.trim()) {
+  alert('Name is required');
+  return;
+}
+
+// Auto-generar slug
+const slug = formData.name.toLowerCase()
+  .replace(/\s+/g, '-')
+  .replace(/[^a-z0-9-]/g, '');
+```
+
+---
+
+## Database Queries Optimizadas
+
+### Estadísticas del Dashboard
+```typescript
+const result = await sql`
+  SELECT 
+    COUNT(*) as total_families,
+    SUM(downloads) as total_downloads,
+    SUM(views) as total_views,
+    COUNT(CASE WHEN category = 'furniture' THEN 1 END) as furniture_count,
+    COUNT(CASE WHEN category = 'doors' THEN 1 END) as doors_count,
+    COUNT(CASE WHEN category = 'windows' THEN 1 END) as windows_count,
+    COUNT(CASE WHEN category = 'lighting' THEN 1 END) as lighting_count
+  FROM families
+`;
+```
+
+**Ventajas:**
+- Una sola query en lugar de 7
+- Mejor rendimiento
+- Menos carga en la base de datos
+
+### Búsqueda y Filtrado
+
+**Client-side filtering (datos ya cargados):**
+```typescript
+const filteredFamilies = families.filter(f => {
+  const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.slug.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchesCategory = categoryFilter === 'all' || f.category === categoryFilter;
+  return matchesSearch && matchesCategory;
 });
 ```
 
----
-
-## 🔧 MANTENIMIENTO
-
-### Agregar Nueva Familia
+**Para grandes datasets (futuro):**
 ```sql
-INSERT INTO families (
-  slug, category, name, description,
-  thumbnail_url, file_url, file_size,
-  author, tags, revit_versions
-) VALUES (
-  'new-chair',
-  'furniture',
-  'Modern Office Chair',
-  'Ergonomic office chair with adjustable height',
-  'https://ik.imagekit.io/.../chair.png',
-  '/downloads/new-chair.rfa',
-  '156 KB',
-  'Boracity Team',
-  ARRAY['chair', 'office', 'furniture'],
-  ARRAY['2025', '2024', '2023']
-);
-```
-
-### Actualizar Estadísticas
-```sql
--- Incrementar descargas
-UPDATE families SET downloads = downloads + 1 WHERE slug = 'bar-chair-modern';
-
--- Incrementar vistas
-UPDATE families SET views = views + 1 WHERE slug = 'bar-chair-modern';
-```
-
-### Verificar Datos
-```sql
--- Ver todas las familias
-SELECT slug, name, category, downloads FROM families ORDER BY downloads DESC;
-
--- Estadísticas generales
-SELECT 
-  COUNT(*) as total_families,
-  SUM(downloads) as total_downloads,
-  SUM(views) as total_views
-FROM families;
-
--- Por categoría
-SELECT category, COUNT(*) FROM families GROUP BY category;
+SELECT * FROM families 
+WHERE 
+  (name ILIKE '%query%' OR slug ILIKE '%query%') 
+  AND (category = 'filter' OR 'all' = 'all')
+ORDER BY created_at DESC
+LIMIT 10 OFFSET 0;
 ```
 
 ---
 
-## 🐛 TROUBLESHOOTING
+## Error Handling
 
-### Error: "password authentication failed"
-**Causa:** DATABASE_URL incorrecta  
-**Solución:** Verificar que la URL de Neon esté correcta en .env.local
+### Try-Catch Pattern
+```typescript
+try {
+  const result = await sql`...`;
+  return NextResponse.json({ success: true, data: result });
+} catch (error) {
+  console.error('Database error:', error);
+  return NextResponse.json(
+    { error: 'Internal server error' },
+    { status: 500 }
+  );
+}
+```
 
-### Error: "Cannot find module '@neondatabase/serverless'"
-**Causa:** Dependencias no instaladas  
-**Solución:** `npm install @neondatabase/serverless`
+### Validación de Sesión
+```typescript
+const session = await auth();
 
-### Error: "R2_ACCOUNT_ID is not defined"
-**Causa:** Variables de entorno faltantes  
-**Solución:** Verificar que todas las variables R2_* estén en .env.local
+if (!session?.user) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
 
-### Familias no aparecen en producción
-**Causa:** Variables de entorno no configuradas en Vercel  
-**Solución:** Settings → Environment Variables → Verificar todas las variables
-
----
-
-## 📚 RECURSOS
-
-### Documentación Oficial
-- Neon: https://neon.tech/docs
-- Cloudflare R2: https://developers.cloudflare.com/r2/
-- Next.js: https://nextjs.org/docs
-- AWS S3 SDK: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/
-
-### Archivos Relacionados
-- `/docs/ARCHITECTURE.md` - Arquitectura completa
-- `/docs/AUDITORIA_PRE_BACKEND.md` - Auditoría inicial
-- `/docs/SESSION_19_BACKEND.md` - Sesión de implementación
+if (session.user.role !== 'admin') {
+  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+}
+```
 
 ---
 
-## 🎯 PRÓXIMOS PASOS (v0.15.0)
+## Seguridad Implementada
 
-### Funcionalidades Pendientes
-- [ ] Admin panel con autenticación
-- [ ] Upload de archivos .rfa a R2
-- [ ] CRUD completo de familias
-- [ ] Sistema de usuarios
-- [ ] Colecciones/favoritos
-- [ ] Comentarios y ratings
+### 1. Password Hashing
+```typescript
+import bcrypt from 'bcryptjs';
 
-### Mejoras Técnicas
-- [ ] Migrations automáticas
-- [ ] Testing suite completo
-- [ ] Monitoring y alertas
-- [ ] Backup automático
-- [ ] CDN para thumbnails
+const hashedPassword = await bcrypt.hash(password, 10);
+const isValid = await bcrypt.compare(inputPassword, storedHash);
+```
+
+### 2. JWT Sessions
+- Tokens firmados con `AUTH_SECRET`
+- Expiración automática
+- No almacena datos sensibles en localStorage
+
+### 3. CSRF Protection
+- NextAuth maneja tokens CSRF automáticamente
+- Cookies httpOnly
+
+### 4. SQL Injection Prevention
+- Uso de prepared statements (template literals de Neon)
+- Nunca concatenar strings directamente
+
+### 5. Role-Based Access Control (RBAC)
+```typescript
+// En layout de admin
+if (session.user.role !== 'admin') {
+  redirect('/');
+}
+```
 
 ---
 
-**Última actualización:** 11 de enero de 2026  
-**Versión del documento:** 2.0  
-**Estado:** ✅ Implementado y en producción
+## Performance Optimizations
+
+### 1. Server Components por Defecto
+- Menos JavaScript enviado al cliente
+- Queries directos a la base de datos
+
+### 2. Client Components Solo Cuando Necesario
+- Interactividad (botones, inputs, modals)
+- React hooks
+
+### 3. Paginación Client-Side
+- Cargar todas las familias una vez
+- Filtrar/paginar en el navegador
+- Para >1000 items → migrar a paginación server-side
+
+### 4. Imagen Optimization
+- ImageKit CDN con transformaciones on-the-fly
+- Lazy loading con Next.js Image component
+
+### 5. Connection Pooling
+- Neon serverless con pooling automático
+- Reducción de latencia
+
+---
+
+## Próximas Mejoras Backend
+
+- 🟡 Rate limiting en API routes
+- 🟡 Cache con Redis
+- 🟡 Background jobs para procesamiento de archivos
+- 🟡 Webhooks para notificaciones
+- 🟡 Logs estructurados (Winston/Pino)
+- 🟡 Health check endpoints
+- 🟡 API versioning
+- 🟡 GraphQL layer (opcional)
+
+---

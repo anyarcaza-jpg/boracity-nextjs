@@ -1,111 +1,119 @@
-# PRÓXIMA SESIÓN: #20 - ADMIN PANEL & AUTHENTICATION
+# PRÓXIMA SESIÓN: #21 - FRONTEND PÚBLICO & SEO
 
-**Prioridad:** Media  
-**Tiempo estimado:** 3-4 horas  
-**Dependencias:** ✅ Sesión 19 completada
+**Prioridad:** Alta  
+**Tiempo estimado:** 4-5 horas  
+**Dependencias:** ✅ Sesión 20 completada
 
 ---
 
-## 🎯 OBJETIVO
+## ✅ SESIÓN 20 - COMPLETADA
 
-Implementar panel de administración con autenticación para gestionar familias Revit.
+**Lo que logramos:**
+- ✅ NextAuth v5 configurado
+- ✅ Login funcional con protección de rutas
+- ✅ Dashboard admin con estadísticas en tiempo real
+- ✅ CRUD completo de familias
+- ✅ Upload de archivos a R2 (Cloudflare)
+- ✅ Upload de thumbnails a ImageKit
+- ✅ Búsqueda en tiempo real
+- ✅ Filtrado por categorías
+- ✅ Paginación con selector de items
+- ✅ UI/UX profesional con colores Boracity
+
+---
+
+## 🎯 OBJETIVO SESIÓN 21
+
+Implementar el frontend público completo: páginas de categorías, páginas de detalle de familias, y optimización SEO.
 
 ---
 
 ## 📋 TAREAS PRINCIPALES
 
-### 1. Setup Autenticación (45 min)
-- [ ] Configurar Clerk (recomendado) o NextAuth
-- [ ] Crear páginas login/registro
-- [ ] Proteger rutas /admin con middleware
-- [ ] Roles: Admin, User
+### 1. Páginas de Categorías (90 min)
+- [ ] `/revit/furniture` - Grid de familias
+- [ ] `/revit/doors` - Grid de familias
+- [ ] `/revit/windows` - Grid de familias
+- [ ] `/revit/lighting` - Grid de familias
 
-### 2. Admin Dashboard (30 min)
-- [ ] Layout admin con sidebar
-- [ ] Dashboard home con estadísticas:
-  - Total familias
-  - Descargas totales
-  - Vistas totales
-  - Gráficos (opcional)
+**Características:**
+- [ ] Grid responsive (1-2-3 columnas)
+- [ ] Componente `FamilyCard` reutilizable
+- [ ] Filtros: Revit version, sort by (popular, recent)
+- [ ] Lazy loading / Infinite scroll
+- [ ] Breadcrumbs de navegación
 
-### 3. Gestión de Familias - CRUD (90 min)
-- [ ] **Listar:** Tabla con todas las familias
-  - Filtros: categoría, búsqueda
-  - Ordenar: nombre, descargas, fecha
-  - Paginación
-- [ ] **Crear:** Formulario nueva familia
-  - Campos: nombre, categoría, descripción, tags
-  - Upload thumbnail (ImageKit)
-  - Upload .rfa (R2)
-- [ ] **Editar:** Formulario edición
-  - Pre-llenar datos existentes
-  - Actualizar DB + archivos si es necesario
-- [ ] **Eliminar:** Confirmación + eliminar
-  - Borrar de DB
-  - Borrar archivos de R2 (opcional)
+### 2. Página de Detalle de Familia (120 min)
+- [ ] `/revit/[category]/[slug]` - Detalle completo
 
-### 4. Upload de Archivos (45 min)
-- [ ] **Componente upload .rfa a R2:**
+**Secciones:**
+```
+├── Hero Section
+│   ├── Thumbnail grande
+│   ├── Título + descripción
+│   └── Botón "Download .rfa"
+│
+├── Info Card
+│   ├── Category
+│   ├── Revit Version
+│   ├── File Size
+│   ├── Downloads count
+│   └── Views count
+│
+├── Related Families (opcional)
+│   └── Slider con 4-6 familias similares
+│
+└── Footer
+```
+
+**Funcionalidad:**
+- [ ] Contador de vistas (+1 al cargar página)
+- [ ] Contador de descargas (+1 al hacer clic en download)
+- [ ] API route: `/api/families/[slug]/download`
+- [ ] API route: `/api/families/[slug]/view`
+
+### 3. Componente FamilyCard (30 min)
+- [ ] Thumbnail con lazy loading
+- [ ] Título truncado (1-2 líneas)
+- [ ] Badge de categoría
+- [ ] Stats: downloads + views
+- [ ] Hover effect + animación
+- [ ] Link a página de detalle
+
+### 4. SEO Optimization (45 min)
+- [ ] Metadata dinámica por página
+- [ ] Open Graph tags (redes sociales)
+- [ ] Twitter Cards
+- [ ] JSON-LD structured data
+- [ ] Sitemap.xml generado dinámicamente
+- [ ] Robots.txt
+
+**Ejemplo metadata:**
 ```typescript
-  // Flujo:
-  1. Usuario selecciona .rfa
-  2. Validar: extensión, tamaño (<50MB)
-  3. Upload a R2: category/slug.rfa
-  4. Guardar URL en DB
-  5. Progress indicator
+// En página de detalle
+export async function generateMetadata({ params }) {
+  const family = await getFamily(params.slug);
+  
+  return {
+    title: `${family.name} - Free Revit Family | Boracity`,
+    description: family.description,
+    openGraph: {
+      images: [family.thumbnail_url],
+    }
+  };
+}
 ```
-- [ ] **Upload thumbnail a ImageKit**
-  - Drag & drop o file picker
-  - Preview antes de subir
-  - Guardar URL en DB
 
-### 5. Testing & Deploy (30 min)
-- [ ] Testing local completo
-- [ ] Verificar permisos y roles
-- [ ] Deploy a Vercel
-- [ ] Testing en producción
+### 5. Homepage Updates (30 min)
+- [ ] Sección "Recent Families" con datos reales
+- [ ] Stats dinámicas (usar API)
+- [ ] Enlaces funcionales a categorías
 
----
-
-## 🛠️ STACK TECNOLÓGICO
-
-### Autenticación
-**Opción A: Clerk (Recomendado)**
-- ✅ Setup rápido (15 min)
-- ✅ UI components incluidos
-- ✅ Free tier generoso
-- ✅ Roles y permisos built-in
-
-**Opción B: NextAuth**
-- ⚠️ Más configuración manual
-- ✅ Más control
-- ✅ Totalmente gratuito
-
-### UI Components
-- shadcn/ui (ya instalado)
-- React Hook Form + Zod
-- TanStack Table (para listar familias)
-
-### File Upload
-- react-dropzone
-- AWS S3 SDK (ya instalado para R2)
-- ImageKit SDK (para thumbnails)
-
----
-
-## 📦 DEPENDENCIAS NUEVAS
-```bash
-# Autenticación (elegir una)
-npm install @clerk/nextjs        # Opción A
-npm install next-auth            # Opción B
-
-# UI & Forms
-npm install react-dropzone
-npm install @tanstack/react-table
-npm install react-hook-form
-
-# Ya tienes: shadcn/ui, zod, @aws-sdk/*
-```
+### 6. Search Functionality (45 min)
+- [ ] Componente de búsqueda en navbar
+- [ ] Autocomplete con resultados en tiempo real
+- [ ] Página de resultados `/search?q=query`
+- [ ] Highlighting de términos buscados
 
 ---
 
@@ -113,161 +121,249 @@ npm install react-hook-form
 ```
 src/
 ├── app/
-│   ├── (auth)/              # Grupo de rutas auth
-│   │   ├── sign-in/
-│   │   └── sign-up/
-│   └── admin/               # Rutas protegidas
-│       ├── layout.tsx       # Layout admin
-│       ├── page.tsx         # Dashboard
-│       └── families/
-│           ├── page.tsx     # Lista
-│           ├── new/
-│           │   └── page.tsx # Crear
-│           └── [slug]/
-│               └── edit/
-│                   └── page.tsx # Editar
+│   ├── revit/
+│   │   ├── [category]/
+│   │   │   ├── page.tsx              # Lista de familias
+│   │   │   └── [slug]/
+│   │   │       └── page.tsx          # Detalle de familia
+│   │   └── layout.tsx                # Layout común
+│   ├── search/
+│   │   └── page.tsx                  # Página de búsqueda
+│   ├── sitemap.ts                    # Sitemap dinámico
+│   └── robots.ts                     # Robots.txt
 ├── components/
-│   └── admin/
-│       ├── FamilyTable.tsx
-│       ├── FamilyForm.tsx
-│       └── FileUploader.tsx
-├── lib/
-│   ├── auth/
-│   │   └── middleware.ts    # Protección rutas
-│   └── r2/
-│       └── upload.ts        # Subir archivos a R2
-└── middleware.ts            # Auth middleware global
+│   ├── FamilyCard.tsx                # Card reutilizable
+│   ├── FamilyGrid.tsx                # Grid container
+│   ├── CategoryHero.tsx              # Hero de categoría
+│   └── search/
+│       ├── SearchBar.tsx             # Barra de búsqueda
+│       └── SearchAutocomplete.tsx    # Autocomplete
+└── lib/
+    └── api/
+        └── families.ts               # Client-side API helpers
 ```
 
 ---
 
-## 🔐 FLUJO DE AUTENTICACIÓN
-```
-Usuario no autenticado
-  ↓
-Intenta acceder /admin
-  ↓
-Middleware detecta (redirect)
-  ↓
-/sign-in (login con Clerk/NextAuth)
-  ↓
-Autenticación exitosa
-  ↓
-Redirect a /admin/dashboard
-  ↓
-Verificar rol = admin
-  ↓
-Acceso concedido ✅
-```
+## 📊 API ROUTES NUEVOS
+
+### GET `/api/families/[slug]`
+Obtener familia pública (sin auth).
+
+### POST `/api/families/[slug]/view`
+Incrementar contador de vistas.
+
+### POST `/api/families/[slug]/download`
+Incrementar contador de descargas y retornar URL.
+
+### GET `/api/search?q=query`
+Buscar familias por nombre, descripción, tags.
 
 ---
 
-## 📊 SCHEMA DB - NUEVAS TABLAS (Opcional)
+## 🎨 UI/UX MEJORAS
 
-Si quieres usuarios en tu propia DB:
-```sql
--- Tabla users (opcional, Clerk maneja esto)
-CREATE TABLE users (
-  id UUID PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
-  role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user')),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Tabla activity_log (para auditoría)
-CREATE TABLE activity_log (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id),
-  action TEXT NOT NULL, -- 'create', 'update', 'delete'
-  resource TEXT NOT NULL, -- 'family'
-  resource_id TEXT,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+### FamilyCard Design
+```
+┌─────────────────────┐
+│                     │
+│   [Thumbnail]       │
+│                     │
+├─────────────────────┤
+│ Modern Office Chair │
+│ [Furniture Badge]   │
+├─────────────────────┤
+│ 👁️ 1.2k  ⬇️ 456    │
+└─────────────────────┘
 ```
 
----
-
-## ⚠️ PREREQUISITOS
-
-### Antes de empezar Sesión 20:
-
-1. **Decidir sistema de auth:**
-   - [ ] ¿Clerk o NextAuth?
-   - Recomendación: Clerk (más rápido)
-
-2. **Crear cuenta Clerk (si eliges Clerk):**
-   - [ ] Ir a https://clerk.com
-   - [ ] Crear cuenta gratuita
-   - [ ] Crear aplicación "Boracity Admin"
-   - [ ] Copiar API keys
-
-3. **Verificar backend funcionando:**
-   - [x] 8 familias en producción ✅
-   - [x] PostgreSQL conectado ✅
-   - [x] R2 configurado ✅
+### Detalle de Familia - Hero
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│   [Large Thumbnail]   ┌──────────────┐  │
+│                       │ Category      │  │
+│                       │ Revit 2024    │  │
+│   Modern Office Chair │ 2.4 MB        │  │
+│   Professional ergon...│ 456 downloads│  │
+│                       │ 1.2k views    │  │
+│   [Download .rfa]     └──────────────┘  │
+│                                         │
+└─────────────────────────────────────────┘
+```
 
 ---
 
-## 🎯 RESULTADO ESPERADO
+## 🔍 SEO STRATEGY
 
-Al finalizar Sesión 20:
+### 1. Dynamic Metadata
+Cada página tiene metadata única:
+- Title: `{Family Name} - Free Revit Family | Boracity`
+- Description: Primeras 160 chars de la descripción
+- OG Image: Thumbnail de la familia
 
-✅ Admin puede:
-- Iniciar sesión seguro
-- Ver dashboard con stats
-- Listar todas las familias
-- Crear nueva familia (con upload)
-- Editar familia existente
-- Eliminar familia
+### 2. Structured Data (JSON-LD)
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Modern Office Chair",
+  "description": "...",
+  "category": "Furniture",
+  "image": "https://...",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+```
 
-✅ Sistema tiene:
-- Autenticación funcionando
-- Rutas protegidas
-- CRUD completo
-- Upload a R2 funcionando
-- UI profesional
+### 3. Sitemap.xml
+```xml
+<urlset>
+  <url>
+    <loc>https://boracity.com/</loc>
+    <lastmod>2026-01-12</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://boracity.com/revit/furniture/modern-office-chair</loc>
+    <lastmod>2026-01-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <!-- ... más familias -->
+</urlset>
+```
 
 ---
 
-## 💡 TIPS PARA LA SESIÓN
+## 📱 RESPONSIVE DESIGN
 
-1. **Empezar con auth:** Es la base de todo
-2. **UI primero, lógica después:** Mockear datos si es necesario
-3. **Testing incremental:** Probar cada feature antes de continuar
-4. **Commits frecuentes:** Guardar progreso cada 30 min
+### Breakpoints
+- Mobile: 1 columna (< 640px)
+- Tablet: 2 columnas (640px - 1024px)
+- Desktop: 3 columnas (> 1024px)
+
+### Componentes Responsive
+- FamilyGrid: Auto-ajuste de columnas
+- CategoryHero: Stack vertical en móvil
+- FamilyDetail: Info card abajo en móvil
+
+---
+
+## ⚡ PERFORMANCE OPTIMIZATIONS
+
+### 1. Image Optimization
+```typescript
+<Image
+  src={family.thumbnail_url}
+  alt={family.name}
+  width={400}
+  height={300}
+  loading="lazy"
+  placeholder="blur"
+/>
+```
+
+### 2. Server Components por Defecto
+- Páginas de categoría: Server Component
+- Páginas de detalle: Server Component
+- Solo usar Client Components para interactividad
+
+### 3. Caching
+```typescript
+// Revalidar cada 1 hora
+export const revalidate = 3600;
+
+// O on-demand con revalidatePath
+revalidatePath('/revit/furniture');
+```
+
+---
+
+## 🧪 TESTING CHECKLIST
+
+- [ ] Todas las categorías muestran familias correctas
+- [ ] Páginas de detalle cargan correctamente
+- [ ] Descargas incrementan contador
+- [ ] Vistas incrementan contador
+- [ ] Búsqueda funciona
+- [ ] SEO metadata correcta en todas las páginas
+- [ ] Responsive en mobile, tablet, desktop
+- [ ] Lazy loading de imágenes funciona
+- [ ] Links de navegación funcionan
+
+---
+
+## 🚀 DEPLOY CHECKLIST
+
+- [ ] Build sin errores: `npm run build`
+- [ ] Lighthouse score > 90 (Performance, SEO)
+- [ ] Testing en Vercel preview
+- [ ] Verificar metadata con Facebook Debugger
+- [ ] Verificar metadata con Twitter Card Validator
+- [ ] Submit sitemap a Google Search Console
+- [ ] Deploy a producción
 
 ---
 
 ## 📚 RECURSOS ÚTILES
 
-- Clerk Quickstart: https://clerk.com/docs/quickstarts/nextjs
-- NextAuth Setup: https://next-auth.js.org/getting-started/example
-- TanStack Table: https://tanstack.com/table/latest
-- React Dropzone: https://react-dropzone.js.org/
-- shadcn/ui Forms: https://ui.shadcn.com/docs/components/form
+- Next.js Metadata: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
+- Next.js Image: https://nextjs.org/docs/app/api-reference/components/image
+- Schema.org Product: https://schema.org/Product
+- Lighthouse CI: https://github.com/GoogleChrome/lighthouse-ci
 
 ---
 
-## 🚀 MOTIVACIÓN
+## 🎯 RESULTADO ESPERADO
 
-**Después de Sesión 20:**
-- ✅ Backend completo read/write
-- ✅ Admin panel funcional
-- ✅ Sistema profesional listo para usuarios reales
-- ✅ Base sólida para monetización futura
+Al finalizar Sesión 21:
 
-**Siguiente después de esto (Sesión 21+):**
-- Sistema de colecciones/favoritos
-- Comentarios y ratings
-- Analytics dashboard
-- Marketplace (vender familias premium)
+✅ Usuario puede:
+- Ver todas las familias por categoría
+- Ver detalle completo de cada familia
+- Descargar archivos .rfa
+- Buscar familias
+- Navegar con breadcrumbs
+
+✅ Sistema tiene:
+- SEO optimizado (metadata, structured data)
+- Performance optimizado (lazy loading, caching)
+- UI profesional y responsive
+- Analytics de descargas y vistas
 
 ---
 
-**Nos vemos en la Sesión 20! 🚀**
+## 💡 PRIORIDADES
+
+**MUST HAVE (核心):**
+1. Páginas de categorías funcionando
+2. Páginas de detalle funcionando
+3. Botón download funcional
+4. SEO básico (metadata)
+
+**NICE TO HAVE (bonus):**
+- Búsqueda con autocomplete
+- Related families
+- Infinite scroll
+- JSON-LD structured data
 
 ---
 
-**Última actualización:** 11 de enero de 2026  
-**Preparado por:** Sesión 19
+## 🔮 DESPUÉS DE SESIÓN 21
+
+**Sesión 22:** Sistema de favoritos/colecciones
+**Sesión 23:** Comentarios y ratings
+**Sesión 24:** Analytics dashboard avanzado
+**Sesión 25:** Sistema de suscripción/monetización
+
+---
+
+**¡Nos vemos en la Sesión 21! 🚀**
+
+---
+
+**Última actualización:** 12 de enero de 2026  
+**Preparado por:** Sesión 20

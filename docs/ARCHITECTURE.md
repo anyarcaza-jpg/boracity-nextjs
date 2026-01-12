@@ -1196,3 +1196,627 @@ When continuing this project, remember:
 **Last Updated:** January 7, 2026  
 **Next Review:** When implementing Phase 3 (API) or Phase 4 (Testing)  
 **Version:** v0.8.0 (Production-Ready Architecture)
+
+---
+
+## ADMIN PANEL ARCHITECTURE
+
+### Overview
+
+El admin panel sigue una arquitectura moderna de **Server Components + Client Components** optimizada para rendimiento y SEO.
+```
+┌─────────────────────────────────────────────────────────┐
+│                     ADMIN PANEL                          │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌──────────────┐        ┌─────────────────────┐       │
+│  │   NextAuth   │───────>│  Middleware         │       │
+│  │   v5 (JWT)   │        │  Route Protection   │       │
+│  └──────────────┘        └─────────────────────┘       │
+│         │                          │                    │
+│         v                          v                    │
+│  ┌──────────────────────────────────────────┐          │
+│  │          Admin Layout                     │          │
+│  │  ┌────────────┐  ┌──────────────────┐   │          │
+│  │  │  Sidebar   │  │  Main Content     │   │          │
+│  │  │            │  │                   │   │          │
+│  │  │ Dashboard  │  │  Server Component │   │          │
+│  │  │ Families   │  │  (SQL Query)      │   │          │
+│  │  │ Users      │  │        ↓          │   │          │
+│  │  │ Settings   │  │  Client Component │   │          │
+│  │  │            │  │  (Interactivity)  │   │          │
+│  │  │  [Logout]  │  │                   │   │          │
+│  │  └────────────┘  └──────────────────┘   │          │
+│  └──────────────────────────────────────────┘          │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Authentication Flow
+
+### NextAuth v5 (Auth.js)
+```
+┌─────────────────────────────────────────────────────────┐
+│                   AUTHENTICATION                         │
+└─────────────────────────────────────────────────────────┘
+
+User visits /admin
+       ↓
+Middleware intercepts (src/middleware.ts)
+       ↓
+Check session exists?
+       ↓
+   NO ────> Redirect to /login
+       ↓
+   YES ───> Continue
+       ↓
+Admin Layout checks role
+       ↓
+role === 'admin'?
+       ↓
+   NO ────> Redirect to /
+       ↓
+   YES ───> Grant access ✅
+```
+
+### Session Management
+
+**JWT Strategy:**
+```typescript
+{
+  user: {
+    id: string,
+    email: string,
+    name?: string,
+    role: 'admin' | 'user'
+  },
+  expires: Date
+}
+```
+
+**Session Storage:**
+- Cookies (httpOnly, secure)
+- No localStorage usage
+- Automatic refresh
+- Server-side validation
+
+---
+
+## Server + Client Components Pattern
+
+### Why This Pattern?
+
+**Server Components (Default):**
+- ✅ Direct database queries (no API route needed)
+- ✅ Less JavaScript sent to client
+- ✅ Better SEO
+- ✅ Faster initial load
+
+**Client Components (When Needed):**
+- ✅ React hooks (useState, useEffect)
+- ✅ Event handlers (onClick, onChange)
+- ✅ Browser APIs
+- ✅ Third-party libraries
+
+### Example Implementation
+
+**File:** `src/app/admin/families/page.tsx`
+```typescript
+// ✅ Server Component (default)
+import { sql } from '@/lib/neon';
+import FamiliesTableClient from './FamiliesTableClient';
+
+export default async function FamiliesPage() {
+  // Direct SQL query on server
+  const families = await sql`
+    SELECT * FROM families 
+    ORDER BY created_at DESC
+  `;
+
+  // Pass data to Client Component
+  return <FamiliesTableClient families={families} />;
+}
+```
+
+**File:** `src/app/admin/families/FamiliesTableClient.tsx`
+```typescript
+'use client'; // ⚠️ Client Component
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function FamiliesTableClient({ families }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+
+  const handleDelete = async (slug) => {
+    await fetch(`/api/admin/families/${slug}`, { 
+      method: 'DELETE' 
+    });
+    router.refresh(); // Revalidate Server Component
+  };
+
+  return (
+    <div>
+      <input 
+        value={searchQuery} 
+        onChange={(e) => setSearchQuery(e.target.value)} 
+      />
+      {/* Interactive UI */}
+    </div>
+  );
+}
+```
+
+---
+
+## Data Flow Architecture
+```
+┌─────────────────────────────────────────────────────────┐
+│                      DATA FLOW                           │
+└─────────────────────────────────────────────────────────┘
+
+Server Component
+       ↓
+SQL Query (Neon PostgreSQL)
+       ↓
+Transform Data
+       ↓
+Pass to Client Component as props
+       ↓
+Client Component renders
+       ↓
+User interaction (delete, edit, etc)
+       ↓
+Fetch API to /api/admin/*
+       ↓
+API Route validates session
+       ↓
+API Route updates DB
+       ↓
+router.refresh() → Re-run Server Component
+       ↓
+Updated data displayed ✅
+```
+
+---
+
+## File Upload Architecture
+
+### Two-Service Strategy
+
+**Cloudflare R2:** `.rfa` files (large)  
+**ImageKit:** Thumbnails (small, CDN optimized)
+```
+┌─────────────────────────────────────────────────────────┐
+│                   FILE UPLOAD FLOW                       │
+└─────────────────────────────────────────────────────────┘
+
+User selects files
+       ↓
+FormData created
+       ↓
+POST /api/admin/upload
+       ↓
+    ┌──────────┴──────────┐
+    ↓                     ↓
+type='rfa'          type='thumbnail'
+    ↓                     ↓
+Validate .rfa       Validate image
+    ↓                     ↓
+Upload to R2        Upload to ImageKit
+    ↓                     ↓
+Return URL          Return URL
+    └──────────┬──────────┘
+               ↓
+Save URLs to PostgreSQL
+       ↓
+Family created ✅
+```
+
+### R2 Integration
+
+**AWS S3 Compatible:**
+```typescript
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const r2Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  }
+});
+```
+
+**File Structure in R2:**
+```
+boracity-files/
+└── rfa-files/
+    ├── 1234567890-modern-chair.rfa
+    ├── 1234567891-glass-door.rfa
+    └── 1234567892-pendant-light.rfa
+```
+
+### ImageKit Integration
+
+**CDN + Transformations:**
+```typescript
+import ImageKit from 'imagekit';
+
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+});
+```
+
+**File Structure in ImageKit:**
+```
+/thumbnails/
+├── 1234567890-modern-chair.png
+├── 1234567891-glass-door.jpg
+└── 1234567892-pendant-light.webp
+```
+
+**URL Transformations (on-the-fly):**
+```
+Original: https://ik.imagekit.io/xxx/thumbnails/image.png
+Small:    https://ik.imagekit.io/xxx/thumbnails/tr:w-200,h-150/image.png
+Large:    https://ik.imagekit.io/xxx/thumbnails/tr:w-800,h-600/image.png
+```
+
+---
+
+## API Routes Architecture
+
+### Structure
+```
+src/app/api/
+├── admin/                    # Protected routes (auth required)
+│   ├── families/
+│   │   ├── route.ts         # POST (create)
+│   │   └── [slug]/
+│   │       └── route.ts     # GET, PUT, DELETE
+│   └── upload/
+│       └── route.ts         # POST (upload files)
+└── auth/
+    └── [...nextauth]/
+        └── route.ts         # NextAuth handlers
+```
+
+### Middleware Protection
+
+**File:** `src/middleware.ts`
+```typescript
+export { auth as middleware } from '@/lib/auth';
+
+export const config = {
+  matcher: ['/admin/:path*'] // Protect all /admin/* routes
+};
+```
+
+### API Route Pattern
+```typescript
+// All admin API routes follow this pattern:
+
+import { auth } from '@/lib/auth';
+import { NextResponse } from 'next/server';
+
+export async function POST(request: Request) {
+  // 1. Validate session
+  const session = await auth();
+  
+  if (!session?.user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' }, 
+      { status: 401 }
+    );
+  }
+
+  // 2. Validate admin role
+  if (session.user.role !== 'admin') {
+    return NextResponse.json(
+      { error: 'Forbidden' }, 
+      { status: 403 }
+    );
+  }
+
+  // 3. Process request
+  try {
+    // Business logic here
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+---
+
+## Database Architecture
+
+### Neon PostgreSQL
+
+**Serverless + Pooling:**
+```
+Application
+    ↓
+Connection Pool (Neon)
+    ↓
+PostgreSQL Database
+```
+
+**Benefits:**
+- Auto-scaling
+- Serverless (no idle costs)
+- Built-in connection pooling
+- Branch-based development
+
+### Query Strategy
+
+**Server Components:** Direct SQL
+```typescript
+import { sql } from '@/lib/neon';
+
+const families = await sql`SELECT * FROM families`;
+```
+
+**API Routes:** Parameterized queries
+```typescript
+const family = await sql`
+  SELECT * FROM families 
+  WHERE slug = ${slug}
+`;
+```
+
+**Security:**
+- No SQL injection (template literals)
+- Connection secrets in env vars
+- No database URL exposed to client
+
+---
+
+## State Management
+
+### No Global State Library Needed
+
+**Why?**
+- Server Components fetch fresh data
+- Client Components use local state
+- URL as source of truth (search params)
+
+**State Locations:**
+
+| Type | Location | Example |
+|------|----------|---------|
+| Server Data | Props from Server Component | `families` list |
+| UI State | Client Component useState | `searchQuery` |
+| Form State | React Hook Form | `formData` |
+| URL State | Search params | `?category=furniture` |
+
+---
+
+## Security Architecture
+
+### Layers of Protection
+```
+┌─────────────────────────────────────────────────────────┐
+│                  SECURITY LAYERS                         │
+└─────────────────────────────────────────────────────────┘
+
+Layer 1: Middleware
+  ↓ Check JWT token exists
+  ↓ Redirect to /login if missing
+
+Layer 2: Layout (Server Component)
+  ↓ Validate session server-side
+  ↓ Check role === 'admin'
+  ↓ Redirect to / if not admin
+
+Layer 3: API Routes
+  ↓ Validate session again
+  ↓ Validate admin role
+  ↓ Validate request body
+
+Layer 4: Database
+  ↓ Parameterized queries
+  ↓ Input sanitization
+  ↓ Prevent SQL injection
+```
+
+### Password Security
+
+**Bcrypt Hashing:**
+```typescript
+import bcrypt from 'bcryptjs';
+
+// On signup/create user
+const hashedPassword = await bcrypt.hash(password, 10);
+
+// On login
+const isValid = await bcrypt.compare(inputPassword, hashedPassword);
+```
+
+**Never:**
+- ❌ Store plain text passwords
+- ❌ Log passwords
+- ❌ Send passwords in URLs
+- ❌ Expose password hashes to client
+
+---
+
+## Performance Optimizations
+
+### 1. Server Components First
+
+**Default approach:**
+```typescript
+// page.tsx - Server Component (default)
+export default async function Page() {
+  const data = await fetchData(); // Runs on server
+  return <ClientComponent data={data} />;
+}
+```
+
+**Benefits:**
+- Smaller JavaScript bundle
+- Faster Time to Interactive (TTI)
+- Better Core Web Vitals
+
+### 2. Selective Client Components
+
+**Only mark as client when needed:**
+```typescript
+'use client'; // ⚠️ Only if using hooks or events
+
+import { useState } from 'react';
+
+export default function InteractiveComponent() {
+  const [state, setState] = useState('');
+  // ...
+}
+```
+
+### 3. Connection Pooling
+
+**Neon handles this automatically:**
+- Reuse database connections
+- Reduce connection overhead
+- Scale to zero when idle
+
+### 4. Image Optimization
+
+**ImageKit CDN:**
+- Automatic WebP conversion
+- Lazy loading
+- Responsive images
+- On-the-fly transformations
+
+---
+
+## Error Handling Strategy
+
+### Levels of Error Handling
+```
+┌─────────────────────────────────────────────────────────┐
+│                  ERROR HANDLING                          │
+└─────────────────────────────────────────────────────────┘
+
+Level 1: Client-side validation
+  ↓ Check required fields
+  ↓ Show inline errors
+  ↓ Prevent invalid submissions
+
+Level 2: API route validation
+  ↓ Validate request body
+  ↓ Return 400 Bad Request
+  ↓ Include error message
+
+Level 3: Try-catch blocks
+  ↓ Catch database errors
+  ↓ Log to console
+  ↓ Return 500 Internal Server Error
+
+Level 4: Error boundaries (future)
+  ↓ Catch React errors
+  ↓ Show fallback UI
+  ↓ Prevent white screen
+```
+
+### Example Error Handling
+```typescript
+// API Route
+try {
+  const result = await sql`INSERT INTO families ...`;
+  return NextResponse.json({ success: true });
+} catch (error) {
+  console.error('Database error:', error);
+  
+  if (error.code === '23505') { // Unique constraint
+    return NextResponse.json(
+      { error: 'Slug already exists' },
+      { status: 400 }
+    );
+  }
+  
+  return NextResponse.json(
+    { error: 'Internal server error' },
+    { status: 500 }
+  );
+}
+```
+
+---
+
+## Deployment Architecture
+
+### Vercel Deployment
+```
+┌─────────────────────────────────────────────────────────┐
+│                   PRODUCTION STACK                       │
+└─────────────────────────────────────────────────────────┘
+
+Frontend/API: Vercel Edge Network
+       ↓
+Database: Neon PostgreSQL (US East)
+       ↓
+File Storage: Cloudflare R2 (Global)
+       ↓
+Image CDN: ImageKit (Global CDN)
+```
+
+**Advantages:**
+- Global edge network (Vercel)
+- Low latency database (Neon)
+- Fast file downloads (R2 + ImageKit)
+- Automatic scaling
+
+---
+
+## Future Architecture Improvements
+
+### Phase 1 (Next 1-2 months)
+- [ ] Redis caching layer
+- [ ] Background jobs (Inngest/QStash)
+- [ ] Rate limiting
+- [ ] API versioning
+
+### Phase 2 (3-6 months)
+- [ ] Microservices (optional)
+- [ ] GraphQL layer (optional)
+- [ ] Real-time updates (WebSockets)
+- [ ] Advanced analytics
+
+### Phase 3 (6+ months)
+- [ ] Multi-region deployment
+- [ ] CDN for .rfa files
+- [ ] Machine learning recommendations
+- [ ] Payment processing
+
+---
+
+## Architecture Principles
+
+### 1. Server-First Mindset
+Render on server when possible, client when necessary.
+
+### 2. Progressive Enhancement
+App works without JavaScript, enhanced with it.
+
+### 3. Security by Default
+Authentication at every layer.
+
+### 4. Performance Focused
+Optimize for Core Web Vitals.
+
+### 5. Scalable by Design
+Ready for 10x growth without major refactoring.
+
+---
