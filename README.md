@@ -5,6 +5,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-Production--Ready-success)
+![Deployed](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)
+
+**🌐 Live Site:** [boracity-nextjs.vercel.app](https://boracity-nextjs.vercel.app)
 
 > Professional BIM content library for architects, designers, and students. Download high-quality Revit families, SketchUp models, and 3D assets — 100% free.
 
@@ -171,6 +174,43 @@ NEXT_PUBLIC_IMAGEKIT_ID=your_imagekit_id
 # Analytics (optional)
 NEXT_PUBLIC_GA_ID=your_google_analytics_id
 ```
+
+---
+
+## 🌐 Deployment
+
+### Quick Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/anyarcaza-jpg/boracity-nextjs)
+
+### Manual Deployment
+
+1. **Push to GitHub:**
+```bash
+git add .
+git commit -m "Ready for deployment"
+git push origin main
+```
+
+2. **Connect to Vercel:**
+- Go to [vercel.com](https://vercel.com)
+- Import your GitHub repository
+- Vercel auto-detects Next.js
+- Click "Deploy"
+
+3. **Done!** Your site will be live in ~2-3 minutes
+
+### Important Notes
+
+⚠️ **Before deploying, ensure:**
+- All unused imports are removed
+- `npm run build` succeeds locally
+- No TypeScript errors
+- Environment variables set in Vercel dashboard
+
+📚 **For detailed deployment guide and troubleshooting:**
+- See [DEPLOYMENT.md](./DEPLOYMENT.md)
+- See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
 ---
 
