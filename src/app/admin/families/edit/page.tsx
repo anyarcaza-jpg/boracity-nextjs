@@ -19,7 +19,6 @@ function EditFamilyForm() {
     description: '',
   });
 
-  // Cargar datos de la familia
   useEffect(() => {
     if (!slug) {
       router.push('/admin/families');
@@ -28,7 +27,7 @@ function EditFamilyForm() {
 
     async function loadFamily() {
       try {
-        const response = await fetch(`/api/admin/families/${slug}`);
+        const response = await fetch(`/api/admin/family?slug=${slug}`);
         if (!response.ok) throw new Error('Family not found');
         
         const data = await response.json();
@@ -56,7 +55,7 @@ function EditFamilyForm() {
     setError('');
 
     try {
-      const response = await fetch(`/api/admin/families/${slug}`, {
+      const response = await fetch(`/api/admin/family?slug=${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -96,7 +95,6 @@ function EditFamilyForm() {
         <h1 className="text-3xl font-bold text-white mb-8">Edit Family</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Name
@@ -110,7 +108,6 @@ function EditFamilyForm() {
             />
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Category
@@ -128,7 +125,6 @@ function EditFamilyForm() {
             </select>
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Description
@@ -141,14 +137,12 @@ function EditFamilyForm() {
             />
           </div>
 
-          {/* Error */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3">
               <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex gap-4">
             <button
               type="submit"
