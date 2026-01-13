@@ -35,25 +35,41 @@ export async function getAllFamilies(): Promise<Family[]> {
 }
 
 /**
- * Obtener familia por category + slug
+ * Obtener familia por slug (sin category - NUEVA)
+ */
+export async function getFamilyBySlug(slug: string): Promise<Family | null>;
+/**
+ * Obtener familia por category + slug (SOBRECARGA)
  */
 export async function getFamilyBySlug(
-  category: FamilyCategory,
-  slug: string
+  categoryOrSlug: FamilyCategory | string,
+  slug?: string
 ): Promise<Family | null> {
   try {
+    // Si solo se pasa un parámetro, es el slug
+    if (slug === undefined) {
+      const rows = await sql`
+        SELECT * FROM families 
+        WHERE slug = ${categoryOrSlug}
+        LIMIT 1
+      `;
+      
+      if (rows.length === 0) return null;
+      return dbRowToFamily(rows[0]);
+    }
+    
+    // Si se pasan dos parámetros, es category + slug
     const rows = await sql`
       SELECT * FROM families 
-      WHERE category = ${category} 
+      WHERE category = ${categoryOrSlug} 
       AND slug = ${slug}
       LIMIT 1
     `;
     
     if (rows.length === 0) return null;
-    
     return dbRowToFamily(rows[0]);
   } catch (error) {
-    logger.error('Error getting family by slug', { category, slug, error });
+    logger.error('Error getting family by slug', { categoryOrSlug, slug, error });
     return null;
   }
 }
@@ -100,6 +116,75 @@ export async function searchFamilies(query: string): Promise<Family[]> {
   } catch (error) {
     logger.error('Error searching families', { query, error });
     return [];
+  }
+}
+
+// ============================================
+// MUTACIONES (CREATE, UPDATE, DELETE)
+// ============================================
+
+/**
+ * Actualizar una familia (VERSIÓN SIMPLE Y SEGURA)
+ */
+export async function updateFamily(
+  slug: string,
+  data: {
+    name?: string;
+    category?: string;
+    description?: string;
+  }
+): Promise<Family | null> {
+  try {
+    const { name, category, description } = data;
+
+    // Query con template literal (compatible con Neon)
+    const rows = await sql`
+      UPDATE families
+      SET 
+        name = COALESCE(${name}, name),
+        category = COALESCE(${category}, category),
+        description = COALESCE(${description}, description),
+        updated_at = NOW()
+      WHERE slug = ${slug}
+      RETURNING *
+    `;
+    
+    if (rows.length === 0) {
+      logger.warn('Family not found for update', { slug });
+      return null;
+    }
+    
+    logger.info('Family updated', { slug });
+    return dbRowToFamily(rows[0]);
+  } catch (error) {
+    logger.error('Error updating family', { slug, error });
+    return null;
+  }
+}
+
+/**
+ * Eliminar una familia
+ */
+export async function deleteFamily(slug: string): Promise<boolean> {
+  try {
+    const rows = await sql`
+      DELETE FROM families
+      WHERE slug = ${slug}
+      RETURNING id
+    `;
+    
+    const deleted = rows.length > 0;
+    
+    if (deleted) {
+      logger.info('Family deleted', { slug });
+    } else {
+      logger.warn('Family not found for deletion', { slug });
+    }
+    
+    return deleted;
+  } catch (error) {
+    logger.error('Error deleting family', { slug, error });
+    return false;
   }
 }
 
