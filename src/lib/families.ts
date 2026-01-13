@@ -161,10 +161,13 @@ export async function getFamilyBySlug(
     }
     
     logger.info('Fetching family by slug', { category, slug });
-    const family = await db.getFamilyBySlug(category as any, slug);
     
-    if (!family) {
-      logger.warn('Family not found by slug', { category, slug });
+    // Usar solo slug (sobrecarga de 1 parámetro) y verificar category después
+    const family = await db.getFamilyBySlug(slug);
+    
+    // Verificar que la categoría coincida
+    if (!family || family.category !== category) {
+      logger.warn('Family not found by slug or category mismatch', { category, slug });
       return null;
     }
     
