@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getFamilyBySlug, updateFamily, deleteFamily } from '@/lib/db/families';
 
-// GET /api/admin/families?slug=xxx
+// GET /api/admin/family?slug=xxx
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   }
 }
 
-// PUT /api/admin/families?slug=xxx
+// PUT /api/admin/family?slug=xxx
 export async function PUT(request: Request) {
   try {
     const session = await auth();
@@ -65,7 +65,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE /api/admin/families?slug=xxx
+// DELETE /api/admin/family?slug=xxx
 export async function DELETE(request: Request) {
   try {
     const session = await auth();
