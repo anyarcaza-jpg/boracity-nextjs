@@ -35,12 +35,13 @@ export async function getAllFamilies(): Promise<Family[]> {
 }
 
 /**
- * Obtener familia por slug (sin category - NUEVA)
+ * Obtener familia por slug - SOBRECARGA CORREGIDA
  */
 export async function getFamilyBySlug(slug: string): Promise<Family | null>;
-/**
- * Obtener familia por category + slug (SOBRECARGA)
- */
+export async function getFamilyBySlug(
+  category: FamilyCategory,
+  slug: string
+): Promise<Family | null>;
 export async function getFamilyBySlug(
   categoryOrSlug: FamilyCategory | string,
   slug?: string
