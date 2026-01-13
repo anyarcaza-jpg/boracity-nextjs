@@ -1,146 +1,101 @@
+// Cliente para ImageKit
+import ImageKit from 'imagekit';
+
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT!,
+});
+
+export async function uploadToImageKit(file: File, folder: string = 'families'): Promise<string> {
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    
+    const result = await imagekit.upload({
+      file: buffer,
+      fileName: `${Date.now()}-${file.name.replace(/\s+/g, '-')}`,
+      folder: folder,
+    });
+
+    return result.url;
+  } catch (error) {
+    console.error('Error uploading to ImageKit:', error);
+    throw new Error('Failed to upload image to ImageKit');
+  }
+}
+
 /**
- * OptimizedImage Component
- * Componente wrapper para Next.js Image con optimizaciones de ImageKit
+ * Genera URL de ImageKit con transformaciones
+ * @param filename - Nombre del archivo o path
+ * @param category - Categoría (furniture, doors, windows, lighting)
+ * @param transformations - Transformaciones opcionales
  */
+export function getImageKitUrl(
+  filename: string,
+  category: string,
+  transformations?: {
+    width?: number;
+    height?: number;
+    quality?: number;
+    format?: 'webp' | 'jpg' | 'png';
+  }
+): string {
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+  
+  if (!urlEndpoint) {
+    return filename;
+  }
 
-import Image from 'next/image';
-import { getImageKitUrl, getThumbnailUrl, getDetailUrl, isImageKitUrl } from '@/lib/imagekit';
+  // Si ya es una URL completa, retornarla
+  if (filename.startsWith('http')) {
+    return filename;
+  }
 
-interface OptimizedImageProps {
-  // Imagen de ImageKit o URL completa
-  src?: string;
-  category?: 'furniture' | 'doors' | 'windows' | 'lighting';
-  
-  // O URL completa (para imágenes locales o externas)
-  fullUrl?: string;
-  
-  // Props comunes
-  alt: string;
-  
-  // Tipo de imagen (afecta el tamaño)
-  variant?: 'thumbnail' | 'detail' | 'gallery' | 'hero';
-  
-  // Opciones de Next.js Image
-  priority?: boolean;
-  className?: string;
-  fill?: boolean;
-  sizes?: string;
-  
-  // Overrides de tamaño
-  width?: number;
-  height?: number;
-  quality?: number;
+  // Construir path: /category/filename
+  const path = filename.startsWith('/') ? filename : `/${category}/${filename}`;
+
+  // Construir transformaciones
+  const params: string[] = [];
+  if (transformations?.width) params.push(`w-${transformations.width}`);
+  if (transformations?.height) params.push(`h-${transformations.height}`);
+  if (transformations?.quality) params.push(`q-${transformations.quality}`);
+  if (transformations?.format) params.push(`f-${transformations.format}`);
+
+  const transformationString = params.length > 0 ? `tr:${params.join(',')}` : '';
+
+  return transformationString
+    ? `${urlEndpoint}/${transformationString}${path}`
+    : `${urlEndpoint}${path}`;
 }
 
-export default function OptimizedImage({
-  src,
-  category,
-  fullUrl,
-  alt,
-  variant = 'thumbnail',
-  priority = false,
-  className = '',
-  fill = false,
-  sizes,
-  width,
-  height,
-  quality,
-}: OptimizedImageProps) {
-  // Determinar la URL final
-  let finalUrl: string;
-  let finalWidth: number;
-  let finalHeight: number;
-
-  // Si se proporciona fullUrl directamente
-  if (fullUrl) {
-    finalUrl = fullUrl;
-    finalWidth = width || 800;
-    finalHeight = height || 600;
-  }
-  // Si src ya es una URL completa (empieza con http o /)
-  else if (src && (src.startsWith('http') || src.startsWith('/'))) {
-    finalUrl = src;
-    finalWidth = width || 400;
-    finalHeight = height || 300;
-  }
-  // Si es imagen de ImageKit (filename solamente)
-  else if (src && category) {
-    // Determinar tamaño según variant
-    switch (variant) {
-      case 'thumbnail':
-        finalUrl = getThumbnailUrl(src, category);
-        finalWidth = width || 400;
-        finalHeight = height || 300;
-        break;
-      
-      case 'detail':
-        finalUrl = getDetailUrl(src, category);
-        finalWidth = width || 1200;
-        finalHeight = height || 900;
-        break;
-      
-      case 'gallery':
-        finalUrl = getImageKitUrl(src, category, { 
-          width: width || 600, 
-          quality: quality || 85 
-        });
-        finalWidth = width || 600;
-        finalHeight = height || 450;
-        break;
-      
-      case 'hero':
-        finalUrl = getImageKitUrl(src, category, { 
-          width: width || 1920, 
-          quality: quality || 90 
-        });
-        finalWidth = width || 1920;
-        finalHeight = height || 1080;
-        break;
-      
-      default:
-        finalUrl = getThumbnailUrl(src, category);
-        finalWidth = width || 400;
-        finalHeight = height || 300;
-    }
-  }
-  // Fallback si faltan parámetros
-  else {
-    console.warn('OptimizedImage: Debes proporcionar (src + category) o fullUrl');
-    finalUrl = '/images/placeholder.jpg';
-    finalWidth = width || 800;
-    finalHeight = height || 600;
-  }
-
-  // Configuración de lazy loading
-  const loading = priority ? 'eager' : 'lazy';
-
-  // Si usa fill prop
-  if (fill) {
-    return (
-      <Image
-        src={finalUrl}
-        alt={alt}
-        fill
-        className={className}
-        sizes={sizes || '100vw'}
-        priority={priority}
-        quality={quality || 85}
-      />
-    );
-  }
-
-  // Imagen con dimensiones fijas
-  return (
-    <Image
-      src={finalUrl}
-      alt={alt}
-      width={finalWidth}
-      height={finalHeight}
-      className={className}
-      loading={loading}
-      priority={priority}
-      quality={quality || 85}
-      sizes={sizes}
-    />
-  );
+/**
+ * Genera URL para thumbnail (400px)
+ */
+export function getThumbnailUrl(filename: string, category: string): string {
+  return getImageKitUrl(filename, category, {
+    width: 400,
+    quality: 80,
+    format: 'webp',
+  });
 }
+
+/**
+ * Genera URL para vista de detalle (1200px)
+ */
+export function getDetailUrl(filename: string, category: string): string {
+  return getImageKitUrl(filename, category, {
+    width: 1200,
+    quality: 90,
+    format: 'webp',
+  });
+}
+
+/**
+ * Verifica si una URL es de ImageKit
+ */
+export function isImageKitUrl(url: string): boolean {
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+  return urlEndpoint ? url.includes(urlEndpoint) : false;
+}
+
+export { imagekit };

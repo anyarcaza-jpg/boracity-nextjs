@@ -1,323 +1,287 @@
-// src/lib/families.ts
-// v0.14.0 - Backend con PostgreSQL
+// src/lib/db/families.ts
 
-import type { Family, FamilyCategory, FamilyStats } from '@/types';
-import * as db from './db/families';
-import { cache } from 'react';
-import { unstable_cache } from 'next/cache';
-import { logger } from './logger';
+import { sql } from '@/lib/neon';
+import { dbRowToFamily, type FamilyRow } from './adapters';
+import type { Family, FamilyCategory } from '@/types';
+import { logger } from '@/lib/logger';
 
 /**
- * CAPA DE SERVICIO - Abstracción de datos
+ * FUNCIONES DE BASE DE DATOS
  * 
- * Este archivo es la interfaz entre el frontend y la base de datos.
- * El frontend llama estas funciones sin saber de dónde vienen los datos.
- * 
- * Ventajas:
- * - Frontend no cambia (mismas funciones)
- * - Podemos cambiar el backend sin romper nada
- * - Cache centralizado aquí
+ * Todas las queries a PostgreSQL están aquí.
+ * Usan el adapter para convertir rows → Family objects.
  */
 
-/* ============================================
-   CORE FUNCTIONS
-   ============================================ */
+// ============================================
+// QUERIES PRINCIPALES
+// ============================================
 
 /**
- * Obtener todas las familias con cache
+ * Obtener todas las familias
  */
-export const getAllFamilies = cache(async (): Promise<Family[]> => {
-  return unstable_cache(
-    async () => {
-      try {
-        logger.info('Fetching all families from database');
-        const families = await db.getAllFamilies();
-        logger.info('Families fetched', { count: families.length });
-        return families;
-      } catch (error) {
-        logger.error('Error fetching families', { 
-          error: error instanceof Error ? error.message : 'Unknown' 
-        });
-        return [];
-      }
-    },
-    ['all-families'],
-    {
-      revalidate: 3600, // 1 hora
-      tags: ['families']
-    }
-  )();
-});
-
-/**
- * Obtener familia por ID (slug en realidad)
- */
-export async function getFamilyById(id: string): Promise<Family | null> {
+export async function getAllFamilies(): Promise<Family[]> {
   try {
-    if (!id || id.trim().length < 3) {
-      logger.warn('Invalid family ID', { id });
-      return null;
-    }
+    const rows = await sql`
+      SELECT * FROM families 
+      ORDER BY created_at DESC 
+      LIMIT 100
+    `;
     
-    // En v0.14.0, el ID es el slug
-    // Necesitamos extraer category del slug o buscarlo
-    const allFamilies = await getAllFamilies();
-    const family = allFamilies.find(f => f.slug === id);
-    
-    if (!family) {
-      logger.warn('Family not found', { id });
-      return null;
-    }
-    
-    logger.info('Family retrieved', { id, name: family.name });
-    return family;
-    
+    return rows.map(dbRowToFamily);
   } catch (error) {
-    logger.error('Error fetching family by ID', { 
-      id, 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return null;
+    logger.error('Error getting all families', { error });
+    return [];
   }
 }
 
 /**
- * Obtener familias por categoría con cache
+ * Obtener familia por slug - SOBRECARGA CORREGIDA
  */
-export const getFamiliesByCategory = cache(async (category: FamilyCategory): Promise<Family[]> => {
-  return unstable_cache(
-    async () => {
-      try {
-        if (!category) {
-          logger.warn('Empty category');
-          return [];
-        }
-        
-        logger.info('Fetching families by category', { category });
-        const families = await db.getFamiliesByCategory(category);
-        logger.info('Families by category fetched', { category, count: families.length });
-        return families;
-        
-      } catch (error) {
-        logger.error('Error fetching by category', { 
-          category, 
-          error: error instanceof Error ? error.message : 'Unknown' 
-        });
-        return [];
-      }
-    },
-    ['families-by-category', category],
-    {
-      revalidate: 3600, // 1 hora
-      tags: ['families', `category-${category}`]
-    }
-  )();
-});
-
-/**
- * Buscar familias con cache
- */
-export const searchFamilies = cache(async (searchTerm: string): Promise<Family[]> => {
-  return unstable_cache(
-    async () => {
-      try {
-        if (!searchTerm || searchTerm.trim().length < 2) {
-          logger.debug('Search term too short', { searchTerm });
-          return [];
-        }
-        
-        logger.info('Searching families', { searchTerm });
-        const results = await db.searchFamilies(searchTerm);
-        logger.info('Search completed', { searchTerm, count: results.length });
-        return results;
-        
-      } catch (error) {
-        logger.error('Error searching families', { 
-          searchTerm, 
-          error: error instanceof Error ? error.message : 'Unknown' 
-        });
-        return [];
-      }
-    },
-    ['search-families', searchTerm.toLowerCase()],
-    {
-      revalidate: 1800, // 30 minutos
-      tags: ['search', 'families']
-    }
-  )();
-});
-
-/**
- * Obtener familia por category + slug
- */
+export async function getFamilyBySlug(slug: string): Promise<Family | null>;
 export async function getFamilyBySlug(
-  category: FamilyCategory, 
+  category: FamilyCategory,
   slug: string
+): Promise<Family | null>;
+export async function getFamilyBySlug(
+  categoryOrSlug: FamilyCategory | string,
+  slug?: string
 ): Promise<Family | null> {
   try {
-    if (!category || !slug || slug.trim().length < 3) {
-      logger.warn('Invalid parameters', { category, slug });
-      return null;
+    // Si solo se pasa un parámetro, es el slug
+    if (slug === undefined) {
+      const rows = await sql`
+        SELECT * FROM families 
+        WHERE slug = ${categoryOrSlug}
+        LIMIT 1
+      `;
+      
+      if (rows.length === 0) return null;
+      return dbRowToFamily(rows[0]);
     }
     
-    logger.info('Fetching family by slug', { category, slug });
-    const family = await db.getFamilyBySlug(category, slug);
+    // Si se pasan dos parámetros, es category + slug
+    const rows = await sql`
+      SELECT * FROM families 
+      WHERE category = ${categoryOrSlug} 
+      AND slug = ${slug}
+      LIMIT 1
+    `;
     
-    if (!family) {
-      logger.warn('Family not found by slug', { category, slug });
-      return null;
-    }
-    
-    logger.info('Family found', { category, slug, name: family.name });
-    return family;
-    
+    if (rows.length === 0) return null;
+    return dbRowToFamily(rows[0]);
   } catch (error) {
-    logger.error('Error fetching by slug', { 
-      category, 
-      slug, 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
+    logger.error('Error getting family by slug', { categoryOrSlug, slug, error });
     return null;
   }
 }
 
-/* ============================================
-   UTILITY FUNCTIONS
-   ============================================ */
-
 /**
- * Obtener estadísticas
+ * Obtener familias por categoría
  */
-export async function getFamiliesStats(): Promise<FamilyStats> {
+export async function getFamiliesByCategory(
+  category: FamilyCategory
+): Promise<Family[]> {
   try {
-    logger.info('Fetching family stats');
-    const stats = await db.getStats();
+    const rows = await sql`
+      SELECT * FROM families 
+      WHERE category = ${category}
+      ORDER BY downloads DESC
+      LIMIT 50
+    `;
     
-    // Obtener las más recientes
-    const allFamilies = await getAllFamilies();
-    const recentlyAdded = allFamilies
-      .sort((a, b) => b.metadata.uploadDate.getTime() - a.metadata.uploadDate.getTime())
-      .slice(0, 6);
-    
-    return {
-      totalFamilies: stats.totalFamilies,
-      totalDownloads: stats.totalDownloads,
-      totalViews: stats.totalViews,
-      categoriesCount: stats.categoriesCount,
-      recentlyAdded,
-    };
-    
+    return rows.map(dbRowToFamily);
   } catch (error) {
-    logger.error('Error fetching stats', { 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return {
-      totalFamilies: 0,
-      totalDownloads: 0,
-      totalViews: 0,
-      categoriesCount: 0,
-      recentlyAdded: []
-    };
+    logger.error('Error getting families by category', { category, error });
+    return [];
   }
 }
+
+/**
+ * Buscar familias (full-text search)
+ */
+export async function searchFamilies(query: string): Promise<Family[]> {
+  try {
+    if (!query || query.length < 2) return [];
+    
+    const rows = await sql`
+      SELECT * FROM families 
+      WHERE 
+        name ILIKE ${'%' + query + '%'} 
+        OR description ILIKE ${'%' + query + '%'}
+        OR ${query} = ANY(tags)
+      ORDER BY downloads DESC
+      LIMIT 20
+    `;
+    
+    return rows.map(dbRowToFamily);
+  } catch (error) {
+    logger.error('Error searching families', { query, error });
+    return [];
+  }
+}
+
+// ============================================
+// MUTACIONES (CREATE, UPDATE, DELETE)
+// ============================================
+
+/**
+ * Actualizar una familia (VERSIÓN SIMPLE Y SEGURA)
+ */
+export async function updateFamily(
+  slug: string,
+  data: {
+    name?: string;
+    category?: string;
+    description?: string;
+  }
+): Promise<Family | null> {
+  try {
+    const { name, category, description } = data;
+
+    // Query con template literal (compatible con Neon)
+    const rows = await sql`
+      UPDATE families
+      SET 
+        name = COALESCE(${name}, name),
+        category = COALESCE(${category}, category),
+        description = COALESCE(${description}, description),
+        updated_at = NOW()
+      WHERE slug = ${slug}
+      RETURNING *
+    `;
+    
+    if (rows.length === 0) {
+      logger.warn('Family not found for update', { slug });
+      return null;
+    }
+    
+    logger.info('Family updated', { slug });
+    return dbRowToFamily(rows[0]);
+  } catch (error) {
+    logger.error('Error updating family', { slug, error });
+    return null;
+  }
+}
+
+/**
+ * Eliminar una familia
+ */
+export async function deleteFamily(slug: string): Promise<boolean> {
+  try {
+    const rows = await sql`
+      DELETE FROM families
+      WHERE slug = ${slug}
+      RETURNING id
+    `;
+    
+    const deleted = rows.length > 0;
+    
+    if (deleted) {
+      logger.info('Family deleted', { slug });
+    } else {
+      logger.warn('Family not found for deletion', { slug });
+    }
+    
+    return deleted;
+  } catch (error) {
+    logger.error('Error deleting family', { slug, error });
+    return false;
+  }
+}
+
+// ============================================
+// CONTADORES (para analytics)
+// ============================================
+
+/**
+ * Incrementar contador de descargas
+ */
+export async function incrementDownloads(
+  category: FamilyCategory,
+  slug: string
+): Promise<void> {
+  try {
+    await sql`
+      UPDATE families 
+      SET downloads = downloads + 1 
+      WHERE category = ${category} 
+      AND slug = ${slug}
+    `;
+    
+    logger.info('Download incremented', { category, slug });
+  } catch (error) {
+    logger.error('Error incrementing downloads', { category, slug, error });
+  }
+}
+
+/**
+ * Incrementar contador de vistas
+ */
+export async function incrementViews(
+  category: FamilyCategory,
+  slug: string
+): Promise<void> {
+  try {
+    await sql`
+      UPDATE families 
+      SET views = views + 1 
+      WHERE category = ${category} 
+      AND slug = ${slug}
+    `;
+  } catch (error) {
+    logger.error('Error incrementing views', { category, slug, error });
+  }
+}
+
+// ============================================
+// ESTADÍSTICAS
+// ============================================
 
 /**
  * Obtener familias populares
  */
 export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
   try {
-    logger.info('Fetching popular families', { limit });
-    const families = await db.getPopularFamilies(limit);
-    logger.debug('Popular families fetched', { count: families.length });
-    return families;
+    const rows = await sql`
+      SELECT * FROM families 
+      ORDER BY downloads DESC 
+      LIMIT ${limit}
+    `;
     
+    return rows.map(dbRowToFamily);
   } catch (error) {
-    logger.error('Error fetching popular families', { 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
+    logger.error('Error getting popular families', { error });
     return [];
   }
 }
 
 /**
- * Obtener familias relacionadas
+ * Obtener estadísticas generales
  */
-export async function getRelatedFamilies(familyId: string, limit: number = 4): Promise<Family[]> {
+export async function getStats() {
   try {
-    if (!familyId || familyId.trim().length < 3) {
-      return [];
-    }
+    const result = await sql`
+      SELECT 
+        COUNT(*) as total_families,
+        SUM(downloads) as total_downloads,
+        SUM(views) as total_views,
+        COUNT(DISTINCT category) as categories_count
+      FROM families
+    `;
     
-    // Obtener la familia actual
-    const currentFamily = await getFamilyById(familyId);
-    if (!currentFamily) {
-      return [];
-    }
-    
-    // Obtener otras de la misma categoría
-    logger.info('Fetching related families', { familyId, category: currentFamily.category });
-    const categoryFamilies = await getFamiliesByCategory(currentFamily.category);
-    
-    const related = categoryFamilies
-      .filter(f => f.slug !== familyId)
-      .slice(0, limit);
-    
-    logger.debug('Related families found', { familyId, count: related.length });
-    return related;
-    
-  } catch (error) {
-    logger.error('Error fetching related families', { 
-      familyId, 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return [];
-  }
-}
-
-/**
- * Obtener info para redirect por ID
- */
-export async function getFamilyByIdForRedirect(
-  id: string
-): Promise<{ category: FamilyCategory; slug: string } | null> {
-  try {
-    if (!id || id.trim().length < 3) {
-      logger.warn('Invalid ID for redirect', { id });
-      return null;
-    }
-    
-    const family = await getFamilyById(id);
-    
-    if (!family) {
-      logger.warn('Family not found for redirect', { id });
-      return null;
-    }
-    
-    logger.info('Redirect generated', { id, category: family.category, slug: family.slug });
     return {
-      category: family.category,
-      slug: family.slug
+      totalFamilies: Number(result[0].total_families),
+      totalDownloads: Number(result[0].total_downloads),
+      totalViews: Number(result[0].total_views),
+      categoriesCount: Number(result[0].categories_count),
     };
-    
   } catch (error) {
-    logger.error('Error generating redirect', { 
-      id, 
-      error: error instanceof Error ? error.message : 'Unknown' 
-    });
-    return null;
+    logger.error('Error getting stats', { error });
+    return {
+      totalFamilies: 0,
+      totalDownloads: 0,
+      totalViews: 0,
+      categoriesCount: 0,
+    };
   }
-}
-
-/* ============================================
-   CACHE MANAGEMENT
-   ============================================ */
-
-export function invalidateFamiliesCache(): void {
-  logger.info('Cache invalidation requested');
-  // En producción: revalidateTag('families')
-}
-
-export function invalidateCategoryCache(category: FamilyCategory): void {
-  logger.info('Category cache invalidation requested', { category });
-  // En producción: revalidateTag(`category-${category}`)
 }
