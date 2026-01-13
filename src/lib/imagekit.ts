@@ -24,4 +24,72 @@ export async function uploadToImageKit(file: File, folder: string = 'families'):
   }
 }
 
+/**
+ * Genera URL de ImageKit con transformaciones
+ */
+export function getImageKitUrl(
+  path: string,
+  transformations?: {
+    width?: number;
+    height?: number;
+    quality?: number;
+    format?: 'webp' | 'jpg' | 'png';
+  }
+): string {
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+  
+  if (!urlEndpoint) {
+    return path;
+  }
+
+  // Si ya es una URL completa de ImageKit, retornarla
+  if (path.startsWith('http')) {
+    return path;
+  }
+
+  // Construir transformaciones
+  const params: string[] = [];
+  if (transformations?.width) params.push(`w-${transformations.width}`);
+  if (transformations?.height) params.push(`h-${transformations.height}`);
+  if (transformations?.quality) params.push(`q-${transformations.quality}`);
+  if (transformations?.format) params.push(`f-${transformations.format}`);
+
+  const transformationString = params.length > 0 ? `tr:${params.join(',')}` : '';
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
+  return transformationString
+    ? `${urlEndpoint}/${transformationString}${cleanPath}`
+    : `${urlEndpoint}${cleanPath}`;
+}
+
+/**
+ * Genera URL para thumbnail
+ */
+export function getThumbnailUri(path: string, width: number = 400): string {
+  return getImageKitUrl(path, {
+    width,
+    quality: 80,
+    format: 'webp',
+  });
+}
+
+/**
+ * Genera URL para vista de detalle
+ */
+export function getDetailUrl(path: string, width: number = 800): string {
+  return getImageKitUrl(path, {
+    width,
+    quality: 90,
+    format: 'webp',
+  });
+}
+
+/**
+ * Verifica si una URL es de ImageKit
+ */
+export function isImageKitUrl(url: string): boolean {
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+  return urlEndpoint ? url.includes(urlEndpoint) : false;
+}
+
 export { imagekit };
