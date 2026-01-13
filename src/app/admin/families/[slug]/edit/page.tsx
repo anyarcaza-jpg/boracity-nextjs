@@ -12,8 +12,13 @@ interface Family {
   description: string;
 }
 
-export default function EditFamilyPage({ params }: { params: { slug: string } }) {
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default function EditFamilyPage({ params }: PageProps) {
   const router = useRouter();
+  const [slug, setSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -25,13 +30,24 @@ export default function EditFamilyPage({ params }: { params: { slug: string } })
     description: '',
   });
 
+  // Resolver params de forma segura
   useEffect(() => {
+    params.then((resolvedParams) => {
+      setSlug(resolvedParams.slug);
+    });
+  }, [params]);
+
+  // Fetch family cuando tengamos el slug
+  useEffect(() => {
+    if (!slug) return;
     fetchFamily();
-  }, []);
+  }, [slug]);
 
   const fetchFamily = async () => {
+    if (!slug) return;
+    
     try {
-      const response = await fetch(`/api/admin/families/${params.slug}`);
+      const response = await fetch(`/api/admin/families/${slug}`);
       if (!response.ok) throw new Error('Family not found');
       
       const data = await response.json();
@@ -50,11 +66,13 @@ export default function EditFamilyPage({ params }: { params: { slug: string } })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!slug) return;
+    
     setError('');
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/admin/families/${params.slug}`, {
+      const response = await fetch(`/api/admin/families/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
