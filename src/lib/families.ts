@@ -161,7 +161,7 @@ export async function getFamilyBySlug(
     }
     
     logger.info('Fetching family by slug', { category, slug });
-    const family = await db.getFamilyBySlug(category, slug);
+    const family = await db.getFamilyBySlug(category as any, slug);
     
     if (!family) {
       logger.warn('Family not found by slug', { category, slug });
