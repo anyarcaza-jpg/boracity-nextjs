@@ -26,9 +26,13 @@ export async function uploadToImageKit(file: File, folder: string = 'families'):
 
 /**
  * Genera URL de ImageKit con transformaciones
+ * @param filename - Nombre del archivo o path
+ * @param category - Categoría (furniture, doors, windows, lighting)
+ * @param transformations - Transformaciones opcionales
  */
 export function getImageKitUrl(
-  path: string,
+  filename: string,
+  category: string,
   transformations?: {
     width?: number;
     height?: number;
@@ -39,13 +43,16 @@ export function getImageKitUrl(
   const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
   
   if (!urlEndpoint) {
-    return path;
+    return filename;
   }
 
-  // Si ya es una URL completa de ImageKit, retornarla
-  if (path.startsWith('http')) {
-    return path;
+  // Si ya es una URL completa, retornarla
+  if (filename.startsWith('http')) {
+    return filename;
   }
+
+  // Construir path: /category/filename
+  const path = filename.startsWith('/') ? filename : `/${category}/${filename}`;
 
   // Construir transformaciones
   const params: string[] = [];
@@ -55,30 +62,29 @@ export function getImageKitUrl(
   if (transformations?.format) params.push(`f-${transformations.format}`);
 
   const transformationString = params.length > 0 ? `tr:${params.join(',')}` : '';
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
 
   return transformationString
-    ? `${urlEndpoint}/${transformationString}${cleanPath}`
-    : `${urlEndpoint}${cleanPath}`;
+    ? `${urlEndpoint}/${transformationString}${path}`
+    : `${urlEndpoint}${path}`;
 }
 
 /**
- * Genera URL para thumbnail
+ * Genera URL para thumbnail (400px)
  */
-export function getThumbnailUri(path: string, width: number = 400): string {
-  return getImageKitUrl(path, {
-    width,
+export function getThumbnailUrl(filename: string, category: string): string {
+  return getImageKitUrl(filename, category, {
+    width: 400,
     quality: 80,
     format: 'webp',
   });
 }
 
 /**
- * Genera URL para vista de detalle
+ * Genera URL para vista de detalle (1200px)
  */
-export function getDetailUrl(path: string, width: number = 800): string {
-  return getImageKitUrl(path, {
-    width,
+export function getDetailUrl(filename: string, category: string): string {
+  return getImageKitUrl(filename, category, {
+    width: 1200,
     quality: 90,
     format: 'webp',
   });
