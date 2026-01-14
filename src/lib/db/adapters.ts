@@ -57,7 +57,7 @@ export interface FamilyRow {
 
 export function dbRowToFamily(row: any): Family {
   return {
-    id: row.slug, // Usar slug como ID para compatibilidad con frontend
+    id: row.id, // ✅ UUID real de la base de datos
     slug: row.slug,
     name: row.name,
     category: row.category,
@@ -66,7 +66,7 @@ export function dbRowToFamily(row: any): Family {
     images: {
       thumbnail: row.thumbnail_url || '',
       category: row.category,
-      gallery: [], // TODO: Agregar en v0.15.0
+      gallery: [], // Se llena desde family_images en página de detalle
     },
     
     file: {

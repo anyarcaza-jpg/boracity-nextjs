@@ -64,6 +64,31 @@ export interface FamilySEO {
 }
 
 // ============================================
+// FAMILY IMAGES - Galería de imágenes
+// ============================================
+
+export interface FamilyImage {
+  id: string;
+  familyId: string;
+  imageUrl: string;
+  thumbnailUrl: string | null;
+  isPrimary: boolean;
+  orderIndex: number;
+  altText: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateFamilyImageInput {
+  familyId: string;
+  imageUrl: string;
+  thumbnailUrl?: string | null;
+  isPrimary?: boolean;
+  orderIndex?: number;
+  altText?: string | null;
+}
+
+// ============================================
 // STATS - Estadísticas
 // ============================================
 

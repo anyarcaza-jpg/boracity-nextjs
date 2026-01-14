@@ -1,6 +1,7 @@
 // src/app/revit/[category]/[slug]/page.tsx
 import Link from 'next/link';
 import { getFamilyBySlug, getRelatedFamilies } from '@/lib/families';
+import { getImagesByFamilyId } from '@/lib/db/images';
 import { CATEGORY_METADATA } from '@/data/models/family.model';
 import FamilyCard from '@/components/FamilyCard';
 import { ProductSchema, BreadcrumbSchema } from '@/components/SchemaOrg';
@@ -30,8 +31,21 @@ export default async function FamilyDetailPage({ params }: PageProps) {
   if (!family) {
     notFound();
   }
+
+  // ============================================
+  // CARGAR GALERÍA REAL DE LA BASE DE DATOS
+  // ============================================
+  const galleryImagesFromDB = await getImagesByFamilyId(family.id);
   
-  const relatedFamilies = await getRelatedFamilies(family.id, 4);
+  // Construir array de URLs para la galería
+  // Prioridad: 1. Imágenes de galería, 2. Thumbnail como fallback
+  const galleryImages = galleryImagesFromDB.length > 0
+    ? galleryImagesFromDB
+        .sort((a, b) => a.orderIndex - b.orderIndex) // Ordenar por orderIndex
+        .map(img => img.imageUrl) // Extraer solo las URLs
+    : [family.images.thumbnail]; // Si no hay galería, usar solo el thumbnail
+  
+  const relatedFamilies = await getRelatedFamilies(family.slug, 4); // Usar slug en lugar de id
   const baseUrl = 'https://boracity.com';
   const currentUrl = `${baseUrl}/revit/${category}/${slug}`;
   
@@ -40,13 +54,6 @@ export default async function FamilyDetailPage({ params }: PageProps) {
     { name: 'Revit Families', url: '/revit' },
     { name: CATEGORY_METADATA[category]?.name || category, url: `/revit/${category}` },
     { name: family.name, url: currentUrl }
-  ];
-  
-  const galleryImages = [
-    family.images.thumbnail,
-    `https://via.placeholder.com/800x600/FF4500/ffffff?text=Image+2`,
-    `https://via.placeholder.com/800x600/E63E00/ffffff?text=Image+3`,
-    `https://via.placeholder.com/800x600/FF6B35/ffffff?text=Image+4`,
   ];
 
   return (
@@ -78,92 +85,49 @@ export default async function FamilyDetailPage({ params }: PageProps) {
               <ImageGallery images={galleryImages} alt={family.name} />
             </div>
             <div className="space-y-5">
-              <UserInfo
-                author={{ name: family.metadata.author }}
-                initialStats={{
-                  likes: family.metadata.downloads,
-                  isLiked: false,
-                  isSaved: false,
-                  isFollowing: false,
-                }}
-              />
-              <div>
-                <Link 
-                  href={`/revit/${family.category}`}
-                  className="inline-block px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors"
-                >
-                  {CATEGORY_METADATA[family.category]?.name || family.category}
-                </Link>
-              </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                {family.name}
-              </h1>
-              <p className="text-base text-gray-600 leading-relaxed">
-                {family.description}
-              </p>
-              <MetadataStats
-                stats={{
-                  likes: 225,
-                  downloads: family.metadata.downloads,
-                  views: family.metadata.views,
-                  collections: 31,
-                }}
-              />
-              <DownloadButton
-                fileName={`${family.id}.rfa`}
-                fileSize={family.file.size}
-                downloadUrl={family.file.downloadUrl}
-              />
-              {/* TAGS */}
-              {family.metadata.tags && family.metadata.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {family.metadata.tags.slice(0, 6).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-full transition-colors cursor-pointer"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h1 className="text-3xl font-bold text-gray-900 mb-3">{family.name}</h1>
+                <p className="text-gray-600 leading-relaxed mb-5">{family.description}</p>
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                    {CATEGORY_METADATA[category]?.name || category}
+                  </span>
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
+                    Revit {family.file.revitVersions[0] || '2024'}
+                  </span>
                 </div>
-              )}
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 space-y-4 border border-gray-200/50">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500 block mb-1">File Size</span>
-                    <span className="font-semibold text-gray-900">{family.file.size}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block mb-1">Author</span>
-                    <span className="font-semibold text-gray-900">{family.metadata.author}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block mb-1">Revit Versions</span>
-                    <span className="font-semibold text-gray-900">
-                      {family.file.revitVersions[0]} - {family.file.revitVersions[family.file.revitVersions.length - 1]}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block mb-1">Upload Date</span>
-                    <span className="font-semibold text-gray-900">
-                      {new Date(family.metadata.uploadDate).toLocaleDateString()}
-                    </span>
-                  </div>
+                <MetadataStats 
+                  stats={{
+                    likes: 0,
+                    downloads: family.metadata.downloads,
+                    views: family.metadata.views,
+                  }}
+                />
+                <div className="mt-6">
+                  <DownloadButton
+                    fileName={`${slug}.rfa`}
+                    fileSize={family.file.size}
+                    downloadUrl={family.file.downloadUrl}
+                  />
                 </div>
               </div>
+              <UserInfo 
+                author={{
+                  name: family.metadata.author,
+                  avatar: undefined,
+                }}
+              />
             </div>
           </div>
           {relatedFamilies.length > 0 && (
-            <section className="mt-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                Related Families
-              </h2>
+            <div className="mt-16">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Families</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedFamilies.map((related) => (
-                  <FamilyCard key={related.id} family={related} />
+                {relatedFamilies.map((relatedFamily) => (
+                  <FamilyCard key={relatedFamily.id} family={relatedFamily} />
                 ))}
               </div>
-            </section>
+            </div>
           )}
         </div>
       </div>
