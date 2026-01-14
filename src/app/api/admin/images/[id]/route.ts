@@ -10,7 +10,7 @@ import { deleteImage } from '@/lib/db/images';
  */
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticación
@@ -23,8 +23,8 @@ export async function DELETE(
       );
     }
 
-    // Extraer el ID directamente del context
-    const imageId = context.params.id;
+    // Await params (Next.js 15)
+    const { id: imageId } = await params;
 
     if (!imageId) {
       return NextResponse.json(

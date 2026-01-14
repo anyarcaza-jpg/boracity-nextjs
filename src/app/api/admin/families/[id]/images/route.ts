@@ -10,7 +10,7 @@ import { getImagesByFamilyId } from '@/lib/db/images';
  */
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticación
@@ -23,8 +23,8 @@ export async function GET(
       );
     }
 
-    // Extraer el ID directamente del context
-    const familyId = context.params.id;
+    // Await params (Next.js 15)
+    const { id: familyId } = await params;
 
     if (!familyId) {
       return NextResponse.json(
