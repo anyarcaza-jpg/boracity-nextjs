@@ -1,30 +1,34 @@
 // src/lib/families.ts
-// v0.14.0 - Backend con PostgreSQL
+// v0.15.0 - Service Layer with Pagination Support
 
 import type { Family, FamilyCategory, FamilyStats } from '@/types';
 import * as db from './db/families';
+import type { SearchResult } from './db/families';
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { logger } from './logger';
 
 /**
- * CAPA DE SERVICIO - Abstracción de datos
+ * SERVICE LAYER - Data Abstraction with Caching
  * 
- * Este archivo es la interfaz entre el frontend y la base de datos.
- * El frontend llama estas funciones sin saber de dónde vienen los datos.
+ * This file is the interface between frontend and database.
+ * Frontend calls these functions without knowing data source.
  * 
- * Ventajas:
- * - Frontend no cambia (mismas funciones)
- * - Podemos cambiar el backend sin romper nada
- * - Cache centralizado aquí
+ * Benefits:
+ * - Frontend doesn't change (same functions)
+ * - Can change backend without breaking anything
+ * - Centralized caching
  */
+
+// Re-export types
+export type { SearchResult };
 
 /* ============================================
    CORE FUNCTIONS
    ============================================ */
 
 /**
- * Obtener todas las familias con cache
+ * Get all families with cache
  */
 export const getAllFamilies = cache(async (): Promise<Family[]> => {
   return unstable_cache(
@@ -43,14 +47,14 @@ export const getAllFamilies = cache(async (): Promise<Family[]> => {
     },
     ['all-families'],
     {
-      revalidate: 3600, // 1 hora
+      revalidate: 3600, // 1 hour
       tags: ['families']
     }
   )();
 });
 
 /**
- * Obtener familia por ID (slug en realidad)
+ * Get family by ID (slug)
  */
 export async function getFamilyById(id: string): Promise<Family | null> {
   try {
@@ -59,8 +63,6 @@ export async function getFamilyById(id: string): Promise<Family | null> {
       return null;
     }
     
-    // En v0.14.0, el ID es el slug
-    // Necesitamos extraer category del slug o buscarlo
     const allFamilies = await getAllFamilies();
     const family = allFamilies.find(f => f.slug === id);
     
@@ -82,7 +84,7 @@ export async function getFamilyById(id: string): Promise<Family | null> {
 }
 
 /**
- * Obtener familias por categoría con cache
+ * Get families by category with cache
  */
 export const getFamiliesByCategory = cache(async (category: FamilyCategory): Promise<Family[]> => {
   return unstable_cache(
@@ -108,47 +110,109 @@ export const getFamiliesByCategory = cache(async (category: FamilyCategory): Pro
     },
     ['families-by-category', category],
     {
-      revalidate: 3600, // 1 hora
+      revalidate: 3600, // 1 hour
       tags: ['families', `category-${category}`]
     }
   )();
 });
 
 /**
- * Buscar familias con cache
+ * Search families with cache and pagination support
+ * 
+ * Note: Pagination results are NOT cached because they change frequently
+ * Only cache is applied at database level for performance
+ * 
+ * @param searchTerm - Search query
+ * @param tags - Optional array of tags to filter by
+ * @param page - Page number (1-based, default: 1)
+ * @param limit - Results per page (default: 20)
+ * @returns SearchResult with families, total, pagination info
  */
-export const searchFamilies = cache(async (searchTerm: string): Promise<Family[]> => {
+export async function searchFamilies(
+  searchTerm: string, 
+  tags: string[] = [],
+  page: number = 1,
+  limit: number = 20
+): Promise<SearchResult> {
+  try {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      logger.debug('Search term too short', { searchTerm });
+      return {
+        families: [],
+        total: 0,
+        page: 1,
+        limit,
+        hasMore: false
+      };
+    }
+    
+    logger.info('Searching families', { 
+      searchTerm, 
+      tags, 
+      page, 
+      limit 
+    });
+    
+    const result = await db.searchFamilies(searchTerm, tags, page, limit);
+    
+    logger.info('Search completed', { 
+      searchTerm, 
+      tags, 
+      page,
+      count: result.families.length,
+      total: result.total,
+      hasMore: result.hasMore
+    });
+    
+    return result;
+    
+  } catch (error) {
+    logger.error('Error searching families', { 
+      searchTerm,
+      tags,
+      page, 
+      error: error instanceof Error ? error.message : 'Unknown' 
+    });
+    
+    return {
+      families: [],
+      total: 0,
+      page: 1,
+      limit,
+      hasMore: false
+    };
+  }
+}
+
+/**
+ * Get all unique tags from database with cache
+ * Used for populating tag filters in search UI
+ */
+export const getAllTags = cache(async (): Promise<string[]> => {
   return unstable_cache(
     async () => {
       try {
-        if (!searchTerm || searchTerm.trim().length < 2) {
-          logger.debug('Search term too short', { searchTerm });
-          return [];
-        }
-        
-        logger.info('Searching families', { searchTerm });
-        const results = await db.searchFamilies(searchTerm);
-        logger.info('Search completed', { searchTerm, count: results.length });
-        return results;
-        
+        logger.info('Fetching all tags');
+        const tags = await db.getAllTags();
+        logger.info('Tags fetched', { count: tags.length });
+        return tags;
       } catch (error) {
-        logger.error('Error searching families', { 
-          searchTerm, 
+        logger.error('Error fetching tags', { 
           error: error instanceof Error ? error.message : 'Unknown' 
         });
         return [];
       }
     },
-    ['search-families', searchTerm.toLowerCase()],
+    ['all-tags'],
     {
-      revalidate: 1800, // 30 minutos
-      tags: ['search', 'families']
+      revalidate: 3600,
+      tags: ['tags', 'families']
     }
   )();
 });
 
 /**
- * Obtener familia por category + slug
+ * Get family by category + slug
  */
 export async function getFamilyBySlug(
   category: FamilyCategory, 
@@ -162,10 +226,8 @@ export async function getFamilyBySlug(
     
     logger.info('Fetching family by slug', { category, slug });
     
-    // Usar solo slug (sobrecarga de 1 parámetro) y verificar category después
     const family = await db.getFamilyBySlug(slug);
     
-    // Verificar que la categoría coincida
     if (!family || family.category !== category) {
       logger.warn('Family not found by slug or category mismatch', { category, slug });
       return null;
@@ -189,14 +251,13 @@ export async function getFamilyBySlug(
    ============================================ */
 
 /**
- * Obtener estadísticas
+ * Get statistics
  */
 export async function getFamiliesStats(): Promise<FamilyStats> {
   try {
     logger.info('Fetching family stats');
     const stats = await db.getStats();
     
-    // Obtener las más recientes
     const allFamilies = await getAllFamilies();
     const recentlyAdded = allFamilies
       .sort((a, b) => b.metadata.uploadDate.getTime() - a.metadata.uploadDate.getTime())
@@ -225,7 +286,7 @@ export async function getFamiliesStats(): Promise<FamilyStats> {
 }
 
 /**
- * Obtener familias populares
+ * Get popular families
  */
 export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
   try {
@@ -243,7 +304,7 @@ export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
 }
 
 /**
- * Obtener familias relacionadas
+ * Get related families
  */
 export async function getRelatedFamilies(familyId: string, limit: number = 4): Promise<Family[]> {
   try {
@@ -251,13 +312,11 @@ export async function getRelatedFamilies(familyId: string, limit: number = 4): P
       return [];
     }
     
-    // Obtener la familia actual
     const currentFamily = await getFamilyById(familyId);
     if (!currentFamily) {
       return [];
     }
     
-    // Obtener otras de la misma categoría
     logger.info('Fetching related families', { familyId, category: currentFamily.category });
     const categoryFamilies = await getFamiliesByCategory(currentFamily.category);
     
@@ -278,7 +337,7 @@ export async function getRelatedFamilies(familyId: string, limit: number = 4): P
 }
 
 /**
- * Obtener info para redirect por ID
+ * Get info for redirect by ID
  */
 export async function getFamilyByIdForRedirect(
   id: string
@@ -317,10 +376,8 @@ export async function getFamilyByIdForRedirect(
 
 export function invalidateFamiliesCache(): void {
   logger.info('Cache invalidation requested');
-  // En producción: revalidateTag('families')
 }
 
 export function invalidateCategoryCache(category: FamilyCategory): void {
   logger.info('Category cache invalidation requested', { category });
-  // En producción: revalidateTag(`category-${category}`)
 }

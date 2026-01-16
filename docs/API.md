@@ -1,6 +1,168 @@
+# 📚 BORACITY API DOCUMENTATION
+
+**Version:** 2.0.0 (Session 24 Update)  
+**Last Updated:** January 15, 2026  
+
 ---
 
-## ADMIN ENDPOINTS
+## 🌐 PUBLIC ENDPOINTS
+
+### No authentication required
+Estos endpoints están disponibles públicamente sin necesidad de autenticación.
+
+---
+
+## GET `/api/search`
+
+Buscar familias con Full-Text Search y paginación.
+
+**Query Parameters:**
+- `q` (required): Search query (2-100 characters)
+- `tags` (optional): Comma-separated tags to filter (e.g., "modern,wooden")
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Results per page (default: 20, max: 100)
+
+**Examples:**
+```bash
+# Basic search
+GET /api/search?q=chair
+
+# Search with pagination
+GET /api/search?q=chair&page=2&limit=20
+
+# Search with tags
+GET /api/search?q=chair&tags=modern,wooden
+
+# Complete search
+GET /api/search?q=chair&tags=modern&page=1&limit=10
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Modern Office Chair",
+      "slug": "modern-office-chair",
+      "category": "furniture",
+      "description": "A modern office chair...",
+      "thumbnailUrl": "https://ik.imagekit.io/xxx/thumb.png",
+      "metadata": {
+        "downloads": 1247,
+        "views": 3891,
+        "fileSize": "245 KB",
+        "revitVersion": "2024",
+        "uploadDate": "2026-01-12T10:30:00Z"
+      },
+      "tags": ["modern", "office", "chair", "furniture"]
+    }
+  ],
+  "pagination": {
+    "total": 150,
+    "page": 1,
+    "limit": 20,
+    "hasMore": true,
+    "totalPages": 8
+  },
+  "query": "chair",
+  "tags": ["modern"]
+}
+```
+
+**Response (400) - Validation Error:**
+```json
+{
+  "success": false,
+  "error": "Query parameter \"q\" is required",
+  "example": "/api/search?q=chair&page=1&limit=20"
+}
+```
+
+**Headers:**
+```
+X-RateLimit-Limit: 20
+X-RateLimit-Remaining: 15
+X-Response-Time: 45ms
+X-Total-Results: 150
+X-Current-Page: 1
+```
+
+**Rate Limit:**
+- 20 requests per minute per IP
+
+**Search Features:**
+- ✅ Full-Text Search with relevance ranking
+- ✅ Multi-word queries ("modern chair")
+- ✅ Tag filtering (AND logic)
+- ✅ Intelligent ranking (relevance + popularity)
+- ✅ Name boost (2x score for title matches)
+- ✅ Automatic fallback to ILIKE if FTS fails
+
+---
+
+## GET `/api/tags`
+
+Obtener todos los tags únicos disponibles.
+
+**No parameters required**
+
+**Example:**
+```bash
+GET /api/tags
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "tags": [
+    "LED",
+    "armchair",
+    "awning",
+    "bar",
+    "casement",
+    "ceiling",
+    "ceiling fan",
+    "chair",
+    "door",
+    "double",
+    "exterior",
+    "fan",
+    "furniture",
+    "glass",
+    "kitchen",
+    "lighting",
+    "living room",
+    "modern",
+    "ottoman",
+    "pendant",
+    "triple",
+    "two lite",
+    "vertical",
+    "window",
+    "wood"
+  ],
+  "count": 25
+}
+```
+
+**Response (500) - Error:**
+```json
+{
+  "success": false,
+  "error": "Failed to fetch tags"
+}
+```
+
+**Cache:**
+- Server-side cache: 1 hour
+- Tags are refreshed automatically when families are created/updated
+
+---
+
+## 🔒 ADMIN ENDPOINTS
 
 ### Autenticación requerida
 Todos los endpoints de admin requieren:
@@ -186,7 +348,7 @@ type: "rfa" | "thumbnail"
 
 ---
 
-## Códigos de Estado
+## 📊 Códigos de Estado
 
 | Código | Descripción |
 |--------|-------------|
@@ -194,11 +356,12 @@ type: "rfa" | "thumbnail"
 | 400 | Bad Request (validación fallida) |
 | 401 | Unauthorized (no autenticado o no admin) |
 | 404 | Not Found (familia no existe) |
+| 429 | Too Many Requests (rate limit excedido) |
 | 500 | Internal Server Error |
 
 ---
 
-## Servicios Externos
+## 🔧 Servicios Externos
 
 ### Cloudflare R2
 - **Uso:** Almacenamiento de archivos .rfa
@@ -212,9 +375,9 @@ type: "rfa" | "thumbnail"
 
 ---
 
-## Ejemplo de Flujo Completo
+## 💡 Ejemplo de Flujo Completo
 
-### 1. Upload de archivos
+### 1. Upload de archivos (Admin)
 ```javascript
 // Upload RFA
 const rfaFormData = new FormData();
@@ -239,7 +402,7 @@ const thumbResponse = await fetch('/api/admin/upload', {
 const thumbData = await thumbResponse.json();
 ```
 
-### 2. Crear familia con URLs
+### 2. Crear familia con URLs (Admin)
 ```javascript
 const createResponse = await fetch('/api/admin/families', {
   method: 'POST',
@@ -257,4 +420,71 @@ const createResponse = await fetch('/api/admin/families', {
 });
 ```
 
+### 3. Búsqueda pública (Frontend)
+```javascript
+// Basic search
+const searchResponse = await fetch('/api/search?q=chair');
+const searchData = await searchResponse.json();
+
+// With pagination and tags
+const advancedSearch = await fetch(
+  '/api/search?q=chair&tags=modern,wooden&page=2&limit=20'
+);
+const advancedData = await advancedSearch.json();
+```
+
+### 4. Infinite scroll implementation (Frontend)
+```javascript
+const [results, setResults] = useState([]);
+const [page, setPage] = useState(1);
+
+async function loadMore() {
+  const response = await fetch(
+    `/api/search?q=${query}&page=${page + 1}&limit=20`
+  );
+  const data = await response.json();
+  
+  setResults(prev => [...prev, ...data.data]);
+  setPage(prev => prev + 1);
+}
+
+// Load more when user scrolls to 80% of page
+useEffect(() => {
+  const handleScroll = () => {
+    const scrollPercentage = 
+      (window.scrollY + window.innerHeight) / document.body.offsetHeight;
+    
+    if (scrollPercentage > 0.8 && data.pagination.hasMore) {
+      loadMore();
+    }
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
+```
+
 ---
+
+## 🚀 Performance Tips
+
+### Search Optimization
+- Use pagination (`page` and `limit` params) to avoid loading all results
+- Cache tags endpoint result on client (updates hourly)
+- Implement debounce for search input (300-500ms)
+
+### Rate Limiting
+- Search endpoint: 20 requests/minute per IP
+- Implement retry logic with exponential backoff
+- Show user-friendly error messages when rate limited
+
+### Caching Strategy
+- Tags: Server cache 1 hour, client cache 1 hour
+- Search results: No cache (always fresh)
+- Family details: Server cache 30 minutes
+
+---
+
+**Documentation Version:** 2.0.0  
+**API Version:** 2.0.0  
+**Last Updated:** January 15, 2026

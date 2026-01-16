@@ -79,6 +79,7 @@ export function dbRowToFamily(row: any): Family {
       tags: row.tags || [],
       author: row.author || 'Boracity Team',
       uploadDate: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at || row.created_at), // ← NUEVA LÍNEA
       downloads: row.downloads || 0,
       views: row.views || 0,
     },

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getFamilyBySlug, updateFamily, deleteFamily } from '@/lib/db/families';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/family?slug=xxx
 export async function GET(request: Request) {
@@ -46,17 +47,37 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { name, category, description } = body;
+    const { name, category, description, thumbnail_url } = body;
 
     if (!name || !category || !description) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const updatedFamily = await updateFamily(slug, { name, category, description });
+    // Preparar datos para actualizar
+    const updateData: any = { name, category, description };
+    
+    // Si se envió un nuevo thumbnail, incluirlo
+    if (thumbnail_url) {
+      updateData.thumbnail_url = thumbnail_url;
+    }
+
+    const updatedFamily = await updateFamily(slug, updateData);
 
     if (!updatedFamily) {
       return NextResponse.json({ error: 'Family not found' }, { status: 404 });
     }
+
+   // ============================================
+    // REVALIDACIÓN DE CACHE
+    // ============================================
+    // Invalidar cache del detalle específico de esta familia
+    revalidatePath(`/revit/${updatedFamily.category}/${updatedFamily.slug}`);
+    
+    // Invalidar cache del listado admin
+    revalidatePath('/admin/families');
+    
+    // Invalidar cache del listado público de esa categoría
+    revalidatePath(`/revit/${updatedFamily.category}`);
 
     return NextResponse.json({ message: 'Family updated successfully', family: updatedFamily });
   } catch (error) {
@@ -85,6 +106,18 @@ export async function DELETE(request: Request) {
     if (!deleted) {
       return NextResponse.json({ error: 'Family not found' }, { status: 404 });
     }
+
+    // ============================================
+    // REVALIDACIÓN DE CACHE
+    // ============================================
+    // Invalidar cache del listado admin
+    revalidatePath('/admin/families');
+    
+    // Invalidar cache de home pública
+    revalidatePath('/revit');
+    
+    // Invalidar cache de todas las categorías
+    revalidatePath('/revit/[category]', 'page');
 
     return NextResponse.json({ message: 'Family deleted successfully' });
   } catch (error) {

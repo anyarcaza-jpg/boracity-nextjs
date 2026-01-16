@@ -3,9 +3,10 @@
 > Professional BIM families library for architects and designers. Built with Next.js 15, TypeScript, PostgreSQL, and deployed on Vercel.
 
 [![Deploy Status](https://img.shields.io/badge/deploy-success-brightgreen)](https://boracity-nextjs.vercel.app)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.9-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.1.3-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.2.0-orange)](PROGRESS.md)
 
 ---
 
@@ -41,6 +42,7 @@
 - 📁 **Categorización** - Furniture, Doors, Windows, Lighting
 - 🖼️ **Vista Previa** - Thumbnails optimizados con ImageKit
 - ⬇️ **Descarga Directa** - Archivos RFA/RVT listos para usar
+- ❤️ **Sistema de Favoritos** - Guarda tus familias favoritas (localStorage + PostgreSQL)
 - 📊 **Estadísticas** - Views y downloads tracking
 - 📱 **Responsive Design** - Mobile, tablet y desktop
 
@@ -60,16 +62,18 @@
 - ☁️ **Cloudflare R2** - Almacenamiento de archivos
 - 🔄 **ISR & Cache** - Revalidación incremental
 - 📱 **PWA Ready** - Progressive Web App capabilities
+- 💾 **Hybrid Storage** - localStorage para invitados, PostgreSQL para usuarios
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### **Frontend:**
-- **Framework:** Next.js 15.5.9 (App Router)
+- **Framework:** Next.js 15.1.3 (App Router)
 - **Language:** TypeScript 5.x
 - **Styling:** Tailwind CSS 3.4
 - **State:** React 19 + Server Components
+- **Icons:** Lucide React
 - **Forms:** React Hook Form (planeado)
 - **Validation:** Zod (planeado)
 
@@ -160,6 +164,10 @@ DATABASE_URL="postgresql://user:password@host/database?sslmode=require"
 AUTH_SECRET="tu-secret-muy-largo-y-aleatorio-aqui"
 NEXTAUTH_URL="http://localhost:3000"
 
+# Admin User (para crear usuario inicial)
+ADMIN_EMAIL="admin@boracity.com"
+ADMIN_PASSWORD="Admin123!Change"
+
 # ImageKit (opcional para desarrollo)
 IMAGEKIT_PUBLIC_KEY="public_xxx"
 IMAGEKIT_PRIVATE_KEY="private_xxx"
@@ -178,6 +186,9 @@ R2_ACCOUNT_ID="xxx"
 ```bash
 # Ejecutar migraciones
 npm run db:migrate
+
+# Crear usuario admin
+npx tsx scripts/create-admin.ts
 
 # Seed de datos de prueba (opcional)
 npm run db:seed
@@ -259,23 +270,33 @@ boracity-nextjs/
 │   │   ├── admin/         # Admin panel
 │   │   │   └── families/  # CRUD de familias
 │   │   ├── api/           # API Routes
-│   │   │   └── admin/     # Admin API endpoints
+│   │   │   ├── admin/     # Admin API endpoints
+│   │   │   └── user/      # User API endpoints (favoritos)
+│   │   ├── favorites/     # Página de favoritos
 │   │   ├── revit/         # Public family pages
 │   │   └── layout.tsx     # Root layout
 │   │
 │   ├── components/        # React Components
 │   │   ├── ui/           # UI primitives
-│   │   └── admin/        # Admin components
+│   │   ├── admin/        # Admin components
+│   │   ├── FavoriteButton.tsx  # Botón de favoritos
+│   │   └── Providers.tsx       # SessionProvider wrapper
 │   │
 │   ├── lib/              # Service Layer
 │   │   ├── db/           # Database queries
 │   │   │   ├── families.ts
 │   │   │   ├── users.ts
+│   │   │   ├── user-favorites.ts  # Funciones de favoritos
 │   │   │   └── adapters.ts
+│   │   ├── storage/      # Storage helpers
+│   │   │   └── favorites.ts      # localStorage helper
 │   │   ├── auth.ts       # NextAuth config
 │   │   ├── families.ts   # Business logic
 │   │   ├── imagekit.ts   # ImageKit utils
 │   │   └── neon.ts       # DB connection
+│   │
+│   ├── hooks/            # Custom React Hooks
+│   │   └── useFavorites.ts      # Hook híbrido de favoritos
 │   │
 │   ├── types/            # TypeScript types
 │   │   └── index.ts
@@ -285,10 +306,17 @@ boracity-nextjs/
 ├── docs/                 # Documentación
 │   ├── SESSION_*.md     # Sesiones de desarrollo
 │   ├── NEXT_SESSION.md  # Próxima sesión
+│   ├── PROGRESS.md      # Estado del proyecto
 │   └── API.md           # API documentation
 │
 ├── migrations/          # SQL migrations
-│   └── 001_initial.sql
+│   ├── 001_initial.sql
+│   ├── 002_create_users.sql
+│   ├── 003_create_family_images.sql
+│   └── 004_create_user_favorites.sql
+│
+├── scripts/             # Utility scripts
+│   └── create-admin.ts  # Crear usuario admin
 │
 ├── .env.local          # Variables de entorno (local)
 ├── next.config.js      # Next.js config
@@ -300,79 +328,52 @@ boracity-nextjs/
 ### **Convenciones de Código:**
 
 - **Components:** PascalCase (`FamilyCard.tsx`)
-- **Utils/Libs:** camelCase (`families.ts`)
+- **Utils/Libs:** camelCase (`favorites.ts`)
+- **Hooks:** camelCase con prefijo `use` (`useFavorites.ts`)
 - **API Routes:** kebab-case en URLs (`/api/admin/families`)
 - **Database:** snake_case (`family_id`, `created_at`)
-- **Types:** PascalCase (`Family`, `FamilyCategory`)
 
 ---
 
-## 🚢 Deployment
+## 🌐 Deployment
 
 ### **Vercel (Recomendado):**
 
-1. **Conecta tu repositorio:**
-   - Ve a [Vercel](https://vercel.com)
-   - Import project desde GitHub
-   - Selecciona `boracity-nextjs`
+1. **Push a GitHub:**
+   ```bash
+   git push origin main
+   ```
 
-2. **Configura variables de entorno:**
-   - Settings → Environment Variables
-   - Agrega todas las variables de `.env.local`
-   - Aplica a Production, Preview, Development
+2. **Conecta con Vercel:**
+   - Importa el proyecto desde GitHub
+   - Configura variables de entorno
+   - Deploy automático en cada push
 
-3. **Deploy:**
-   - Vercel auto-deploya en cada push a `main`
-   - O usa: `vercel --prod`
+3. **Variables de entorno en Vercel:**
+   - `DATABASE_URL`
+   - `AUTH_SECRET`
+   - `NEXTAUTH_URL`
+   - `IMAGEKIT_*` (todas las keys)
+   - `R2_*` (todas las keys)
 
-### **Variables de Entorno en Producción:**
-```env
-# ✅ Requeridas
-DATABASE_URL=postgresql://...
-AUTH_SECRET=xxx
-NEXTAUTH_URL=https://tu-dominio.vercel.app
-
-# ⚠️ Opcionales (pero recomendadas)
-IMAGEKIT_PUBLIC_KEY=xxx
-IMAGEKIT_PRIVATE_KEY=xxx
-IMAGEKIT_URL_ENDPOINT=xxx
-NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=xxx
-NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=xxx
-R2_ACCESS_KEY_ID=xxx
-R2_SECRET_ACCESS_KEY=xxx
-R2_BUCKET_NAME=xxx
-R2_ACCOUNT_ID=xxx
+### **Build Manual:**
+```bash
+npm run build
+npm run start
 ```
-
-### **Build Time:**
-
-- Promedio: 45-55 segundos
-- First Load JS: ~150KB
-- Edge Functions: Habilitadas
 
 ---
 
 ## 📡 API Reference
 
-### **Autenticación:**
-
-Todas las rutas `/api/admin/*` requieren autenticación.
-
-**Headers requeridos:**
-```
-Cookie: next-auth.session-token=xxx
-```
-
 ### **Endpoints Públicos:**
 
 #### **GET /api/families**
-Lista todas las familias públicas.
+Obtiene todas las familias.
 
-**Query params:**
-- `category` (opcional): Filter by category
-- `search` (opcional): Search term
-- `limit` (opcional): Items per page (default: 10)
-- `page` (opcional): Page number (default: 1)
+**Query Parameters:**
+- `category` (opcional) - Filtrar por categoría
+- `search` (opcional) - Búsqueda por texto
 
 **Response:**
 ```json
@@ -380,58 +381,77 @@ Lista todas las familias públicas.
   "families": [
     {
       "id": "uuid",
-      "slug": "modern-office-chair",
-      "name": "Modern Office Chair",
+      "slug": "modern-chair",
+      "name": "Modern Chair",
       "category": "furniture",
-      "description": "...",
-      "downloads": 1234,
-      "views": 5678,
-      "created_at": "2024-01-01T00:00:00Z"
+      "thumbnail_url": "https://...",
+      "downloads": 100,
+      "views": 500
     }
-  ],
-  "total": 100,
-  "page": 1,
-  "limit": 10
+  ]
 }
 ```
 
-#### **GET /api/families/:slug**
-Obtiene una familia específica.
+#### **GET /api/families?ids=xxx,yyy**
+Obtiene familias específicas por IDs (para página de favoritos).
+
+**Query Parameters:**
+- `ids` (requerido) - IDs separados por comas
+
+---
+
+### **Endpoints de Usuario (Requieren autenticación):**
+
+#### **GET /api/user/favorites**
+Obtiene favoritos del usuario autenticado.
+
+**Headers:**
+- `Cookie: authjs.session-token=xxx`
 
 **Response:**
 ```json
 {
-  "family": { /* Family object */ },
-  "related": [ /* Related families */ ]
+  "favorites": ["uuid1", "uuid2", "uuid3"],
+  "count": 3
 }
 ```
 
-### **Endpoints Admin:**
+#### **POST /api/user/favorites**
+Agrega favorito o migra desde localStorage.
 
-#### **GET /api/admin/family?slug=xxx**
-Obtiene familia para edición (requiere auth).
+**Body (agregar):**
+```json
+{
+  "familyId": "uuid"
+}
+```
+
+**Body (migrar):**
+```json
+{
+  "migrate": true,
+  "familyIds": ["uuid1", "uuid2"]
+}
+```
+
+#### **DELETE /api/user/favorites?familyId=xxx**
+Elimina un favorito.
+
+---
+
+### **Endpoints Admin (Requieren autenticación + role admin):**
+
+#### **GET /api/admin/families**
+Obtiene todas las familias (admin view).
+
+#### **POST /api/admin/family**
+Crea una nueva familia.
 
 #### **PUT /api/admin/family?slug=xxx**
-Actualiza una familia (requiere auth).
-
-**Body:**
-```json
-{
-  "name": "Updated Name",
-  "category": "furniture",
-  "description": "Updated description"
-}
-```
+Actualiza una familia.
 
 #### **DELETE /api/admin/family?slug=xxx**
-Elimina una familia (requiere auth).
-
-**Response:**
-```json
-{
-  "message": "Family deleted successfully"
-}
-```
+Elimina una familia.
 
 Ver `docs/API.md` para documentación completa.
 
@@ -476,6 +496,21 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users(email);
 ```
 
+### **Tabla: user_favorites** ✨ (NUEVO)
+```sql
+CREATE TABLE user_favorites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT unique_user_family UNIQUE(user_id, family_id)
+);
+
+CREATE INDEX idx_user_favorites_user_id ON user_favorites(user_id);
+CREATE INDEX idx_user_favorites_family_id ON user_favorites(family_id);
+CREATE INDEX idx_user_favorites_user_family ON user_favorites(user_id, family_id);
+```
+
 ### **Tabla: family_images (planeada)**
 ```sql
 CREATE TABLE family_images (
@@ -495,10 +530,22 @@ Ver `migrations/` para todas las migraciones.
 
 ## 📊 Estado del Proyecto
 
-**Última actualización:** 13 de Enero, 2026  
-**Versión:** 0.14.0  
-**Sesión completada:** Sesión 21  
+**Última actualización:** 16 de Enero, 2026  
+**Versión:** 1.2.0  
+**Sesión completada:** Sesión 26  
 **Status:** ✅ **En producción**
+
+### **Progress Bar:**
+```
+████████████████████░░░░░░ 75% Completado
+
+Backend:           ████████████████████ 100% ✅
+Admin Panel:       ████████████████████ 100% ✅
+Frontend Público:  ██████████████░░░░░░ 70%  🟡
+Autenticación:     ████████████████████ 100% ✅
+Favoritos:         ████████████████████ 100% ✅
+SEO & Analytics:   ████░░░░░░░░░░░░░░░░ 20%  🟡
+```
 
 ### **✅ Funcionalidades Implementadas:**
 
@@ -507,17 +554,26 @@ Ver `migrations/` para todas las migraciones.
 - ✅ Admin panel completo
 - ✅ CRUD de familias (Create, Read, Update, Delete)
 - ✅ Base de datos PostgreSQL (Neon)
+- ✅ **Sistema de favoritos completo** 🎉
+  - localStorage para usuarios no autenticados
+  - PostgreSQL para usuarios autenticados
+  - Migración automática al hacer login
+  - Página `/favorites` con búsqueda
+  - Sincronización entre dispositivos
 - ✅ 9 familias de prueba en producción
-- ✅ Search y filtros básicos
+- ✅ Búsqueda avanzada con infinite scroll
 - ✅ Paginación client-side
 - ✅ Middleware de protección de rutas
 
 #### **UI/UX:**
 - ✅ Responsive design (mobile, tablet, desktop)
-- ✅ Loading states
+- ✅ Loading states con spinners
 - ✅ Modal de confirmación para delete
 - ✅ Error boundaries
-- ✅ Form validation (básica)
+- ✅ Form validation
+- ✅ **FavoriteButton component** con animaciones
+- ✅ Contador de favoritos en navbar
+- ✅ Empty states elegantes
 
 #### **Técnico:**
 - ✅ Next.js 15 App Router
@@ -526,36 +582,46 @@ Ver `migrations/` para todas las migraciones.
 - ✅ Service Layer pattern
 - ✅ Database adapters
 - ✅ ImageKit integration
+- ✅ **Custom Hooks** (useFavorites, useDebounce, useClickOutside)
+- ✅ **Optimistic UI updates**
 - ✅ Vercel deployment
+
+### **📊 Métricas:**
+- **Sesiones completadas:** 26
+- **Horas invertidas:** ~75 horas
+- **Archivos creados:** 70+
+- **Líneas de código:** ~8,500
+- **Componentes React:** 35+
+- **API Routes:** 15+
+- **Custom Hooks:** 3
+- **Tablas en BD:** 3
 
 ### **⏳ En Progreso / Próximamente:**
 
-#### **Alta Prioridad (Sesión 22):**
-- 🔄 Sistema de subida de archivos RFA/RVT
-- 🔄 Manejo de imágenes múltiples
-- 🔄 Página de detalle individual (`/revit/{category}/{slug}`)
-- 🔄 API de descarga con contador
-- 🔄 Validación con Zod
+#### **Alta Prioridad (Sesión 27):**
+- 🔄 Sistema de upload completo (drag & drop)
+- 🔄 Manejo de imágenes múltiples en admin
+- 🔄 Componente ImageGalleryUploader
+- 🔄 Edición de galería (eliminar, reordenar)
 
 #### **Media Prioridad:**
+- ⏳ Registro de usuarios públicos
+- ⏳ Perfiles de usuario
+- ⏳ Validación con Zod
 - ⏳ Toast notifications
-- ⏳ Drag & drop para uploads
-- ⏳ Búsqueda avanzada con filtros
-- ⏳ Paginación server-side
 - ⏳ Loading skeletons
 
 #### **Baja Prioridad:**
 - ⏸️ Dashboard de analytics
-- ⏸️ Sistema de versiones
 - ⏸️ Comentarios y ratings
-- ⏸️ Sistema de favoritos
+- ⏸️ Sistema de versiones
 - ⏸️ Export/Import de familias
 - ⏸️ API pública
 - ⏸️ Tests automatizados
 
 ### **🐛 Bugs Conocidos:**
 
-**Ninguno** - Todos los bugs de Sesión 21 fueron resueltos.
+**Ninguno** - Todos los bugs fueron resueltos en las sesiones 25-26.
 
 ---
 
@@ -564,29 +630,29 @@ Ver `migrations/` para todas las migraciones.
 ### **Q1 2026 (Enero - Marzo):**
 - [x] ✅ Sistema de autenticación completo
 - [x] ✅ CRUD básico de familias
+- [x] ✅ **Sistema de favoritos completo**
 - [ ] 🔄 Sistema de uploads (archivos + imágenes)
-- [ ] 🔄 Páginas de detalle públicas
-- [ ] ⏳ Validación robusta con Zod
-- [ ] ⏳ Toast notifications
+- [ ] 🔄 Páginas de detalle públicas mejoradas
+- [ ] ⏳ 50+ familias en catálogo
 
 ### **Q2 2026 (Abril - Junio):**
-- [ ] ⏸️ Búsqueda avanzada con Elasticsearch/Algolia
+- [ ] ⏸️ Sistema de usuarios públicos (registro)
 - [ ] ⏸️ Dashboard de analytics
 - [ ] ⏸️ Sistema de comentarios
 - [ ] ⏸️ Ratings y reviews
-- [ ] ⏸️ API pública v1
+- [ ] ⏸️ 100+ familias
 
 ### **Q3 2026 (Julio - Septiembre):**
 - [ ] ⏸️ Sistema de suscripciones
 - [ ] ⏸️ Marketplace premium
-- [ ] ⏸️ Integración con Revit API
-- [ ] ⏸️ Mobile app (React Native)
+- [ ] ⏸️ SEO avanzado
+- [ ] ⏸️ 200+ familias
 
 ### **Q4 2026 (Octubre - Diciembre):**
 - [ ] ⏸️ AI-powered search
-- [ ] ⏸️ Automated 3D previews
+- [ ] ⏸️ Mobile app (React Native)
 - [ ] ⏸️ Multi-language support
-- [ ] ⏸️ Enterprise features
+- [ ] ⏸️ 500+ familias
 
 ---
 
@@ -639,11 +705,12 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 ## 📚 Documentación Adicional
 
-- [Sesión 21 - Changelog completo](docs/SESSION_21_COMPLETE.md)
+- [Sistema de Favoritos - Sesiones 25-26](docs/SESSION_25_26_FAVORITES_SYSTEM.md) ⭐
+- [Progreso General](docs/PROGRESS.md)
 - [Próxima Sesión - Roadmap](docs/NEXT_SESSION.md)
+- [Búsqueda Avanzada - Sesión 24](docs/SESSION_24_DOCUMENTATION.md)
 - [API Documentation](docs/API.md) (planeado)
 - [Deployment Guide](docs/DEPLOYMENT.md) (planeado)
-- [Contributing Guide](CONTRIBUTING.md) (planeado)
 
 ---
 
@@ -677,6 +744,13 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 # Verificar que NEXTAUTH_URL es correcto
 ```
 
+### **Problema: Favoritos no se guardan**
+```bash
+# Sin login: Verificar que localStorage está habilitado
+# Con login: Verificar que sesión está activa
+# Ver consola del navegador para errores
+```
+
 Ver `docs/TROUBLESHOOTING.md` para más problemas comunes.
 
 ---
@@ -694,10 +768,13 @@ npm install
 cp .env.example .env.local
 # Edita .env.local con tus credenciales
 
-# 4. Run
+# 4. Setup DB
+npx tsx scripts/create-admin.ts
+
+# 5. Run
 npm run dev
 
-# 5. Visit
+# 6. Visit
 open http://localhost:3000
 ```
 
@@ -713,5 +790,9 @@ open http://localhost:3000
 ⭐ **Star this repo** si te resultó útil!
 
 [Report Bug](https://github.com/anyarcaza-jpg/boracity-nextjs/issues) · [Request Feature](https://github.com/anyarcaza-jpg/boracity-nextjs/issues) · [Documentation](docs/)
+
+---
+
+**v1.2.0** | 26 Sesiones | 75 Horas | 8,500+ Líneas de Código | Sistema de Favoritos ✨
 
 </div>

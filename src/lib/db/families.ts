@@ -1,4 +1,5 @@
 // src/lib/db/families.ts
+// Version: 2.2.0 (Session 24 - Pagination Support for Infinite Scroll)
 
 import { sql } from '@/lib/neon';
 import { dbRowToFamily, type FamilyRow } from './adapters';
@@ -6,18 +7,30 @@ import type { Family, FamilyCategory } from '@/types';
 import { logger } from '@/lib/logger';
 
 /**
- * FUNCIONES DE BASE DE DATOS
+ * DATABASE LAYER - PostgreSQL Queries
  * 
- * Todas las queries a PostgreSQL están aquí.
- * Usan el adapter para convertir rows → Family objects.
+ * All database queries for families are defined here.
+ * Uses adapter pattern to convert database rows to Family objects.
  */
 
 // ============================================
-// QUERIES PRINCIPALES
+// TYPES
+// ============================================
+
+export interface SearchResult {
+  families: Family[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+// ============================================
+// CORE QUERIES
 // ============================================
 
 /**
- * Obtener todas las familias
+ * Get all families from database
  */
 export async function getAllFamilies(): Promise<Family[]> {
   try {
@@ -35,7 +48,7 @@ export async function getAllFamilies(): Promise<Family[]> {
 }
 
 /**
- * Obtener familia por slug - SOBRECARGA CORREGIDA
+ * Get family by slug (overloaded function)
  */
 export async function getFamilyBySlug(slug: string): Promise<Family | null>;
 export async function getFamilyBySlug(
@@ -47,7 +60,6 @@ export async function getFamilyBySlug(
   slug?: string
 ): Promise<Family | null> {
   try {
-    // Si solo se pasa un parámetro, es el slug
     if (slug === undefined) {
       const rows = await sql`
         SELECT * FROM families 
@@ -59,7 +71,6 @@ export async function getFamilyBySlug(
       return dbRowToFamily(rows[0]);
     }
     
-    // Si se pasan dos parámetros, es category + slug
     const rows = await sql`
       SELECT * FROM families 
       WHERE category = ${categoryOrSlug} 
@@ -76,7 +87,7 @@ export async function getFamilyBySlug(
 }
 
 /**
- * Obtener familias por categoría
+ * Get families by category
  */
 export async function getFamiliesByCategory(
   category: FamilyCategory
@@ -97,35 +108,234 @@ export async function getFamiliesByCategory(
 }
 
 /**
- * Buscar familias (full-text search)
+ * Search families using PostgreSQL Full-Text Search with Pagination
+ * 
+ * Version: 2.2.0 (Pagination + Infinite Scroll Support)
+ * 
+ * Key features:
+ * - PostgreSQL Full-Text Search with ts_rank for relevance scoring
+ * - Multi-word query support ("modern chair")
+ * - Intelligent ranking (relevance + name matching + popularity)
+ * - Tag filtering support
+ * - Pagination for infinite scroll
+ * - Total count for UI indicators
+ * - Automatic fallback to ILIKE if FTS fails
+ * 
+ * Examples:
+ * - searchFamilies("chair") returns first 20 families
+ * - searchFamilies("chair", [], 1, 20) returns families 1-20
+ * - searchFamilies("chair", ["modern"], 2, 20) returns families 21-40 with "modern" tag
+ * 
+ * @param query - Search term (minimum 2 characters)
+ * @param tags - Optional array of tags to filter by
+ * @param page - Page number (1-based, default: 1)
+ * @param limit - Results per page (default: 20, max: 100)
+ * @returns SearchResult object with families, total, page, limit, hasMore
  */
-export async function searchFamilies(query: string): Promise<Family[]> {
+export async function searchFamilies(
+  query: string, 
+  tags: string[] = [],
+  page: number = 1,
+  limit: number = 20
+): Promise<SearchResult> {
   try {
-    if (!query || query.length < 2) return [];
-    
-    const rows = await sql`
-      SELECT * FROM families 
-      WHERE 
-        name ILIKE ${'%' + query + '%'} 
-        OR description ILIKE ${'%' + query + '%'}
-        OR ${query} = ANY(tags)
-      ORDER BY downloads DESC
-      LIMIT 20
-    `;
-    
-    return rows.map(dbRowToFamily);
+    if (!query || query.length < 2) {
+      logger.debug('Search query too short', { query });
+      return { 
+        families: [], 
+        total: 0, 
+        page: 1, 
+        limit, 
+        hasMore: false 
+      };
+    }
+
+    // Validate and sanitize pagination parameters
+    const validPage = Math.max(1, page);
+    const validLimit = Math.min(Math.max(1, limit), 100);
+    const offset = (validPage - 1) * validLimit;
+
+    const sanitizedQuery = query
+      .trim()
+      .replace(/[^\w\s]/gi, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 0)
+      .join(' & ');
+
+    logger.info('Searching families with FTS', { 
+      originalQuery: query, 
+      sanitizedQuery,
+      queryLength: query.length,
+      tagFilters: tags,
+      tagCount: tags.length,
+      page: validPage,
+      limit: validLimit,
+      offset
+    });
+
+    try {
+      // Execute search query with pagination
+      const rows = await sql`
+        SELECT 
+          *,
+          ts_rank(
+            to_tsvector('english', 
+              COALESCE(name, '') || ' ' || 
+              COALESCE(description, '') || ' ' || 
+              COALESCE(array_to_string(tags, ' '), '')
+            ),
+            plainto_tsquery('english', ${query})
+          ) AS relevance,
+          CASE 
+            WHEN LOWER(name) LIKE LOWER(${'%' + query + '%'}) THEN 2.0
+            ELSE 1.0
+          END AS name_boost
+        FROM families
+        WHERE 
+          (
+            to_tsvector('english', 
+              COALESCE(name, '') || ' ' || 
+              COALESCE(description, '') || ' ' || 
+              COALESCE(array_to_string(tags, ' '), '')
+            ) @@ plainto_tsquery('english', ${query})
+            OR ${query} ILIKE ANY(tags)
+            OR name ILIKE ${'%' + query + '%'}
+            OR description ILIKE ${'%' + query + '%'}
+          )
+          ${tags.length > 0 ? sql`AND tags @> ${tags}` : sql``}
+        ORDER BY 
+          (relevance * name_boost * LOG(downloads + 1)) DESC,
+          downloads DESC
+        LIMIT ${validLimit}
+        OFFSET ${offset}
+      `;
+
+      // Get total count for pagination
+      const countResult = await sql`
+        SELECT COUNT(*) as total
+        FROM families
+        WHERE 
+          (
+            to_tsvector('english', 
+              COALESCE(name, '') || ' ' || 
+              COALESCE(description, '') || ' ' || 
+              COALESCE(array_to_string(tags, ' '), '')
+            ) @@ plainto_tsquery('english', ${query})
+            OR ${query} ILIKE ANY(tags)
+            OR name ILIKE ${'%' + query + '%'}
+            OR description ILIKE ${'%' + query + '%'}
+          )
+          ${tags.length > 0 ? sql`AND tags @> ${tags}` : sql``}
+      `;
+
+      const total = Number(countResult[0]?.total || 0);
+      const families = rows.map(dbRowToFamily);
+      const hasMore = (validPage * validLimit) < total;
+
+      logger.info('FTS search completed', { 
+        query, 
+        resultsCount: families.length,
+        total,
+        page: validPage,
+        hasMore,
+        tagsApplied: tags.length > 0
+      });
+
+      return {
+        families,
+        total,
+        page: validPage,
+        limit: validLimit,
+        hasMore
+      };
+
+    } catch (ftsError) {
+      // Fallback to simple ILIKE search if FTS fails
+      logger.warn('FTS failed, using simple search fallback', { 
+        query, 
+        error: ftsError instanceof Error ? ftsError.message : 'Unknown',
+        fallbackActive: true
+      });
+
+      const rows = await sql`
+        SELECT * FROM families 
+        WHERE 
+          (
+            name ILIKE ${'%' + query + '%'} 
+            OR description ILIKE ${'%' + query + '%'}
+            OR ${query} ILIKE ANY(tags)
+          )
+          ${tags.length > 0 ? sql`AND tags @> ${tags}` : sql``}
+        ORDER BY 
+          CASE 
+            WHEN LOWER(name) LIKE LOWER(${'%' + query + '%'}) THEN 1
+            WHEN LOWER(description) LIKE LOWER(${'%' + query + '%'}) THEN 2
+            ELSE 3
+          END,
+          downloads DESC
+        LIMIT ${validLimit}
+        OFFSET ${offset}
+      `;
+
+      // Get total for fallback
+      const countResult = await sql`
+        SELECT COUNT(*) as total
+        FROM families 
+        WHERE 
+          (
+            name ILIKE ${'%' + query + '%'} 
+            OR description ILIKE ${'%' + query + '%'}
+            OR ${query} ILIKE ANY(tags)
+          )
+          ${tags.length > 0 ? sql`AND tags @> ${tags}` : sql``}
+      `;
+
+      const total = Number(countResult[0]?.total || 0);
+      const families = rows.map(dbRowToFamily);
+      const hasMore = (validPage * validLimit) < total;
+
+      logger.info('Simple search completed', { 
+        query, 
+        resultsCount: families.length,
+        total,
+        page: validPage,
+        hasMore,
+        fallbackUsed: true,
+        tagsApplied: tags.length > 0
+      });
+
+      return {
+        families,
+        total,
+        page: validPage,
+        limit: validLimit,
+        hasMore
+      };
+    }
+
   } catch (error) {
-    logger.error('Error searching families', { query, error });
-    return [];
+    logger.error('Critical error in searchFamilies', { 
+      query, 
+      error: error instanceof Error ? error.message : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    
+    return { 
+      families: [], 
+      total: 0, 
+      page: 1, 
+      limit, 
+      hasMore: false 
+    };
   }
 }
 
 // ============================================
-// MUTACIONES (CREATE, UPDATE, DELETE)
+// MUTATIONS
 // ============================================
 
 /**
- * Actualizar una familia (VERSIÓN SIMPLE Y SEGURA)
+ * Update family data
  */
 export async function updateFamily(
   slug: string,
@@ -133,18 +343,19 @@ export async function updateFamily(
     name?: string;
     category?: string;
     description?: string;
+    thumbnail_url?: string;
   }
 ): Promise<Family | null> {
   try {
-    const { name, category, description } = data;
+    const { name, category, description, thumbnail_url } = data;
 
-    // Query con template literal (compatible con Neon)
     const rows = await sql`
       UPDATE families
       SET 
         name = COALESCE(${name}, name),
         category = COALESCE(${category}, category),
         description = COALESCE(${description}, description),
+        thumbnail_url = COALESCE(${thumbnail_url}, thumbnail_url),
         updated_at = NOW()
       WHERE slug = ${slug}
       RETURNING *
@@ -164,7 +375,7 @@ export async function updateFamily(
 }
 
 /**
- * Eliminar una familia
+ * Delete family by slug
  */
 export async function deleteFamily(slug: string): Promise<boolean> {
   try {
@@ -190,11 +401,11 @@ export async function deleteFamily(slug: string): Promise<boolean> {
 }
 
 // ============================================
-// CONTADORES (para analytics)
+// ANALYTICS COUNTERS
 // ============================================
 
 /**
- * Incrementar contador de descargas
+ * Increment download counter for family
  */
 export async function incrementDownloads(
   category: FamilyCategory,
@@ -215,7 +426,7 @@ export async function incrementDownloads(
 }
 
 /**
- * Incrementar contador de vistas
+ * Increment view counter for family
  */
 export async function incrementViews(
   category: FamilyCategory,
@@ -234,11 +445,11 @@ export async function incrementViews(
 }
 
 // ============================================
-// ESTADÍSTICAS
+// STATISTICS
 // ============================================
 
 /**
- * Obtener familias populares
+ * Get most popular families by downloads
  */
 export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
   try {
@@ -256,7 +467,7 @@ export async function getPopularFamilies(limit: number = 6): Promise<Family[]> {
 }
 
 /**
- * Obtener estadísticas generales
+ * Get overall statistics
  */
 export async function getStats() {
   try {
@@ -283,5 +494,27 @@ export async function getStats() {
       totalViews: 0,
       categoriesCount: 0,
     };
+  }
+}
+
+/**
+ * Get all unique tags from all families
+ * Used for populating tag filters in search UI
+ * 
+ * @returns Array of unique tag strings sorted alphabetically
+ */
+export async function getAllTags(): Promise<string[]> {
+  try {
+    const rows = await sql`
+      SELECT DISTINCT unnest(tags) as tag
+      FROM families
+      WHERE tags IS NOT NULL
+      ORDER BY tag ASC
+    `;
+    
+    return rows.map(row => row.tag);
+  } catch (error) {
+    logger.error('Error getting all tags', { error });
+    return [];
   }
 }

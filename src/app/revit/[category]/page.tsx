@@ -78,3 +78,5 @@ export default async function CategoryPage({ params }: PageProps) {
     </>
   );
 }
+// Forzar revalidación en cada request (desarrollo)
+export const revalidate = 0;

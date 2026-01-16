@@ -3,6 +3,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { deleteImage } from '@/lib/db/images';
+import { revalidatePath } from 'next/cache'; // ← NUEVO
+import { sql } from '@/lib/neon'; // ← NUEVO
 
 /**
  * DELETE /api/admin/images/[id]
@@ -35,17 +37,48 @@ export async function DELETE(
 
     console.log('Deleting image:', imageId);
 
-    // Eliminar imagen de la base de datos
-    const success = await deleteImage(imageId);
+    // ============================================
+    // OBTENER DATOS DE LA FAMILIA (ANTES DE ELIMINAR)
+    // ============================================
+    try {
+      // Query para obtener category y slug de la familia
+      // IMPORTANTE: Hacerlo ANTES de eliminar la imagen
+      const familyData = await sql`
+        SELECT f.category, f.slug 
+        FROM family_images fi 
+        JOIN families f ON fi.family_id = f.id 
+        WHERE fi.id = ${imageId}
+      `;
 
-    if (!success) {
-      return NextResponse.json(
-        { error: 'Failed to delete image or image not found' },
-        { status: 404 }
-      );
+      // Eliminar imagen de la base de datos
+      const success = await deleteImage(imageId);
+
+      if (!success) {
+        return NextResponse.json(
+          { error: 'Failed to delete image or image not found' },
+          { status: 404 }
+        );
+      }
+
+      console.log('Image deleted successfully:', imageId);
+
+      // ============================================
+      // REVALIDACIÓN DE CACHE (NUEVO)
+      // ============================================
+      // Si encontramos la familia, invalidar su página de detalle
+      if (familyData.length > 0) {
+        const { category, slug } = familyData[0];
+        
+        console.log('Revalidating family page after image deletion:', { category, slug });
+        
+        // Invalidar cache de la página de detalle
+        revalidatePath(`/revit/${category}/${slug}`);
+      }
+
+    } catch (revalidateError) {
+      // Si falla la revalidación, no hacer fallar toda la operación
+      console.warn('Failed to revalidate cache after deletion:', revalidateError);
     }
-
-    console.log('Image deleted successfully:', imageId);
 
     return NextResponse.json({
       success: true,

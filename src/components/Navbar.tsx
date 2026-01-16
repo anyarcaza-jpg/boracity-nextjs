@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Heart } from 'lucide-react';
+import { useFavorites } from '@/hooks/useFavorites';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { favoritesCount } = useFavorites();
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -40,6 +42,17 @@ export default function Navbar() {
             <li>
               <Link href="/#categories" className="text-[15px] font-medium text-gray-700 hover:text-primary transition-colors">
                 Categories
+              </Link>
+            </li>
+            <li>
+              <Link href="/favorites" className="text-[15px] font-medium text-gray-700 hover:text-primary transition-colors flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Favorites
+                {favoritesCount > 0 && (
+                  <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded-full">
+                    {favoritesCount}
+                  </span>
+                )}
               </Link>
             </li>
             <li>
@@ -83,6 +96,15 @@ export default function Navbar() {
             </Link>
             <Link href="/#categories" className="block text-[15px] font-medium text-gray-700 hover:text-primary">
               Categories
+            </Link>
+            <Link href="/favorites" className="flex items-center gap-2 text-[15px] font-medium text-gray-700 hover:text-primary">
+              <Heart className="w-4 h-4" />
+              Favorites
+              {favoritesCount > 0 && (
+                <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded-full">
+                  {favoritesCount}
+                </span>
+              )}
             </Link>
             <Link href="/#pricing" className="block text-[15px] font-medium text-gray-700 hover:text-primary">
               Pricing

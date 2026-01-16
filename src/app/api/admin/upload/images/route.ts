@@ -6,6 +6,8 @@ import { uploadToImageKit } from '@/lib/imagekit';
 import { createImages } from '@/lib/db/images';
 import { logger } from '@/lib/logger';
 import type { CreateFamilyImageInput } from '@/types';
+import { revalidatePath } from 'next/cache'; // ← NUEVO
+import { sql } from '@/lib/neon'; // ← NUEVO
 
 /**
  * API ROUTE - UPLOAD MÚLTIPLE DE IMÁGENES
@@ -176,6 +178,31 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to save images to database' },
         { status: 500 }
       );
+    }
+
+    // ============================================
+    // REVALIDACIÓN DE CACHE (NUEVO)
+    // ============================================
+    try {
+      // Obtener category y slug de la familia
+      const familyData = await sql`
+        SELECT category, slug 
+        FROM families 
+        WHERE id = ${familyId}
+      `;
+
+      // Si encontramos la familia, invalidar su página de detalle
+      if (familyData.length > 0) {
+        const { category, slug } = familyData[0];
+        
+        logger.info('Revalidating family page', { category, slug });
+        
+        // Invalidar cache de la página de detalle
+        revalidatePath(`/revit/${category}/${slug}`);
+      }
+    } catch (revalidateError) {
+      // No fallar si la revalidación falla, solo loggear
+      logger.warn('Failed to revalidate cache', { error: revalidateError });
     }
 
     // ============================================

@@ -42,7 +42,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      images,
+      images,  // ← ✅ CORRECTO: Retorna "images" no "families"
       count: images.length,
     });
 

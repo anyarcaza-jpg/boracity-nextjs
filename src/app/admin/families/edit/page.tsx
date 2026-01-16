@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { FamilyImage } from '@/types';
+import { compressImage, compressMultipleImages } from '@/lib/imageCompression';
 
 function EditFamilyForm() {
   const router = useRouter();
@@ -12,6 +13,7 @@ function EditFamilyForm() {
   const [family, setFamily] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState('');
 
   // Estados para thumbnail
@@ -116,13 +118,12 @@ function EditFamilyForm() {
   };
 
   // ============================================
-  // CAMBIAR THUMBNAIL
+  // CAMBIAR THUMBNAIL (CON COMPRESIÓN)
   // ============================================
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const MAX_SIZE = 1 * 1024 * 1024; // 1MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
     // Validar tipo
@@ -134,18 +135,25 @@ function EditFamilyForm() {
       return;
     }
 
-    // Validar tamaño
-    if (file.size > MAX_SIZE) {
-      const errorMsg = `"${file.name}" is too large. Maximum 1MB (current: ${(file.size / 1024 / 1024).toFixed(2)}MB)`;
-      setError(errorMsg);
-      alert(errorMsg);
-      e.target.value = '';
-      return;
-    }
-
-    setNewThumbnail(file);
-    setNewThumbnailPreview(URL.createObjectURL(file));
+    setCompressing(true);
     setError('');
+
+    try {
+      // ============================================
+      // COMPRIMIR THUMBNAIL
+      // ============================================
+      console.log('🔄 Compressing new thumbnail...');
+      const compressedFile = await compressImage(file);
+      console.log('✅ Thumbnail compressed');
+
+      setNewThumbnail(compressedFile);
+      setNewThumbnailPreview(URL.createObjectURL(compressedFile));
+    } catch (err: any) {
+      console.error('Error compressing thumbnail:', err);
+      setError('Failed to compress thumbnail');
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const uploadNewThumbnail = async () => {
@@ -179,14 +187,13 @@ function EditFamilyForm() {
   };
 
   // ============================================
-  // AGREGAR NUEVAS IMÁGENES
+  // AGREGAR NUEVAS IMÁGENES (CON COMPRESIÓN)
   // ============================================
-  const handleNewGalleryFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewGalleryFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const MAX_TOTAL = 6;
-    const MAX_SIZE = 1 * 1024 * 1024; // 1MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
     const currentTotal = existingImages.length + newGalleryFiles.length;
@@ -197,31 +204,51 @@ function EditFamilyForm() {
       return;
     }
 
-    const newFiles: File[] = [];
-    const newPreviews: string[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
-      // Validar tipo
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        setError(`"${file.name}" is not a valid image type`);
-        return;
-      }
-
-      // Validar tamaño
-      if (file.size > MAX_SIZE) {
-        setError(`"${file.name}" is too large. Maximum 1MB per image`);
-        return;
-      }
-
-      newFiles.push(file);
-      newPreviews.push(URL.createObjectURL(file));
-    }
-
-    setNewGalleryFiles([...newGalleryFiles, ...newFiles]);
-    setNewGalleryPreviews([...newGalleryPreviews, ...newPreviews]);
+    setCompressing(true);
     setError('');
+
+    try {
+      const filesToCompress: File[] = [];
+
+      // Validar tipos primero
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // Validar tipo
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          const errorMsg = `"${file.name}" is not a valid image type`;
+          setError(errorMsg);
+          alert(errorMsg);
+          setCompressing(false);
+          return;
+        }
+
+        filesToCompress.push(file);
+      }
+
+      // ============================================
+      // COMPRIMIR TODAS LAS IMÁGENES EN PARALELO
+      // ============================================
+      console.log(`🔄 Compressing ${filesToCompress.length} new gallery images...`);
+      const compressedFiles = await compressMultipleImages(filesToCompress);
+      console.log('✅ All new gallery images compressed');
+
+      // Crear previews de las imágenes comprimidas
+      const newPreviews: string[] = [];
+      for (const compressedFile of compressedFiles) {
+        newPreviews.push(URL.createObjectURL(compressedFile));
+      }
+
+      setNewGalleryFiles([...newGalleryFiles, ...compressedFiles]);
+      setNewGalleryPreviews([...newGalleryPreviews, ...newPreviews]);
+      setError('');
+
+    } catch (err: any) {
+      console.error('Error compressing gallery images:', err);
+      setError('Failed to compress images. Please try again.');
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const handleRemoveNewGalleryImage = (index: number) => {
@@ -320,9 +347,8 @@ function EditFamilyForm() {
         await uploadNewGalleryImages(family.id);
       }
 
-      // 4. Redirect
-      router.push('/admin/families');
-      router.refresh();
+      // 4. Recargar la misma página para ver cambios
+      window.location.reload();
     } catch (err: any) {
       setError(err.message || 'Failed to save changes');
       setSaving(false);
@@ -351,15 +377,25 @@ function EditFamilyForm() {
   const canAddMore = totalImages < 6;
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Edit Family</h1>
-
+    <div className="min-h-screen bg-gray-900 p-8">
+      <div className="max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* HEADER */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-white">Edit Family</h1>
+            <button
+              type="button"
+              onClick={() => router.push('/admin/families')}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+            >
+              ← Back
+            </button>
+          </div>
+
           {/* BASIC INFO */}
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">Basic Information</h2>
-
+            
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Name
@@ -368,7 +404,6 @@ function EditFamilyForm() {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -380,13 +415,18 @@ function EditFamilyForm() {
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                required
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="furniture">Furniture</option>
                 <option value="doors">Doors</option>
                 <option value="windows">Windows</option>
                 <option value="lighting">Lighting</option>
+                <option value="plumbing">Plumbing</option>
+                <option value="electrical">Electrical</option>
+                <option value="hvac">HVAC</option>
+                <option value="equipment">Equipment</option>
+                <option value="landscaping">Landscaping</option>
+                <option value="other">Other</option>
               </select>
             </div>
 
@@ -455,11 +495,14 @@ function EditFamilyForm() {
                 type="file"
                 accept="image/jpeg,image/jpg,image/png,image/webp"
                 onChange={handleThumbnailChange}
-                disabled={uploadingThumbnail}
+                disabled={uploadingThumbnail || compressing}
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 disabled:opacity-50"
               />
+              {compressing && !uploadingGallery && (
+                <p className="text-sm text-blue-400 mt-2">🔄 Compressing thumbnail...</p>
+              )}
               <p className="text-xs text-gray-500 mt-2">
-                JPG, PNG, WebP • Max 1MB
+                Images will be automatically compressed
               </p>
             </div>
           </div>
@@ -519,10 +562,14 @@ function EditFamilyForm() {
                   accept="image/jpeg,image/jpg,image/png,image/webp"
                   multiple
                   onChange={handleNewGalleryFilesChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
+                  disabled={compressing}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700 disabled:opacity-50"
                 />
+                {compressing && uploadingGallery === false && (
+                  <p className="text-sm text-blue-400">🔄 Compressing images...</p>
+                )}
                 <p className="text-xs text-gray-500">
-                  JPG, PNG, WebP • Max 1MB each • {6 - totalImages} remaining
+                  Images will be automatically compressed • {6 - totalImages} remaining
                 </p>
 
                 {/* NEW IMAGES PREVIEW */}
@@ -572,7 +619,7 @@ function EditFamilyForm() {
           <div className="flex gap-4">
             <button
               type="submit"
-              disabled={saving || uploadingGallery}
+              disabled={saving || uploadingGallery || compressing}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition"
             >
               {saving ? (uploadingGallery ? 'Uploading...' : 'Saving...') : 'Save Changes'}

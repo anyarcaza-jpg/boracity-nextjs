@@ -2,38 +2,25 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, Bookmark, Share2, UserPlus, Check } from 'lucide-react';
+import { Share2, UserPlus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import FavoriteButton from '@/components/FavoriteButton';
 
 interface UserInfoProps {
   author: {
     name: string;
     avatar?: string;
   };
+  familyId: string;
   initialStats?: {
-    likes?: number;
-    isLiked?: boolean;
-    isSaved?: boolean;
     isFollowing?: boolean;
   };
   className?: string;
 }
 
-export function UserInfo({ author, initialStats, className }: UserInfoProps) {
-  const [isLiked, setIsLiked] = useState(initialStats?.isLiked || false);
-  const [isSaved, setIsSaved] = useState(initialStats?.isSaved || false);
+export function UserInfo({ author, familyId, initialStats, className }: UserInfoProps) {
   const [isFollowing, setIsFollowing] = useState(initialStats?.isFollowing || false);
-  const [likesCount, setLikesCount] = useState(initialStats?.likes || 0);
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-  };
-
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-  };
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
@@ -83,14 +70,14 @@ export function UserInfo({ author, initialStats, className }: UserInfoProps) {
 
         {/* Botón Follow */}
         <button
-  onClick={handleFollow}
-  className={cn(
-  'ml-2 px-5 py-2 rounded-full font-semibold text-sm transition-all duration-200',
-  isFollowing
-    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-    : 'bg-primary/10 text-primary hover:bg-primary/20 hover:scale-105'
-)}
->
+          onClick={handleFollow}
+          className={cn(
+            'ml-2 px-5 py-2 rounded-full font-semibold text-sm transition-all duration-200',
+            isFollowing
+              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              : 'bg-primary/10 text-primary hover:bg-primary/20 hover:scale-105'
+          )}
+        >
           {isFollowing ? (
             <span className="flex items-center gap-1.5">
               <Check className="w-4 h-4" />
@@ -105,45 +92,15 @@ export function UserInfo({ author, initialStats, className }: UserInfoProps) {
         </button>
       </div>
 
-      {/* ACCIONES (Like, Save, Share) */}
+      {/* ACCIONES (Favorite, Share) */}
       <div className="flex items-center gap-2">
         
-        {/* Like */}
-        <button
-          onClick={handleLike}
-          className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
-            'hover:scale-105 active:scale-95',
-            isLiked
-              ? 'bg-red-50 text-red-600'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          )}
-          aria-label={isLiked ? 'Unlike' : 'Like'}
-        >
-          <Heart 
-            className={cn('w-5 h-5', isLiked && 'fill-current')}
-          />
-          {likesCount > 0 && (
-            <span className="font-medium text-sm">{likesCount}</span>
-          )}
-        </button>
-
-        {/* Save */}
-        <button
-          onClick={handleSave}
-          className={cn(
-            'p-2 rounded-full transition-all duration-200',
-            'hover:scale-105 active:scale-95',
-            isSaved
-              ? 'bg-primary/10 text-primary'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          )}
-          aria-label={isSaved ? 'Unsave' : 'Save'}
-        >
-          <Bookmark 
-            className={cn('w-5 h-5', isSaved && 'fill-current')}
-          />
-        </button>
+        {/* Favorite Button */}
+        <FavoriteButton 
+          familyId={familyId} 
+          size="md" 
+          showLabel={false}
+        />
 
         {/* Share */}
         <button

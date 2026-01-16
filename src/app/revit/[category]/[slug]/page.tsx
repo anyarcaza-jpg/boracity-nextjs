@@ -116,6 +116,7 @@ export default async function FamilyDetailPage({ params }: PageProps) {
                   name: family.metadata.author,
                   avatar: undefined,
                 }}
+                familyId={family.id}
               />
             </div>
           </div>

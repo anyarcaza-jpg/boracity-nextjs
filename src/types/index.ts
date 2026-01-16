@@ -53,6 +53,7 @@ export interface FamilyMetadata {
   tags: string[];
   author: string;
   uploadDate: Date;
+  updatedAt: Date;
   downloads: number;
   views: number;
 }

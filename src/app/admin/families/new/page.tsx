@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { compressImage, compressMultipleImages } from '@/lib/imageCompression';
 
 export default function NewFamilyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState({ rfa: false, thumbnail: false });
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
@@ -32,13 +34,24 @@ export default function NewFamilyPage() {
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   // ============================================
-  // UPLOAD RFA Y THUMBNAIL (igual que antes)
+  // UPLOAD RFA Y THUMBNAIL (con compresión)
   // ============================================
   const handleFileUpload = async (file: File, type: 'rfa' | 'thumbnail') => {
     setUploading(prev => ({ ...prev, [type]: true }));
     setError('');
 
     try {
+      // ============================================
+      // COMPRIMIR THUMBNAIL ANTES DE SUBIR
+      // ============================================
+      if (type === 'thumbnail') {
+        setCompressing(true);
+        console.log('🔄 Compressing thumbnail...');
+        file = await compressImage(file);
+        console.log('✅ Thumbnail compressed');
+        setCompressing(false);
+      }
+
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       formDataUpload.append('type', type);
@@ -72,18 +85,18 @@ export default function NewFamilyPage() {
     } catch (err: any) {
       setError(err.message);
       setUploading(prev => ({ ...prev, [type]: false }));
+      setCompressing(false);
     }
   };
 
   // ============================================
-  // MANEJO DE GALERÍA (SOLO PREVIEW, NO UPLOAD)
+  // MANEJO DE GALERÍA (CON COMPRESIÓN)
   // ============================================
-  const handleGalleryFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const MAX_FILES = 6;
-    const MAX_SIZE = 1 * 1024 * 1024; // 1MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
     // Validar cantidad
@@ -92,35 +105,51 @@ export default function NewFamilyPage() {
       return;
     }
 
-    const newFiles: File[] = [];
-    const newPreviews: string[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
-      // Validar tipo
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        const errorMsg = `"${file.name}" is not a valid image type. Only JPG, PNG, and WebP are allowed.`;
-        setError(errorMsg);
-        alert(errorMsg); // Alert adicional
-        return;
-      }
-
-      // Validar tamaño
-      if (file.size > MAX_SIZE) {
-        const errorMsg = `"${file.name}" is too large. Maximum 1MB per image (current: ${(file.size / 1024 / 1024).toFixed(2)}MB)`;
-        setError(errorMsg);
-        alert(errorMsg); // Alert adicional para que sea más visible
-        return;
-      }
-
-      newFiles.push(file);
-      newPreviews.push(URL.createObjectURL(file));
-    }
-
-    setGalleryFiles([...galleryFiles, ...newFiles]);
-    setGalleryPreviews([...galleryPreviews, ...newPreviews]);
+    setCompressing(true);
     setError('');
+
+    try {
+      const filesToCompress: File[] = [];
+
+      // Validar tipos primero
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // Validar tipo
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          const errorMsg = `"${file.name}" is not a valid image type. Only JPG, PNG, and WebP are allowed.`;
+          setError(errorMsg);
+          alert(errorMsg);
+          setCompressing(false);
+          return;
+        }
+
+        filesToCompress.push(file);
+      }
+
+      // ============================================
+      // COMPRIMIR TODAS LAS IMÁGENES EN PARALELO
+      // ============================================
+      console.log(`🔄 Compressing ${filesToCompress.length} gallery images...`);
+      const compressedFiles = await compressMultipleImages(filesToCompress);
+      console.log('✅ All gallery images compressed');
+
+      // Crear previews de las imágenes comprimidas
+      const newPreviews: string[] = [];
+      for (const compressedFile of compressedFiles) {
+        newPreviews.push(URL.createObjectURL(compressedFile));
+      }
+
+      setGalleryFiles([...galleryFiles, ...compressedFiles]);
+      setGalleryPreviews([...galleryPreviews, ...newPreviews]);
+      setError('');
+
+    } catch (err: any) {
+      console.error('Error compressing gallery images:', err);
+      setError('Failed to compress images. Please try again.');
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const handleRemoveGalleryImage = (index: number) => {
@@ -145,7 +174,7 @@ export default function NewFamilyPage() {
     try {
       const formDataGallery = new FormData();
 
-      // Agregar todas las imágenes
+      // Agregar todas las imágenes (ya comprimidas)
       galleryFiles.forEach((file) => {
         formDataGallery.append('files', file);
       });
@@ -208,12 +237,8 @@ export default function NewFamilyPage() {
         throw new Error(data.error || 'Failed to create family');
       }
 
-      const familyData = await response.json();
-      const familyId = familyData.family?.id;
-
-      if (!familyId) {
-        throw new Error('Family created but no ID returned');
-      }
+      const data = await response.json();
+      const familyId = data.family.id;
 
       console.log('Family created with ID:', familyId);
 
@@ -225,130 +250,152 @@ export default function NewFamilyPage() {
       }
 
       // ============================================
-      // PASO 3: REDIRIGIR AL LISTADO
+      // PASO 3: REDIRECT AL LISTADO
       // ============================================
       router.push('/admin/families');
       router.refresh();
-
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to create family');
       setLoading(false);
     }
   };
 
-  const handleNameChange = (name: string) => {
-    setFormData(prev => ({
-      ...prev,
-      name,
-      slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-    }));
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Auto-generate slug from name
+    if (name === 'name') {
+      const slug = value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      setFormData(prev => ({ ...prev, slug }));
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 p-8">
-      <div className="mb-8">
-        <Link href="/admin/families" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
-          ← Back to Families
-        </Link>
-        <h1 className="text-3xl font-bold text-white">Add New Family</h1>
-        <p className="text-gray-400 mt-1">Create a new Revit family</p>
-      </div>
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-white">Create New Family</h1>
+          <Link
+            href="/admin/families"
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+          >
+            ← Back
+          </Link>
+        </div>
 
-      <div className="bg-gray-800 rounded-xl shadow-sm border border-gray-700 p-8 max-w-3xl">
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mb-6">
+            <p className="text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          {/* FAMILY NAME */}
+          {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-              Family Name *
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Name *
             </label>
             <input
               type="text"
-              id="name"
-              required
+              name="name"
               value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Modern Office Chair"
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., Modern Office Chair"
             />
           </div>
 
-          {/* SLUG */}
+          {/* Slug (auto-generated) */}
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium text-gray-300 mb-2">
-              Slug * (auto-generated)
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Slug (auto-generated)
             </label>
             <input
               type="text"
-              id="slug"
-              required
+              name="slug"
               value={formData.slug}
-              onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 focus:outline-none"
               placeholder="modern-office-chair"
+              readOnly
             />
           </div>
 
-          {/* CATEGORY */}
+          {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Category *
             </label>
             <select
-              id="category"
-              required
+              name="category"
               value={formData.category}
-              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="furniture">Furniture</option>
               <option value="doors">Doors</option>
               <option value="windows">Windows</option>
               <option value="lighting">Lighting</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="electrical">Electrical</option>
+              <option value="hvac">HVAC</option>
+              <option value="equipment">Equipment</option>
+              <option value="landscaping">Landscaping</option>
+              <option value="other">Other</option>
             </select>
           </div>
 
-          {/* REVIT VERSION */}
+          {/* Description */}
           <div>
-            <label htmlFor="revit_version" className="block text-sm font-medium text-gray-300 mb-2">
-              Revit Version *
-            </label>
-            <input
-              type="text"
-              id="revit_version"
-              required
-              value={formData.revit_version}
-              onChange={(e) => setFormData(prev => ({ ...prev, revit_version: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="2024"
-            />
-          </div>
-
-          {/* DESCRIPTION */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Description *
             </label>
             <textarea
-              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
               required
               rows={4}
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="A modern office chair with ergonomic design..."
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Describe this Revit family..."
             />
           </div>
 
-          {/* RFA FILE */}
+          {/* Revit Version */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              RFA File * (.rfa only)
+              Revit Version
+            </label>
+            <select
+              name="revit_version"
+              value={formData.revit_version}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </select>
+          </div>
+
+          {/* RFA File Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              RFA File *
             </label>
             <input
               type="file"
@@ -356,21 +403,24 @@ export default function NewFamilyPage() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  setFiles(prev => ({ ...prev, rfa: file }));
+                  setFiles({ ...files, rfa: file });
                   handleFileUpload(file, 'rfa');
                 }
               }}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-              disabled={uploading.rfa}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
             />
-            {uploading.rfa && <p className="text-sm text-blue-400 mt-2">Uploading RFA file...</p>}
-            {formData.rfa_url && <p className="text-sm text-green-400 mt-2">✓ RFA uploaded successfully</p>}
+            {uploading.rfa && (
+              <p className="text-sm text-blue-400 mt-2">Uploading RFA file...</p>
+            )}
+            {formData.rfa_url && (
+              <p className="text-sm text-green-400 mt-2">✓ RFA uploaded successfully</p>
+            )}
           </div>
 
-          {/* THUMBNAIL IMAGE */}
+          {/* Thumbnail Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Thumbnail Image * (PNG, JPG, WebP - Max 1MB)
+              Thumbnail Image *
             </label>
             <input
               type="file"
@@ -378,119 +428,93 @@ export default function NewFamilyPage() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Validaciones
-                  const MAX_SIZE = 1 * 1024 * 1024; // 1MB
-                  const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-                  // Validar tipo
-                  if (!ALLOWED_TYPES.includes(file.type)) {
-                    const errorMsg = `"${file.name}" is not a valid image type. Only JPG, PNG, and WebP are allowed.`;
-                    setError(errorMsg);
-                    alert(errorMsg);
-                    e.target.value = ''; // Limpiar input
-                    return;
-                  }
-
-                  // Validar tamaño
-                  if (file.size > MAX_SIZE) {
-                    const errorMsg = `"${file.name}" is too large. Maximum 1MB (current: ${(file.size / 1024 / 1024).toFixed(2)}MB)`;
-                    setError(errorMsg);
-                    alert(errorMsg);
-                    e.target.value = ''; // Limpiar input
-                    return;
-                  }
-
-                  setFiles(prev => ({ ...prev, thumbnail: file }));
+                  setFiles({ ...files, thumbnail: file });
                   handleFileUpload(file, 'thumbnail');
                 }
               }}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-              disabled={uploading.thumbnail}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
             />
-            {uploading.thumbnail && <p className="text-sm text-blue-400 mt-2">Uploading thumbnail...</p>}
-            {formData.thumbnail_url && <p className="text-sm text-green-400 mt-2">✓ Thumbnail uploaded successfully</p>}
-          </div>
-
-          {/* DIVIDER */}
-          <div className="border-t border-gray-700 pt-6">
-            <h3 className="text-lg font-semibold text-white mb-2">Gallery Images (Optional)</h3>
-            <p className="text-sm text-gray-400 mb-4">
-              Add up to 6 additional images for the gallery (Max 1MB each)
-            </p>
-          </div>
-
-          {/* GALLERY UPLOADER - SIMPLE VERSION */}
-          <div className="bg-gray-900/50 rounded-lg p-6 border border-gray-700">
-            <div className="space-y-4">
-              {/* INPUT */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Select Gallery Images ({galleryFiles.length}/6)
-                </label>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                  multiple
-                  onChange={handleGalleryFilesChange}
-                  disabled={galleryFiles.length >= 6}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700 disabled:opacity-50"
+            {compressing && !uploadingGallery && (
+              <p className="text-sm text-blue-400 mt-2">🔄 Compressing image...</p>
+            )}
+            {uploading.thumbnail && (
+              <p className="text-sm text-blue-400 mt-2">Uploading thumbnail...</p>
+            )}
+            {formData.thumbnail_url && (
+              <div className="mt-4">
+                <p className="text-sm text-green-400 mb-2">✓ Thumbnail uploaded</p>
+                <img
+                  src={formData.thumbnail_url}
+                  alt="Thumbnail preview"
+                  className="w-32 h-32 object-cover rounded-lg border border-gray-700"
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  JPG, PNG, WebP • Max 1MB each • Up to 6 images
-                </p>
               </div>
-
-              {/* PREVIEWS */}
-              {galleryPreviews.length > 0 && (
-                <div className="grid grid-cols-3 gap-4">
-                  {galleryPreviews.map((preview, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={preview}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full aspect-square object-cover rounded-lg border-2 border-gray-700"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveGalleryImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ✕
-                      </button>
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                        #{index + 1}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* INFO */}
-              {galleryFiles.length > 0 && (
-                <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-3">
-                  <p className="text-blue-400 text-sm">
-                    ℹ️ {galleryFiles.length} image(s) will be uploaded after creating the family
-                  </p>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* SUBMIT BUTTONS */}
-          <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-700">
-            <Link 
-              href="/admin/families" 
-              className="px-6 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition"
+          {/* Gallery Images Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Gallery Images (Optional, max 6)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleGalleryFilesChange}
+              disabled={galleryFiles.length >= 6}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            
+            {compressing && uploadingGallery === false && (
+              <p className="text-sm text-blue-400 mt-2">🔄 Compressing gallery images...</p>
+            )}
+
+            <p className="text-xs text-gray-400 mt-2">
+              Images will be automatically compressed. Current: {galleryFiles.length}/6
+            </p>
+
+            {/* Gallery Previews */}
+            {galleryPreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {galleryPreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Gallery ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-700"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGalleryImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ×
+                    </button>
+                    <span className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                      #{index + 1}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              disabled={loading || uploading.rfa || uploading.thumbnail || compressing}
+              className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {loading ? 'Creating...' : 'Create Family'}
+            </button>
+            <Link
+              href="/admin/families"
+              className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg text-center transition"
             >
               Cancel
             </Link>
-            <button
-              type="submit"
-              disabled={loading || uploading.rfa || uploading.thumbnail || uploadingGallery}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition font-medium"
-            >
-              {loading ? (uploadingGallery ? 'Uploading gallery...' : 'Creating...') : 'Create Family'}
-            </button>
           </div>
         </form>
       </div>
